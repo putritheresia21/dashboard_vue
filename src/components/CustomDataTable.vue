@@ -1,24 +1,32 @@
 <script setup lang="ts">
 import DataTable from 'primevue/datatable'
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, useSlots } from 'vue'
 import Column from 'primevue/column'
 import Select from 'primevue/select'
 import SearchInput from '@/components/SearchInput.vue'
+import Button from 'primevue/button'
+import Avatar from 'primevue/avatar'
 
-export interface ColumnDef {
+interface ColumnDef {
   field: string
   header: string
   sortable?: boolean
   width?: string
   align?: 'left' | 'center' | 'right'
   slot?: string //nama scoped-slot, defaultnya field
-  hideOnMobile?: boolean //sembunyikan kolom ini di layar kecil (<640px)
+  hideOnMobile?: boolean //sembunyikan kolom ini di layar kecil
+  type?: 'text' | 'icon-text'
+  format?: (value: any, row: any) => string
+
+  iconField?: string
+  titleField?: string
+  subtitleField?: string
 }
 
-export interface FilterDef {
+interface FilterDef {
   key: string
   placeholder: string
-  options: string[]
+  options?: string[] //opsional - kalau di buat kosong, otomatis diambil dari nilai unik
 }
 
 const props = withDefaults(
@@ -33,6 +41,9 @@ const props = withDefaults(
     rows?: number
     rowsPerPageOptions?: number[]
     showActions?: boolean
+    showView?: boolean
+    showEdit?: boolean
+    showDelete?: boolean
   }>(),
   {
     searchFields: () => [],
@@ -41,11 +52,35 @@ const props = withDefaults(
     rows: 10,
     rowsPerPageOptions: () => [5, 10, 20, 50],
     showActions: true,
+    showView: false,
+    showEdit: false,
+    showDelete: false,
   },
+)
+
+const emit = defineEmits<{
+  view: [row: any]
+  edit: [row: any]
+  delete: [row: any]
+}>()
+
+const slots = useSlots()
+
+const hasActionsColumn = computed(
+  () =>
+    props.showActions && (!!slots.actions || props.showView || props.showEdit || props.showDelete),
 )
 
 const searchQuery = ref('')
 const activeFilters = ref<Record<string, string | null>>({})
+
+const resolvedFilters = computed(() =>
+  props.filters.map((f) => ({
+    ...f,
+    options:
+      f.options ?? [...new Set(props.data.map((item) => item[f.key]))].filter(Boolean).sort(),
+  })),
+)
 
 const filteredData = computed(() => {
   return props.data.filter((item) => {
@@ -76,7 +111,6 @@ function columnClass(col: ColumnDef) {
   return classes.filter(Boolean).join(' ')
 }
 
-// reset scroll ke kiri tiap kali data/filter berubah, biar user selalu mulai dari kolom pertama
 const scrollContainer = ref<HTMLElement | null>(null)
 watch(filteredData, () => {
   nextTick(() => {
@@ -101,7 +135,7 @@ watch(filteredData, () => {
           :placeholder="searchPlaceholder"
         />
         <Select
-          v-for="f in filters"
+          v-for="f in resolvedFilters"
           :key="f.key"
           v-model="activeFilters[f.key]"
           :options="f.options"
@@ -127,21 +161,74 @@ watch(filteredData, () => {
           :field="col.field"
           :header="col.header"
           :sortable="col.sortable"
-          :style="col.width ? { width: col.width } : undefined"
+          :style="col.width ? { minWidth: col.width } : undefined"
           :header-class="columnClass(col)"
           :body-class="columnClass(col)"
         >
           <template #body="slotProps">
-            <slot :name="col.slot || col.field" v-bind="slotProps">
+            <slot v-if="col.slot" :name="col.slot" v-bind="slotProps">
               {{ slotProps.data[col.field] }}
             </slot>
+
+            <!--avatar + judul + subjudul-->
+            <div v-else-if="col.type === 'icon-text'" class="flex items-center gap-3">
+              <Avatar :image="slotProps.data[col.iconField || `${col.field}Icon`]" shape="circle" />
+              <div class="flex flex-col">
+                <span class="font-medium text-slate-800">
+                  {{ slotProps.data[col.titleField || col.field] }}
+                </span>
+                <span v-if="col.subtitleField" class="text-xs text-slate-400">
+                  {{ slotProps.data[col.subtitleField] }}
+                </span>
+              </div>
+            </div>
+            <span v-else>
+              {{
+                col.format
+                  ? col.format(slotProps.data[col.field], slotProps.data)
+                  : slotProps.data[col.field]
+              }}
+            </span>
           </template>
         </Column>
 
-        <Column v-if="showActions && $slots.actions" header="" style="width: 6rem">
+        <Column v-if="hasActionsColumn" header="" style="width: 6rem">
           <template #body="slotProps">
             <div class="flex items-center justify-end gap-1">
-              <slot name="actions" v-bind="slotProps" />
+              <slot v-if="$slots.actions" name="actions" v-bind="slotProps" />
+
+              <template v-else>
+                <Button
+                  v-if="showView"
+                  icon="pi pi-eye"
+                  severity="info"
+                  text
+                  rounded
+                  size="small"
+                  aria-label="Detail"
+                  @click="emit('view', slotProps.data)"
+                />
+                <Button
+                  v-if="showEdit"
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  text
+                  rounded
+                  size="small"
+                  aria-label="Edit"
+                  @click="emit('edit', slotProps.data)"
+                />
+                <Button
+                  v-if="showDelete"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  text
+                  rounded
+                  size="small"
+                  aria-label="Delete"
+                  @click="emit('delete', slotProps.data)"
+                />
+              </template>
             </div>
           </template>
         </Column>

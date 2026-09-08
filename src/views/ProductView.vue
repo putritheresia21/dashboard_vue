@@ -6,7 +6,7 @@ import PlusIcon from '@primeicons/vue/plus'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
-import CustomDataTable, { type ColumnDef, type FilterDef } from '@/components/CustomDataTable.vue'
+import CustomDataTable from '@/components/CustomDataTable.vue'
 import ChartCard from '@/components/ChartCard.vue'
 import SummaryCard from '@/components/SummaryCard.vue'
 import { getProducts, createProduct } from '@/services/product-service'
@@ -47,9 +47,9 @@ onMounted(() => {
 
 const categoryOptions = computed(() => [...new Set(products.value.map((p) => p.category))])
 
-const filters = computed<FilterDef[]>(() => [
-  { key: 'category', placeholder: 'All Category', options: categoryOptions.value },
-])
+// const filters = computed<FilterDef[]>(() => [
+//   { key: 'category', placeholder: 'All Category', options: categoryOptions.value },
+// ])
 
 //summary cards
 const totalProducts = computed(() => products.value.length)
@@ -263,7 +263,7 @@ async function saveNewProduct() {
     </div> -->
 
     <!--Table-->
-    <CustomDataTable
+    <!-- <CustomDataTable
       title="All Products"
       :data="products"
       :columns="[
@@ -320,7 +320,7 @@ async function saveNewProduct() {
           @click="deleteProduct(data)"
         />
       </template>
-    </CustomDataTable>
+    </CustomDataTable> -->
 
     <Dialog
       v-model:visible="showAddDialog"

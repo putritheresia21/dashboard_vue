@@ -1,31 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
 import Slider from 'primevue/slider'
-import CustomDataTable, { type ColumnDef, type FilterDef } from '@/components/CustomDataTable.vue'
+import CustomDataTable from '@/components/CustomDataTable.vue'
+import DetailDialog from '@/components/dialogs/DetailDialog.vue'
 import { salesTeamData, type SalesPerson } from '@/dummy/salesData'
 import { ArrowUpIcon } from '@primevue/icons'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
+import { formatRupiah, formatDate, getAge, getTenure, getPercent } from '@/utils/formatter'
 
 const salesTeam = ref<SalesPerson[]>(salesTeamData)
-
-const formatRupiah = (value: number) =>
-  new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value)
-
-const getAchievementPercent = (person: SalesPerson) =>
-  Math.min(Math.round((person.achieved / person.target) * 100), 100)
 
 const getStatusSeverity = (status: SalesPerson['status']) => {
   switch (status) {
@@ -44,7 +29,7 @@ const achievementRange = ref<[number, number]>([0, 100])
 
 const preFilteredData = computed(() =>
   salesTeam.value.filter((s) => {
-    const pct = getAchievementPercent(s)
+    const pct = getPercent(s.achieved, s.target)
     return pct >= achievementRange.value[0] && pct <= achievementRange.value[1]
   }),
 )
@@ -56,14 +41,28 @@ const resetFilters = () => {
   tableKey.value++
 }
 
-const columns: ColumnDef[] = [
-  { field: 'name', header: 'Sales Person', sortable: true, slot: 'name' },
-  { field: 'department', header: 'Departemen', sortable: true, align: 'center' },
-  { field: 'city', header: 'Kota', sortable: true, align: 'center' },
-  { field: 'achieved', header: 'Target vs Tercapai', width: '20%', slot: 'progress' },
-  { field: 'commission', header: 'Komisi', sortable: true, align: 'center', slot: 'commission' },
-  { field: 'status', header: 'Status', sortable: true, align: 'center', slot: 'status' },
-]
+const columns = computed(() => [
+  {
+    field: 'name',
+    header: 'Sales Person',
+    sortable: true,
+    type: 'icon-text' as const,
+    iconField: 'avatar',
+    titleField: 'name',
+    subtitleField: 'email',
+  },
+  { field: 'department', header: 'Departemen', sortable: true, align: 'center' as const },
+  { field: 'city', header: 'Kota', sortable: true, align: 'center' as const },
+  { field: 'achieved', header: 'Target vs Tercapai', width: '160px', slot: 'progress' },
+  {
+    field: 'commission',
+    header: 'Komisi',
+    sortable: true,
+    align: 'center' as const,
+    format: formatRupiah,
+  },
+  { field: 'status', header: 'Status', sortable: true, align: 'center' as const, slot: 'status' },
+])
 
 const statusOptions = ['Top Performer', 'On Track', 'Below Target']
 const departmentOptions = computed(() =>
@@ -72,11 +71,11 @@ const departmentOptions = computed(() =>
 
 const cityOptions = computed(() => [...new Set(salesTeam.value.map((s) => s.city))].sort())
 
-const filters = computed<FilterDef[]>(() => [
-  { key: 'status', placeholder: 'Filter Status', options: statusOptions },
-  { key: 'department', placeholder: 'Filter Departemen', options: departmentOptions.value },
-  { key: 'city', placeholder: 'Filter Kota', options: cityOptions.value },
-])
+const filters = [
+  { key: 'status', placeholder: 'Filter Status' },
+  { key: 'department', placeholder: 'Filter Departemen' },
+  { key: 'city', placeholder: 'Filter Kota' },
+]
 
 //detail pop up
 const detailVisible = ref(false)
@@ -107,49 +106,49 @@ const topPerformerCount = computed(
   () => salesTeam.value.filter((s) => s.status === 'Top Performer').length,
 )
 
-const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-
-const getAge = (birthDate: string) => {
-  const birth = new Date(birthDate)
-  const today = new Date()
-  let age = today.getFullYear() - birth.getFullYear()
-  const monthDiff = today.getMonth() - birth.getMonth()
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--
-  }
-  return age
-}
-
-const getTenure = (joinDate: string) => {
-  const join = new Date(joinDate)
-  const today = new Date()
-  let years = today.getFullYear() - join.getFullYear()
-  let months = today.getMonth() - join.getMonth()
-
-  if (months < 0) {
-    years--
-    months += 12
-  }
-  if (years === 0) return `${months} bulan`
-  return months === 0 ? `${years} tahun` : `${years} tahun ${months} bulan`
-}
-
 const summaryCards = computed(() => [
   {
     label: 'Total Achieved',
     value: formatRupiah(totalAchieved.value),
-    change: `${achievementRate.value}% of target`,
+    change: `${achievementRate.value}% dari target`,
   },
-  { label: 'Total Target', value: `$${totalTarget.value.toLocaleString()}`, change: '' },
-  { label: 'Total Commission', value: `$${totalCommission.value.toLocaleString()}`, change: '' },
+  { label: 'Total Target', value: formatRupiah(totalTarget.value), change: '' },
+  { label: 'Total Komisi', value: formatRupiah(totalCommission.value), change: '' },
   { label: 'Top Performers', value: String(topPerformerCount.value), change: '' },
 ])
+
+const detailTabs = computed(() => {
+  const p = selectedPerson.value
+  if (!p) return []
+  return [
+    {
+      value: 'biodata',
+      label: 'Biodata',
+      items: [
+        { label: 'No. Hp', value: p.phone },
+        {
+          label: 'Tanggal Lahir',
+          value: formatDate(p.birthDate),
+          hint: `${getAge(p.birthDate)} tahun`,
+        },
+        { label: 'Bergabung Sejak', value: formatDate(p.joinDate), hint: getTenure(p.joinDate) },
+        { label: 'Alamat', value: p.address, span2: true },
+      ],
+    },
+    {
+      value: 'ringkasan',
+      label: 'Ringkasan',
+      items: [
+        { label: 'Target', value: formatRupiah(p.target) },
+        { label: 'Tercapai', value: formatRupiah(p.achieved) },
+        { label: 'Komisi', value: formatRupiah(p.commission) },
+        { label: 'Status', value: p.status },
+      ],
+    },
+    { value: 'riwayat', label: 'Riwayat Target' },
+    { value: 'produk', label: 'Produk Terjual' },
+  ]
+})
 </script>
 
 <template>
@@ -246,222 +245,111 @@ const summaryCards = computed(() => [
       search-placeholder="Cari sales...."
       :filters="filters"
       :rows="8"
+      show-view
+      show-edit
+      show-delete
+      @view="openDetail"
+      @edit="openDetail"
+      @delete="deleteSales"
     >
-      <template #name="{ data }">
-        <div class="flex items-center gap-3">
-          <Avatar :image="data.avatar" shape="circle" />
-          <div class="flex flex-col">
-            <span class="font-medium text-slate-800">{{ data.name }}</span>
-            <span class="text-xs text-slate-400">{{ data.email }}</span>
-          </div>
-        </div>
-      </template>
       <template #progress="{ data }">
         <div>
-          <div class="flex items-center justify-between mb-1 text-xs">
+          <div class="flex flex-col text-xs gap-0.5 mb-1">
             <span class="text-slate-500">{{ formatRupiah(data.achieved) }}</span>
             <span class="text-slate-400">dari {{ formatRupiah(data.target) }}</span>
           </div>
           <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
               class="h-full rounded-full transition-all duration-700"
-              :class="getAchievementPercent(data) >= 100 ? 'bg-emerald-500' : 'bg-yellow-500'"
-              :style="{ width: getAchievementPercent(data) + '%' }"
+              :class="
+                getPercent(data.achieved, data.target) >= 100 ? 'bg-emerald-500' : 'bg-yellow-500'
+              "
+              :style="{ width: getPercent(data.achieved, data.target) + '%' }"
             ></div>
           </div>
         </div>
       </template>
 
-      <template #commission="{ data }">
-        <span class="font-semibold text-slate-700">{{ formatRupiah(data.commission) }}</span>
-      </template>
-
       <template #status="{ data }">
         <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
-      </template>
-
-      <template #actions="{ data }">
-        <Button
-          icon="pi pi-eye"
-          severity="info"
-          text
-          rounded
-          size="small"
-          aria-label="Detail"
-          @click="openDetail(data)"
-        />
-        <Button
-          icon="pi pi-pencil"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          aria-label="Edit"
-        />
-        <Button
-          icon="pi pi-trash"
-          severity="danger"
-          text
-          rounded
-          size="small"
-          aria-label="Delete"
-          @click="deleteSales(data)"
-        />
       </template>
     </CustomDataTable>
 
     <!--Pop up detail-->
-    <Dialog
-      v-model:visible="detailVisible"
-      modal
-      header="Detail Sales Person"
-      :style="{ width: '32rem' }"
+    <DetailDialog
+      :visible="detailVisible"
+      @update:visible="detailVisible = $event"
+      title="Detail Sales Person"
+      :name="selectedPerson?.name ?? ''"
+      :subtitle="selectedPerson ? `${selectedPerson.department} · ${selectedPerson.city}` : ''"
+      :tabs="detailTabs"
     >
-      <div v-if="selectedPerson" class="flex flex-col gap-4">
-        <div class="flex items-center gap-3">
-          <Avatar :image="selectedPerson.avatar" shape="circle" size="xlarge" />
-          <div>
-            <p class="font-semibold text-slate-800 text-lg">{{ selectedPerson.name }}</p>
-            <p class="text-sm text-slate-400">{{ selectedPerson.email }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">
-              {{ selectedPerson.department }} . {{ selectedPerson.city }}
-            </p>
+      <template #header-icon>
+        <Avatar :image="selectedPerson?.avatar" shape="circle" size="xlarge" />
+      </template>
+
+      <template #item-value="{ item }">
+        <Tag
+          v-if="item.label === 'Status' && selectedPerson"
+          :value="selectedPerson.status"
+          :severity="getStatusSeverity(selectedPerson.status)"
+        />
+        <p v-else class="font-medium text-slate-800">{{ item.value }}</p>
+      </template>
+
+      <template #content="{ tab }">
+        <div v-if="tab.value === 'ringkasan' && selectedPerson" class="mt-3">
+          <p class="text-xs text-slate-400 mb-1">
+            Pencapaian: {{ getPercent(selectedPerson.achieved, selectedPerson.target) }}%
+          </p>
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full"
+              :class="
+                getPercent(selectedPerson.achieved, selectedPerson.target) >= 100
+                  ? 'bg-emerald-500'
+                  : 'bg-yellow-500'
+              "
+              :style="{
+                width: getPercent(selectedPerson.achieved, selectedPerson.target) + '%',
+              }"
+            ></div>
           </div>
         </div>
 
-        <Tabs value="0">
-          <TabList>
-            <Tab value="0">Biodata</Tab>
-            <Tab value="1">Ringkasan</Tab>
-            <Tab value="2">Riwayat Target</Tab>
-            <Tab value="3">Produk Terjual</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel value="0">
-              <div class="pt-2">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                  Biodata
-                </p>
-                <div class="grid grid-cols-2 gap-3 text-sm mb-4">
-                  <div class="bg-slate-50 rounded-lg p-3">
-                    <p class="text-slate-400 mb-1">No. Hp</p>
-                    <p class="font-medium text-slate-800">{{ selectedPerson.phone }}</p>
-                  </div>
-                  <div class="bg-slate-50 rounded-lg p-3">
-                    <p class="text-slate-400 mb-1">Tanggal Lahir</p>
-                    <p class="font-medium text-slate-800">
-                      {{ formatDate(selectedPerson.birthDate) }}
-                    </p>
-                    <p class="text-xs text-slate-400">
-                      {{ getAge(selectedPerson.birthDate) }} tahun
-                    </p>
-                  </div>
-                  <div class="bg-slate-50 rounded-lg p-3">
-                    <p class="text-slate-400 mb-1">Bergabung Sejak</p>
-                    <p class="font-medium text-slate-800">
-                      {{ formatDate(selectedPerson.joinDate) }}
-                    </p>
-                    <p class="text-xs text-slate-400">{{ getTenure(selectedPerson.joinDate) }}</p>
-                  </div>
-                  <div class="bg-slate-50 rounded-lg p-3 col-span-2">
-                    <p class="text-slate-400 mb-1">Alamat</p>
-                    <p class="font-medium text-slate-800">{{ selectedPerson.address }}</p>
-                  </div>
-                </div>
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                  Performa
-                </p>
-                <div class="grid grid-cols-2 gap-3 text-sm">
-                  <!-- grid Target/Tercapai/Komisi/Status yang sudah ada, taruh di sini -->
-                </div>
-              </div>
-            </TabPanel>
-            <TabPanel value="1">
-              <div class="grid grid-cols gap-3 text-sm pt-2">
-                <div class="bg-slate-50 rounded-lg p-3">
-                  <p class="text-slate-400 mb-1">Target</p>
-                  <p class="font-semibold text-slate-800">
-                    {{ formatRupiah(selectedPerson.target) }}
-                  </p>
-                </div>
-                <div class="bg-slate-50 rounded-lg p-3">
-                  <p class="text-slate-400 mb-1">Tercapai</p>
-                  <p class="font-semibold text-slate-800">
-                    {{ formatRupiah(selectedPerson.achieved) }}
-                  </p>
-                </div>
-                <div class="bg-slate-50 rounded-lg p-3">
-                  <p class="text-slate-400 mb-1">Komisi</p>
-                  <p class="font-semibold text-slate-800">
-                    {{ formatRupiah(selectedPerson.commission) }}
-                  </p>
-                </div>
-                <div class="bg-slate-50 rounded-lg p-3">
-                  <p class="text-slate-400 mb-1">Status</p>
-                  <Tag
-                    :value="selectedPerson.status"
-                    :severity="getStatusSeverity(selectedPerson.status)"
-                  />
-                </div>
-              </div>
-              <div class="mt-3">
-                <p class="text-xs text-slate-400 mb-1">
-                  Pencapaian: {{ getAchievementPercent(selectedPerson) }}%
-                </p>
-                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    class="h-full rounded-full"
-                    :class="
-                      getAchievementPercent(selectedPerson) >= 100
-                        ? 'bg-emerald-500'
-                        : 'bg-yellow-500'
-                    "
-                    :style="{ width: getAchievementPercent(selectedPerson) + '%' }"
-                  ></div>
-                </div>
-              </div>
-            </TabPanel>
+        <div v-else-if="tab.value === 'riwayat' && selectedPerson" class="flex flex-col gap-3 pt-2">
+          <div v-for="h in selectedPerson.targetHistory" :key="h.month" class="text-xs">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-medium text-slate-600">{{ h.month }}</span>
+              <span class="text-slate-400"
+                >{{ formatRupiah(h.achieved) }} / {{ formatRupiah(h.target) }}</span
+              >
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full"
+                :class="h.achieved >= h.target ? 'bg-emerald-500' : 'bg-yellow-500'"
+                :style="{ width: getPercent(h.achieved, h.target) + '%' }"
+              ></div>
+            </div>
+          </div>
+        </div>
 
-            <TabPanel value="2">
-              <div class="flex flex-col gap-3 pt-2">
-                <div v-for="h in selectedPerson.targetHistory" :key="h.month" class="text-xs">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="font-medium text-slate-600">{{ h.month }}</span>
-                    <span class="text-slate-400"
-                      >{{ formatRupiah(h.achieved) }} / {{ formatRupiah(h.target) }}</span
-                    >
-                  </div>
-                  <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      class="h-full rounded-full"
-                      :class="h.achieved >= h.target ? 'bg-emerald-500' : 'bg-yellow-500'"
-                      :style="{
-                        width: Math.min(Math.round((h.achieved / h.target) * 100), 100) + '%',
-                      }"
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </TabPanel>
-            <TabPanel value="3">
-              <div class="flex flex-col gap-2 pt-2">
-                <div
-                  v-for="prod in selectedPerson.products"
-                  :key="prod.name"
-                  class="flex items-center justify-between bg-slate-50 rounded-lg p-3 text-sm"
-                >
-                  <div>
-                    <p class="font-medium text-slate-800">{{ prod.name }}</p>
-                    <p class="text-xs text-slate-400">{{ prod.category }}</p>
-                  </div>
-                  <p class="font-semibold text-slate-700">{{ formatRupiah(prod.revenue) }}</p>
-                </div>
-              </div>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </div>
-    </Dialog>
+        <div v-else-if="tab.value === 'produk' && selectedPerson" class="flex flex-col gap-2 pt-2">
+          <div
+            v-for="prod in selectedPerson.products"
+            :key="prod.name"
+            class="flex items-center justify-between bg-slate-50 rounded-lg p-3 text-sm"
+          >
+            <div>
+              <p class="font-medium text-slate-800">{{ prod.name }}</p>
+              <p class="text-xs text-slate-400">{{ prod.category }} · {{ prod.qty }} unit</p>
+            </div>
+            <p class="font-semibold text-slate-700">{{ formatRupiah(prod.revenue) }}</p>
+          </div>
+        </div>
+      </template>
+    </DetailDialog>
   </div>
 </template>
 
@@ -472,5 +360,15 @@ const summaryCards = computed(() => [
 
 :deep(.text-center .p-datatable-column-header-content) {
   justify-content: center;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.25s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>
