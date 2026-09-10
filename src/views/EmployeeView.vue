@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 import Tag from 'primevue/tag'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
-import Slider from 'primevue/slider'
 import CustomDataTable from '@/components/CustomDataTable.vue'
 import DetailDialog from '@/components/dialogs/DetailDialog.vue'
 import { salesTeamData, type SalesPerson } from '@/dummy/salesData'
@@ -23,22 +22,6 @@ const getStatusSeverity = (status: SalesPerson['status']) => {
     default:
       return 'secondary'
   }
-}
-
-const achievementRange = ref<[number, number]>([0, 100])
-
-const preFilteredData = computed(() =>
-  salesTeam.value.filter((s) => {
-    const pct = getPercent(s.achieved, s.target)
-    return pct >= achievementRange.value[0] && pct <= achievementRange.value[1]
-  }),
-)
-
-//reset (buat filter)
-const tableKey = ref(0)
-const resetFilters = () => {
-  achievementRange.value = [0, 100]
-  tableKey.value++
 }
 
 const columns = computed(() => [
@@ -63,18 +46,27 @@ const columns = computed(() => [
   },
   { field: 'status', header: 'Status', sortable: true, align: 'center' as const, slot: 'status' },
 ])
+// tambahan viko
+const exportColumns = columns.value.map(({ field, header }) => ({
+  key: field,
+  header,
+}))
+// akhir
 
-const statusOptions = ['Top Performer', 'On Track', 'Below Target']
-const departmentOptions = computed(() =>
-  [...new Set(salesTeam.value.map((s) => s.department))].sort(),
-)
-
-const cityOptions = computed(() => [...new Set(salesTeam.value.map((s) => s.city))].sort())
-
+// filter select + filter
 const filters = [
-  { key: 'status', placeholder: 'Filter Status' },
-  { key: 'department', placeholder: 'Filter Departemen' },
-  { key: 'city', placeholder: 'Filter Kota' },
+  { type: 'select' as const, key: 'status', placeholder: 'Filter Status' },
+  { type: 'select' as const, key: 'department', placeholder: 'Filter Departemen' },
+  { type: 'select' as const, key: 'city', placeholder: 'Filter Kota' },
+  {
+    type: 'range' as const,
+    key: 'achievement',
+    label: 'Pencapaian',
+    min: 0,
+    max: 100,
+    unit: '%',
+    compute: (row: any) => getPercent(row.achieved, row.target),
+  },
 ]
 
 //detail pop up
@@ -198,48 +190,11 @@ const detailTabs = computed(() => {
         </div>
       </div>
     </transition>
-
-    <!-- Filter pencapaian -->
-    <div
-      class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4"
-      style="margin-bottom: 22px"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-            Pencapaian
-          </span>
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-teal-50 text-teal-600">
-            {{ achievementRange[0] }}% – {{ achievementRange[1] }}%
-          </span>
-        </div>
-        <Button
-          label="Reset Semua Filter"
-          severity="secondary"
-          text
-          size="small"
-          @click="resetFilters"
-        />
-      </div>
-      <div class="flex items-center gap-3 mt-3 max-w-md">
-        <span class="text-xs text-slate-400 w-8 text-right">0%</span>
-        <Slider
-          v-model="achievementRange"
-          range
-          :min="0"
-          :max="100"
-          class="achievement-slider flex-1"
-        />
-        <span class="text-xs text-slate-400 w-10">100%</span>
-      </div>
-    </div>
-
-    <!--Table-->
+    <!--Table (search, filter select, filter pencapaian, actions — semua bawaan CustomDataTable) -->
     <CustomDataTable
-      :key="tableKey"
       title="Sales Team Performance"
       subtitle="Klik header kolom untuk sorting"
-      :data="preFilteredData"
+      :data="salesTeam"
       :columns="columns"
       :search-fields="['name', 'email']"
       search-placeholder="Cari sales...."
@@ -248,6 +203,8 @@ const detailTabs = computed(() => {
       show-view
       show-edit
       show-delete
+      show-export
+      export-file-name="Daftar Karyawan"
       @view="openDetail"
       @edit="openDetail"
       @delete="deleteSales"

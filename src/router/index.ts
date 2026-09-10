@@ -70,6 +70,12 @@ const router = createRouter({
         },
       ],
     },
+
+    {
+      path: '/employee/view-report/:id',
+      name: 'report-employee-pdf',
+      component: () => import('@/components/export/templates/EmployeeReportView.vue'),
+    },
   ],
 })
 

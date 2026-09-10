@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Select from 'primevue'
+import Select from 'primevue/select'
 
 defineProps<{
   filter: {
@@ -24,6 +24,6 @@ const emit = defineEmits<{
     :placeholder="filter.placeholder"
     show-clear
     size="small"
-    class="w-full sm:w-40"
+    class="flex-1 min-w-[10rem] max-w-xs"
   />
 </template>

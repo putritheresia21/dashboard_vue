@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Slider from 'primevue'
+import Slider from 'primevue/slider'
 
 defineProps<{
   filter: {
@@ -20,14 +20,14 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="bg-slate-50 rounded-xl p-4 w-full sm:w-72">
+  <div class="bg-slate-50 rounded-xl p-4 flex-1 min-w-[16rem]">
     <div class="flex items-center gap-3 mb-2">
       <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
         {{ filter.label }}
       </span>
-      <span class="text-xs font-medium px2 py-0.5 rounded-full bg-emerald-50 text-emerald-600"
-        >{{ modelValue?.[0] ?? filter.min ?? 0 }}{{ filter.unit }}
-        -
+      <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-teal-50 text-teal-600">
+        {{ modelValue?.[0] ?? filter.min ?? 0 }}{{ filter.unit }}
+        –
         {{ modelValue?.[1] ?? filter.max ?? 100 }}{{ filter.unit }}
       </span>
     </div>
@@ -37,6 +37,7 @@ const emit = defineEmits<{
       >
       <Slider
         :model-value="modelValue ?? [filter.min ?? 0, filter.max ?? 100]"
+        @update:model-value="emit('update:modelValue', $event as [number, number])"
         range
         :min="filter.min ?? 0"
         :max="filter.max ?? 100"
