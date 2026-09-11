@@ -144,10 +144,10 @@ onUnmounted(() => {
       <table class="w-full text-sm border-collapse border border-gray-300">
         <thead class="bg-gray-100 text-left">
           <tr>
-            <th class="border border-gray-300 p-2">Bulan</th>
-            <th class="border border-gray-300 p-2 text-right">Target (Rp)</th>
-            <th class="border border-gray-300 p-2 text-right">Pencapaian (Rp)</th>
-            <th class="border border-gray-300 p-2 text-center">Persentase</th>
+            <th class="font-bold border border-gray-300 p-2">Bulan</th>
+            <th class="font-bold border border-gray-300 p-2 text-right">Target (Rp)</th>
+            <th class="font-bold border border-gray-300 p-2 text-right">Pencapaian (Rp)</th>
+            <th class="font-bold border border-gray-300 p-2 text-center">Persentase</th>
           </tr>
         </thead>
         <tbody>
@@ -156,7 +156,7 @@ onUnmounted(() => {
             <td class="border border-gray-300 p-2 text-right">{{ history.target }}</td>
             <td class="border border-gray-300 p-2 text-right">{{ history.achieved }}</td>
             <td class="border border-gray-300 p-2 text-center text-green-600 font-bold">
-              {{ (history.achieved / history.target) * 100 }}%
+              {{ ((history.achieved / history.target) * 100).toFixed(2) }}%
             </td>
           </tr>
         </tbody>
@@ -171,10 +171,10 @@ onUnmounted(() => {
       <table class="w-full text-sm border-collapse border border-gray-300">
         <thead class="bg-gray-100 text-left">
           <tr>
-            <th class="border border-gray-300 p-2">Nama Produk</th>
-            <th class="border border-gray-300 p-2">Kategori</th>
-            <th class="border border-gray-300 p-2 text-center">Qty</th>
-            <th class="border border-gray-300 p-2 text-right">Pendapatan (Rp)</th>
+            <th class="font-bold border border-gray-300 p-2">Nama Produk</th>
+            <th class="font-bold border border-gray-300 p-2">Kategori</th>
+            <th class="font-bold border border-gray-300 p-2 text-center">Qty</th>
+            <th class="font-bold border border-gray-300 p-2 text-right">Pendapatan (Rp)</th>
           </tr>
         </thead>
         <tbody>
@@ -187,8 +187,8 @@ onUnmounted(() => {
         </tbody>
         <tfoot class="bg-gray-50 font-bold">
           <tr>
-            <td colspan="3" class="border border-gray-300 p-2 text-right">Total Achieved</td>
-            <td class="border border-gray-300 p-2 text-right text-blue-700">
+            <td colspan="3" class="font-bold border border-gray-300 p-2 text-right">Total Achieved</td>
+            <td class="font-bold border border-gray-300 p-2 text-right text-blue-700">
               {{ employee?.achieved }}
             </td>
           </tr>
@@ -212,7 +212,7 @@ onUnmounted(() => {
     </section>
   </div>
 
-  <div id="paged-output"></div>
+  <div id="paged-output" class="w-full overflow-x-auto bg-gray-200 text-gray-900"></div>
 </template>
 
 <style>
@@ -252,7 +252,7 @@ tr {
   #app,
   .paged-report-container {
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;

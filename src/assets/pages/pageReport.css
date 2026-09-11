@@ -48,14 +48,33 @@ tfoot {
 
 /* Styling area cetak Paged.js di browser */
 .pagedjs_pages {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #e5e7eb;
+  display: block;
+  background-color: transparent;
+  width: max-content; /* Pastikan container selebar kertas A4 */
+  margin: 0 auto;
   padding: 20px 0;
 }
+
+@media (min-width: 768px) {
+  .pagedjs_pages {
+    align-items: center;
+  }
+}
+
+.pagedjs_page {
+  background-color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  /* Tambahkan margin kiri-kanan agar di HP ada jarak dengan bezel/tepi layar */
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
 .pagedjs_page {
   background-color: white;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  /* Tambahkan margin kiri-kanan agar tidak menempel di tepi layar HP */
+  margin-left: 16px;
+  margin-right: 16px;
 }
