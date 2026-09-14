@@ -17,4 +17,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+
+  server: {
+    proxy: {
+      '/gotenberg': {
+        target: 'https://demo.gotenberg.dev',
+        rewrite: (path) => path.replace(/^\/gotenberg/, ''),
+        changeOrigin: true,
+      }
+    }
+  }
 })
