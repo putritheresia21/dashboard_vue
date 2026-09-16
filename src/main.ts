@@ -12,6 +12,7 @@ import 'primeicons/primeicons.css'
 import ConfirmationService from 'primevue/confirmationservice'
 import DialogService from 'primevue/dialogservice'
 import ToastService from 'primevue/toastservice'
+import KeyFilter from 'primevue/keyfilter'
 
 const app = createApp(App)
 
@@ -39,5 +40,7 @@ app.use(router)
 app.use(DialogService)
 app.use(ConfirmationService)
 app.use(ToastService)
+
+app.directive('keyfilter', KeyFilter)
 
 app.mount('#app')

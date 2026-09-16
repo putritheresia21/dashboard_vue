@@ -5,9 +5,9 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
-import { ref } from 'vue'
+import ExcelJS from 'exceljs'
+import { ref, computed, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
-import { useExportExcel } from '@/composables/useExport'
 
 interface ExportColumnDef {
   key: string
@@ -16,9 +16,12 @@ interface ExportColumnDef {
 
 // Deteksi layar dengan lebar maksimal 640px (ukuran standar sm pada Tailwind)
 const isMobile = useMediaQuery('(max-width: 640px)')
-
-const { exportToExcel, isExporting } = useExportExcel()
+const toast = useToast()
 const visible = ref(false)
+const isExporting = ref(false)
+
+// const { exportToExcel, isExporting } = useExportExcel()
+// const visible = ref(false)
 
 const props = withDefaults(
   defineProps<{
@@ -42,6 +45,82 @@ const props = withDefaults(
 )
 
 const selectedColumns = ref<ExportColumnDef[]>([...props.columns])
+
+watch(
+  () => props.columns,
+  (newColumns) => {
+    selectedColumns.value = newColumns.filter((col) =>
+      selectedColumns.value.some((selected) => selected.key === col.key),
+    )
+    if (selectedColumns.value.length === 0) {
+      selectedColumns.value = [...newColumns]
+    }
+  },
+)
+
+const usingColumns = computed(() =>
+  props.columns.filter((column) =>
+    selectedColumns.value.some((selected) => selected.key === column.key),
+  ),
+)
+
+function headerText(header: string | string[]): string {
+  return Array.isArray(header) ? header.join(' / ') : header
+}
+
+async function handleExport() {
+  if (!props.data.length) {
+    toast.add({ severity: 'warn', summary: 'Peringatan', detail: 'Data Kosong', life: 3000 })
+    return
+  }
+
+  if (!usingColumns.value.length) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Peringatan',
+      detail: 'Pilih minimal satu kolom.',
+      life: 3000,
+    })
+    return
+  }
+  isExporting.value = true
+
+  try {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Data')
+
+    worksheet.columns = usingColumns.value.map((col) => ({
+      key: col.key,
+      header: headerText(col.header),
+    }))
+
+    props.data.forEach((item) => worksheet.addRow(item))
+
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${props.fileName}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    visible.value = false
+  } catch (err) {
+    toast.add({
+      severity: 'error',
+      summary: 'Gagal',
+      detail: 'Terjadi kesalahan saat membuat file Excel.',
+      life: 4000,
+    })
+  } finally {
+    isExporting.value = false
+  }
+}
 </script>
 
 <template>
@@ -116,7 +195,7 @@ const selectedColumns = ref<ExportColumnDef[]>([...props.columns])
             class="w-full text-sm"
           >
             <Column
-              v-for="column of selectedColumns"
+              v-for="column of usingColumns"
               :key="column.key"
               :field="String(column.key)"
               :header="
@@ -159,7 +238,7 @@ const selectedColumns = ref<ExportColumnDef[]>([...props.columns])
           severity="success"
           :loading="isExporting"
           :disabled="!selectedColumns.length"
-          @click="exportToExcel(data, fileName, selectedColumns)"
+          @click="handleExport"
           class="w-auto whitespace-nowrap"
         />
       </div>

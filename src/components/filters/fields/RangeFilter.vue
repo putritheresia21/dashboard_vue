@@ -5,6 +5,7 @@ defineProps<{
   filter: {
     type: 'range'
     key: string
+    row?: number
     label: string
     min?: number
     max?: number

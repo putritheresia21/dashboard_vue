@@ -5,14 +5,15 @@ defineProps<{
   filter: {
     type: 'select'
     key: string
+    row?: number
     placeholder: string
     options?: string[]
   }
-  modelValue: any
+  modelValue: string | null
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: any]
+  'update:modelValue': [value: string | null]
 }>()
 </script>
 

@@ -39,25 +39,25 @@ const menuGroups: MenuGroup[] = [
           { label: 'Categories', icon: ChartBarIcon, to: '/categories' },
         ],
       },
-      { label: 'Employee', icon: UsersIcon, to: '/employee' },
+      { label: 'Sales', icon: UsersIcon, to: '/employee' },
       { label: 'Login', icon: UsersIcon, to: '/login' },
     ],
   },
-  {
-    title: 'Financial',
-    items: [
-      { label: 'Transaction', icon: SendIcon, to: '/' },
-      { label: 'Invoices', icon: FileIcon, to: '/' },
-    ],
-  },
-  {
-    title: 'Tools',
-    items: [
-      { label: 'Settings', icon: CogIcon, to: '/' },
-      { label: 'Feedback', icon: CommentIcon, to: '/' },
-      { label: 'Help', icon: QuestionCircleIcon, to: '/' },
-    ],
-  },
+  // {
+  //   title: 'Financial',
+  //   items: [
+  //     { label: 'Transaction', icon: SendIcon, to: '/transaction' },
+  //     { label: 'Invoices', icon: FileIcon, to: '/invoices' },
+  //   ],
+  // },
+  // {
+  //   title: 'Tools',
+  //   items: [
+  //     { label: 'Settings', icon: CogIcon, to: '/settings' },
+  //     { label: 'Feedback', icon: CommentIcon, to: '/feedback' },
+  //     { label: 'Help', icon: QuestionCircleIcon, to: '/help' },
+  //   ],
+  // },
 ]
 
 const route = useRoute()
@@ -100,14 +100,14 @@ function hasActiveChild(item: MenuItem): boolean {
     :class="{ 'translate-x-0': props.isOpen }"
   >
     <!-- Header / Brand Info -->
-    <div class="flex items-center gap-2.5 px-5 mb-8">
+    <div class="flex items-center gap-2.5 py-2 px-4 mb-8">
       <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-600 flex-shrink-0">
         <span class="text-white font-bold text-md">A</span>
       </div>
       <span class="text-base font-bold text-slate-800 whitespace-nowrap"> Admin Panel </span>
     </div>
 
-    <nav class="flex-1 overflow-y-auto overflow-x-hidden py-8 px-4">
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden py-2 px-4">
       <div v-for="group in menuGroups" :key="group.title">
         <p
           class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-1 py-3 mb-2 whitespace-nowrap"

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@primeicons/vue": "^8.0.0",
+    "@primevue/forms": "^5.0.1",
     "@primevue/icons": "^5.0.1",
     "@primevue/themes": "^4.5.4",
     "@tailwindcss/vite": "^4.3.3",
@@ -26,7 +27,8 @@
     "primevue": "^4.5.5",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.40",
-    "vue-router": "^5.2.0"
+    "vue-router": "^5.2.0",
+    "zod": "^4.6.2"
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",

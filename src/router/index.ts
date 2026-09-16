@@ -6,6 +6,7 @@ import ProductView from '../views/ProductView.vue'
 import ReportView from '@/views/ReportView.vue'
 import LoginView from '@/views/LoginView.vue'
 import CategoryView from '@/views/CategoryView.vue'
+import { useAuthStore } from '@/stores/authStore.ts'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +20,7 @@ const router = createRouter({
       path: '/',
       name: 'dashboard',
       component: AppLayout,
+      meta: { requiresAuth: true },
       children: [
         {
           path: '',
@@ -53,14 +55,6 @@ const router = createRouter({
           },
         },
         {
-          path: 'login',
-          name: 'login',
-          component: LoginView,
-          meta: {
-            title: 'Login',
-          },
-        },
-        {
           path: 'reports',
           name: 'reports',
           component: ReportView,
@@ -72,11 +66,31 @@ const router = createRouter({
     },
 
     {
-      path: '/employee/view-report/:id',
-      name: 'report-employee-pdf',
-      component: () => import('@/views/DetailReportView.vue'),
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+      meta: {
+        title: 'Login',
+      },
     },
   ],
+})
+
+// implementasi middleware sementara
+router.beforeEach((to) => {
+  const authStore = useAuthStore()
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return {
+      name: 'login',
+      query: {
+        redirect: to.fullPath,
+      },
+    }
+  }
+  if (to.name === 'login' && authStore.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
 })
 
 export default router

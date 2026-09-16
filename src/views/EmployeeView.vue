@@ -7,6 +7,8 @@ import CustomDataTable from '@/components/CustomDataTable.vue'
 import DetailDialog from '@/components/dialogs/DetailDialog.vue'
 import { salesTeamData, type SalesPerson } from '@/dummy/salesData'
 import { ArrowUpIcon } from '@primevue/icons'
+import PdfExport from '@/components/export/PdfExport.vue'
+import { buildSalesReportHtml } from '@/reports/SalesReport'
 import { formatRupiah, formatDate, getAge, getTenure, getPercent } from '@/utils/formatter'
 
 const salesTeam = ref<SalesPerson[]>(salesTeamData)
@@ -237,28 +239,74 @@ const detailTabs = computed(() => {
       :visible="detailVisible"
       @update:visible="detailVisible = $event"
       title="Detail Sales Person"
-      :name="selectedPerson?.name ?? ''"
-      :subtitle="selectedPerson ? `${selectedPerson.department} · ${selectedPerson.city}` : ''"
       :tabs="detailTabs"
     >
-      <template #header-icon>
+      <template #header>
         <Avatar :image="selectedPerson?.avatar" shape="circle" size="xlarge" />
-      </template>
-
-      <template #item-value="{ item }">
-        <Tag
-          v-if="item.label === 'Status' && selectedPerson"
-          :value="selectedPerson.status"
-          :severity="getStatusSeverity(selectedPerson.status)"
+        <div>
+          <p class="font-semibold text-slate-800 text-lg">{{ selectedPerson?.name }}</p>
+          <p class="text-xs text-slate-400 mt-0.5">{{ selectedPerson?.department }}</p>
+        </div>
+        <PdfExport
+          class="ml-auto"
+          :build-html="() => buildSalesReportHtml(selectedPerson!)"
+          :disabled="!selectedPerson"
         />
-        <p v-else class="font-medium text-slate-800">{{ item.value }}</p>
       </template>
 
-      <template #content="{ tab }">
-        <div v-if="tab.value === 'ringkasan' && selectedPerson" class="mt-3">
-          <p class="text-xs text-slate-400 mb-1">
+      <template #tab-biodata>
+        <div v-if="selectedPerson" class="grid grid-cols-2 gap-3 text-sm pt-2">
+          <div class="bg-slate-50 rounded-lg p-3">
+            <p class="text-slate-400 mb-1">No. Hp</p>
+            <p class="font-medium text-slate-800">{{ selectedPerson.phone }}</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3">
+            <p class="text-slate-400 mb-1">Tanggal Lahir</p>
+            <p class="font-medium text-slate-800">{{ formatDate(selectedPerson.birthDate) }}</p>
+            <p class="text-xs text-slate-400">{{ getAge(selectedPerson.birthDate) }} tahun</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3">
+            <p class="text-slate-400 mb-1">Bergabung Sejak</p>
+            <p class="font-medium text-slate-800">{{ formatDate(selectedPerson.joinDate) }}</p>
+            <p class="text-xs text-slate-400">{{ getTenure(selectedPerson.joinDate) }}</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 col-span-2">
+            <p class="text-slate-400 mb-1">Alamat</p>
+            <p class="font-medium text-slate-800">{{ selectedPerson.address }}</p>
+          </div>
+        </div>
+      </template>
+
+      <template #tab-ringkasan>
+        <div v-if="selectedPerson">
+          <div class="grid grid-cols-2 gap-3 text-sm pt-2">
+            <div class="bg-slate-50 rounded-lg p-3">
+              <p class="text-slate-400 mb-1">Target</p>
+              <p class="font-medium text-slate-800">{{ formatRupiah(selectedPerson.target) }}</p>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-3">
+              <p class="text-slate-400 mb-1">Tercapai</p>
+              <p class="font-medium text-slate-800">{{ formatRupiah(selectedPerson.achieved) }}</p>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-3">
+              <p class="text-slate-400 mb-1">Komisi</p>
+              <p class="font-medium text-slate-800">
+                {{ formatRupiah(selectedPerson.commission) }}
+              </p>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-3">
+              <p class="text-slate-400 mb-1">Status</p>
+              <Tag
+                :value="selectedPerson.status"
+                :severity="getStatusSeverity(selectedPerson.status)"
+              />
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-400 mb-1 mt-3">
             Pencapaian: {{ getPercent(selectedPerson.achieved, selectedPerson.target) }}%
           </p>
+
           <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
               class="h-full rounded-full"
@@ -273,8 +321,10 @@ const detailTabs = computed(() => {
             ></div>
           </div>
         </div>
+      </template>
 
-        <div v-else-if="tab.value === 'riwayat' && selectedPerson" class="flex flex-col gap-3 pt-2">
+      <template #tab-riwayat>
+        <div v-if="selectedPerson" class="flex flex-col gap-3 pt-2">
           <div v-for="h in selectedPerson.targetHistory" :key="h.month" class="text-xs">
             <div class="flex items-center justify-between mb-1">
               <span class="font-medium text-slate-600">{{ h.month }}</span>
@@ -291,8 +341,10 @@ const detailTabs = computed(() => {
             </div>
           </div>
         </div>
+      </template>
 
-        <div v-else-if="tab.value === 'produk' && selectedPerson" class="flex flex-col gap-2 pt-2">
+      <template #tab-produk>
+        <div v-if="selectedPerson" class="flex flex-col gap-2 pt-2">
           <div
             v-for="prod in selectedPerson.products"
             :key="prod.name"

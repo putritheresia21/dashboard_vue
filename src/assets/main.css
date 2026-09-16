@@ -1,6 +1,11 @@
-@import './base.css';
+/* bagian ini dipindahkan */
+/* @import './base.css'; */
 
 @layer tailwind-theme, tailwind-base, primevue, tailwind-utilities;
+
+@theme {
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
 @layer tailwind-theme {
   @import 'tailwindcss/theme.css';
@@ -8,6 +13,7 @@
 
 @layer tailwind-base {
   @import 'tailwindcss/preflight.css';
+  @import './base.css';
 }
 
 @layer tailwind-utilities {

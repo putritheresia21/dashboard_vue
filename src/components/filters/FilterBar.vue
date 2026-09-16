@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, type Component } from 'vue'
 import Button from 'primevue/button'
-import SelectFilter from './SelectFilter.vue'
-import RangeFilter from './RangeFilter.vue'
-import {
-  deriveSelectOptions,
-  defaultFilterValue,
-  type FilterDef,
-  type SelectFilterDef,
-} from './FilterTypes.ts'
+import SelectFilter from './fields/SelectFilter.vue'
+import RangeFilter from './fields/RangeFilter.vue'
+
+const componentMap: Record<string, any> = {
+  select: SelectFilter,
+  range: RangeFilter,
+}
 
 const props = withDefaults(
   defineProps<{
-    filters: FilterDef[]
+    filters: any[]
     modelValue: Record<string, any>
     data?: any[]
     showReset?: boolean
@@ -27,26 +26,25 @@ const emit = defineEmits<{
   'update:modelValue': [value: Record<string, any>]
 }>()
 
-function isSelectFilter(f: FilterDef): f is SelectFilterDef {
-  return f.type === 'select'
-}
-
-const resolvedFilters = computed<FilterDef[]>(() =>
-  props.filters.map((f): FilterDef => {
-    if (isSelectFilter(f)) {
-      const rawOptions = f.options
-      const options: string[] = Array.isArray(rawOptions)
-        ? rawOptions
-        : deriveSelectOptions(props.data, f.key)
-      return { ...f, options }
+const resolvedFilters = computed(() =>
+  props.filters.map((f) => {
+    if (f.type === 'select' && !Array.isArray(f.options)) {
+      const opts = [...new Set(props.data.map((item) => item[f.key]))].filter(Boolean).sort()
+      return { ...f, options: opts }
     }
     return f
   }),
 )
 
-// pisahkan select & range, supaya bisa dirender di baris terpisah
-const selectFilters = computed(() => resolvedFilters.value.filter(isSelectFilter))
-const rangeFilters = computed(() => resolvedFilters.value.filter((f) => f.type === 'range'))
+const groupedRows = computed(() => {
+  const rows = new Map<string, any[]>()
+  resolvedFilters.value.forEach((f) => {
+    const rowKey = f.row !== undefined ? `r-${f.row}` : `t-${f.type}`
+    if (!rows.has(rowKey)) rows.set(rowKey, [])
+    rows.get(rowKey)!.push(f)
+  })
+  return [...rows.values()]
+})
 
 function updateValue(key: string, value: any) {
   emit('update:modelValue', { ...props.modelValue, [key]: value })
@@ -55,7 +53,7 @@ function updateValue(key: string, value: any) {
 function resetAll() {
   const reset: Record<string, any> = {}
   props.filters.forEach((f) => {
-    reset[f.key] = defaultFilterValue(f)
+    reset[f.key] = f.type === 'range' ? [f.min ?? 0, f.max ?? 100] : null
   })
   emit('update:modelValue', reset)
 }
@@ -63,28 +61,20 @@ function resetAll() {
 
 <template>
   <div v-if="filters.length" class="flex flex-col gap-3">
-    <!-- baris 1: semua select filter -->
-    <div v-if="selectFilters.length" class="flex flex-wrap items-center gap-3">
-      <SelectFilter
-        v-for="f in selectFilters"
+    <div
+      v-for="(rowFilters, idx) in groupedRows"
+      :key="idx"
+      class="flex flex-wrap items-start gap-3"
+    >
+      <component
+        :is="componentMap[f.type]"
+        v-for="f in rowFilters"
         :key="f.key"
         :filter="f"
         :model-value="modelValue[f.key]"
         @update:model-value="updateValue(f.key, $event)"
       />
     </div>
-
-    <!-- baris 2: semua range filter -->
-    <div v-if="rangeFilters.length" class="flex flex-wrap items-start gap-3">
-      <RangeFilter
-        v-for="f in rangeFilters"
-        :key="f.key"
-        :filter="f"
-        :model-value="modelValue[f.key]"
-        @update:model-value="updateValue(f.key, $event)"
-      />
-    </div>
-
     <div v-if="showReset" class="flex justify-end">
       <Button
         label="Reset Semua Filter"

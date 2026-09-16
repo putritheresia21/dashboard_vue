@@ -6,12 +6,6 @@ import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
 import SearchInput from '@/components/SearchInput.vue'
 import FilterBar from '@/components/filters/FilterBar.vue'
-import {
-  defaultFilterValue,
-  matchesAllFilters,
-  type FilterDef,
-  type FilterValue,
-} from '@/components/filters/filterTypes'
 import ExcelExport from './export/ExcelExport.vue'
 
 interface ColumnDef {
@@ -38,7 +32,7 @@ const props = withDefaults(
     columns: ColumnDef[]
     searchFields?: string[]
     searchPlaceholder?: string
-    filters?: FilterDef[]
+    filters?: any[]
     rows?: number
     rowsPerPageOptions?: number[]
     showActions?: boolean
@@ -77,19 +71,28 @@ const hasActionsColumn = computed(
 )
 
 const searchQuery = ref('')
-const activeFilters = ref<Record<string, FilterValue>>({})
+const activeFilters = ref<Record<string, any>>({})
 
 watch(
   () => props.filters,
   (newFilters) => {
-    const next: Record<string, FilterValue> = {}
+    const next: Record<string, any> = {}
     newFilters.forEach((f) => {
-      next[f.key] = activeFilters.value[f.key] ?? defaultFilterValue(f)
+      next[f.key] =
+        activeFilters.value[f.key] ?? (f.type === 'range' ? [f.min ?? 0, f.max ?? 100] : null)
     })
     activeFilters.value = next
   },
   { immediate: true },
 )
+
+function matchesFilter(item: any, filter: any, value: any): boolean {
+  if (!value) return true
+  if (filter.type === 'select') return item[filter.key] === value
+  const [min, max] = value as [number, number]
+  const actual = filter.compute ? filter.compute(item) : item[filter.key]
+  return actual >= min && actual <= max
+}
 
 const filteredData = computed(() => {
   return props.data.filter((item) => {
@@ -100,7 +103,9 @@ const filteredData = computed(() => {
           .toLowerCase()
           .includes(searchQuery.value.toLowerCase()),
       )
-    const matchesFilters = matchesAllFilters(item, props.filters, activeFilters.value)
+    const matchesFilters = props.filters.every((f) =>
+      matchesFilter(item, f, activeFilters.value[f.key]),
+    )
     return matchesSearch && matchesFilters
   })
 })
@@ -144,17 +149,20 @@ watch(filteredData, () => {
           v-model="searchQuery"
           :placeholder="searchPlaceholder"
         />
-        <ExcelExport
-          v-if="showExport"
-          :data="filteredData"
-          :columns="exportColumns"
-          :file-name="exportFileName"
-          button-class="w-auto"
-        />
       </div>
       <div v-if="filters.length" class="p-5">
         <FilterBar :filters="filters" v-model="activeFilters" :data="data" />
       </div>
+    </div>
+
+    <div v-if="showExport" class="flex justify-end">
+      <ExcelExport
+        v-if="showExport"
+        :data="filteredData"
+        :columns="exportColumns"
+        :file-name="exportFileName"
+        button-class="w-auto"
+      />
     </div>
 
     <!--Card 2: tabel-->

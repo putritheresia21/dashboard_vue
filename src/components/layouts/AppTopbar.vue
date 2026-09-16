@@ -31,7 +31,7 @@ const emit = defineEmits<{ toggleSidebar: [] }>()
         </button>
 
         <div>
-          <h2 class="text-2xl font-bold text-slate-800 tracking-tight">
+          <h2 class="text-2xl text-slate-800 tracking-tight">
             {{ route.meta.title }}
           </h2>
         </div>
