@@ -30,16 +30,16 @@ const menuGroups: MenuGroup[] = [
     title: 'Menu',
     items: [
       { label: 'Dashboard', icon: HomeIcon, to: '/' },
-      { label: 'Report', icon: ChartBarIcon, to: '/reports' },
+      { label: 'Report', icon: ChartBarIcon, to: '/report-view' },
       {
         label: 'Products',
         icon: ShoppingBagIcon,
         children: [
-          { label: 'All Products', icon: ShoppingBagIcon, to: '/product' },
-          { label: 'Categories', icon: ChartBarIcon, to: '/categories' },
+          { label: 'All Products', icon: ShoppingBagIcon, to: '/product-view' },
+          { label: 'Category Product', icon: ChartBarIcon, to: '/category-view' },
         ],
       },
-      { label: 'Sales', icon: UsersIcon, to: '/employee' },
+      { label: 'Sales', icon: UsersIcon, to: '/employee-view' },
       { label: 'Login', icon: UsersIcon, to: '/login' },
     ],
   },

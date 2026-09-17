@@ -45,9 +45,9 @@ export function getAuthenticate(userInput: AuthRequest): AuthResponse | null {
     return null
   }
 
-  // 3. Kalkulasi tanggal (1 hari dari sekarang) yang lebih mudah dibaca
+  // 3. Kalkulasi tanggal (7 hari dari sekarang) yang lebih mudah dibaca
   const expiredDate = new Date()
-  expiredDate.setDate(expiredDate.getDate() + 1)
+  expiredDate.setDate(expiredDate.getDate() + 7)
 
   return {
     nik: user.nik,

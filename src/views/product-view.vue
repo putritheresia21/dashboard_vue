@@ -1,3 +1,9 @@
+<route lang="yaml">
+meta:
+  title: Product
+  requiresAuth: true
+</route>
+
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Tag from 'primevue/tag'
@@ -7,11 +13,15 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
+import { Message } from 'primevue'
 import CustomDataTable from '@/components/CustomDataTable.vue'
 import { ArrowUpIcon } from '@primevue/icons'
 import { productsData, categoryOptionsDummy, type Product } from '@/dummy/productsData'
-import { useConfirmDelete } from '@/composables/useConfirmDelete'
+// import { useConfirmDelete } from '@/composables/useConfirmDelete'
 import { getPercent } from '@/utils/formatter'
+import { useValidateInput } from '@/composables/useValidateInput'
+import { Form, FormField } from '@primevue/forms'
+import z from 'zod'
 // TODO: kalau backend sudah siap, ganti productsData dengan hasil getProducts()/getCategories()
 // import { getProducts, createProduct } from '@/services/product-service'
 // import { getCategories } from '@/services/category-service'
@@ -134,15 +144,7 @@ const deleteProduct = (product: Product) => {
 const showAddDialog = ref(false)
 const saving = ref(false)
 
-const newProduct = ref({
-  name: '',
-  categoryID: null as number | null,
-  quantity: 0,
-  price: 0,
-})
-
 function openAddDialog() {
-  newProduct.value = { name: '', categoryID: null, quantity: 0, price: 0 }
   showAddDialog.value = true
 }
 
@@ -150,31 +152,42 @@ function generateProductCode(): string {
   return `PRD-${String(products.value.length + 1).padStart(4, '0')}`
 }
 
-function saveNewProduct() {
-  if (!newProduct.value.name || !newProduct.value.categoryID) {
-    alert('Nama produk dan kategori wajib diisi')
-    return
-  }
-  const cat = categories.value.find((c) => c.id === newProduct.value.categoryID)!
-  const qty = newProduct.value.quantity
+// menambah validasi input
+const schema = z.object({
+  name: z.string('Nama produk wajib diisi').min(1, 'Nama produk wajib diisi'),
+  category: z.int('Kategori harus dipilih'),
+  quantity: z.int('Jumlah harus diisi'),
+  price: z.int('Harga harus diisi'),
+})
 
-  products.value.push({
-    id: products.value.length + 1,
-    code: generateProductCode(),
-    name: newProduct.value.name,
-    category: cat.name,
-    categoryId: cat.id,
-    quantity: qty,
-    price: newProduct.value.price,
-    image: `https://placehold.co/100x100/0d9488/white?text=${newProduct.value.name.charAt(0)}`,
-    inventoryStatus: qty === 0 ? 'OUTOFSTOCK' : qty <= 10 ? 'LOWSTOCK' : 'INSTOCK',
-    rating: 4,
-    description: '',
-    stockHistory: [],
-  })
+const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidateInput(
+  schema,
+  async (values) => {
+    saving.value = true
 
-  showAddDialog.value = false
-}
+    const cat = categories.value.find((c) => c.id === values.category)!
+    const qty = values.quantity
+
+    products.value.push({
+      id: products.value.length + 1,
+      code: generateProductCode(),
+      name: values.name,
+      category: cat.name,
+      categoryId: cat.id,
+      quantity: qty,
+      price: values.price,
+      image: `https://placehold.co/100x100/0d9488/white?text=${values.name.charAt(0)}`,
+      inventoryStatus: qty === 0 ? 'OUTOFSTOCK' : qty <= 10 ? 'LOWSTOCK' : 'INSTOCK',
+      rating: 4,
+      description: '',
+      stockHistory: [],
+    })
+
+    showAddDialog.value = false
+
+    saving.value = false
+  },
+)
 </script>
 
 <template>
@@ -267,41 +280,61 @@ function saveNewProduct() {
       modal
       :style="{ width: '28rem' }"
     >
-      <div class="flex flex-col gap-4">
-        <div>
+      <Form
+        class="flex flex-col gap-4"
+        :resolver="resolver"
+        :validate-on-blur="true"
+        :validate-on-value-update="fieldsToValidateOnUpdate"
+        :validate-on-submit="true"
+        @submit="onSubmit"
+      >
+        <FormField name="name" v-slot="$field">
           <label class="text-sm font-medium text-slate-700 mb-1 block">Product Name</label>
-          <InputText v-model="newProduct.name" class="w-full" placeholder="e.g Bamboo Watch" />
-        </div>
-        <div>
+          <InputText v-bind="$field" class="w-full" placeholder="e.g Bamboo Watch" />
+          <Message v-if="$field.invalid" severity="error" size="small" variant="simple">
+            {{ $field.error?.message }}
+          </Message>
+        </FormField>
+        <FormField name="category" v-slot="$field">
           <label class="text-sm font-medium text-slate-700 mb-1 block">Category</label>
           <Select
-            v-model="newProduct.categoryID"
+            v-bind="$field"
             :options="categories"
             optionLabel="name"
             optionValue="id"
             placeholder="Pilih Kategori"
             class="w-full"
           />
-        </div>
+          <Message v-if="$field.invalid" severity="error" size="small" variant="simple">
+            {{ $field.error?.message }}
+          </Message>
+        </FormField>
         <div class="grid grid-cols-2 gap-4">
-          <div>
+          <FormField name="quantity" v-slot="$field">
             <label class="text-sm font-medium text-slate-700 mb-1 block">Quantity</label>
-            <InputNumber v-model="newProduct.quantity" class="w-full" :min="0" />
-          </div>
-          <div>
+            <InputNumber v-bind="$field" class="w-full" :min="0" :default-value="0" />
+            <Message v-if="$field.invalid" severity="error" size="small" variant="simple">
+              {{ $field.error?.message }}
+            </Message>
+          </FormField>
+          <FormField name="price" v-slot="$field">
             <label class="text-sm font-medium text-slate-700 mb-1 block">Price ($)</label>
             <InputNumber
-              v-model="newProduct.price"
+              v-bind="$field"
               class="w-full"
               :min="0"
               mode="currency"
               currency="USD"
               locale="en-US"
+              :default-value="0"
             />
-          </div>
+            <Message v-if="$field.invalid" severity="error" size="small" variant="simple">
+              {{ $field.error?.message }}
+            </Message>
+          </FormField>
         </div>
-        <Button label="Save" :loading="saving" @click="saveNewProduct" />
-      </div>
+        <Button type="submit" label="Save" :loading="saving" />
+      </Form>
     </Dialog>
   </div>
 </template>

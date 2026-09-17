@@ -2,10 +2,33 @@
 import { RouterView } from 'vue-router'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+import type { Component } from 'vue'
+
+import AppLayout from '@/components/layouts/AppLayout.vue'
+
+const layouts: Record<string, Component> = {
+  default: AppLayout,
+}
+
+const route = useRoute()
+
+const layout = computed(() => {
+  const name = route.meta.layout
+  if (name === false || name === 'none') return null
+  return layouts[name ?? 'default']
+})
 </script>
 
 <template>
-  <RouterView />
+  <!-- jika dengan layout -->
+  <component v-if="layout" :is="layout">
+    <RouterView />
+  </component>
+  <!-- jika diatur tanpa layout -->
+  <RouterView v-else />
+
   <Toast />
   <ConfirmDialog />
 </template>

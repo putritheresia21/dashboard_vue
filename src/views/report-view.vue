@@ -1,3 +1,9 @@
+<route lang="yaml">
+meta:
+  title: Report
+  requiresAuth: true
+</route>
+
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Tag from 'primevue/tag'

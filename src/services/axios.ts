@@ -22,7 +22,7 @@ api.interceptors.response.use(
       authStore.logout()
 
       // 2. Redirect ke halaman login
-      router.push({ name: 'login' })
+      router.push('/login')
 
       // toast.add({
       //   severity: 'error',

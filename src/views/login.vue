@@ -1,25 +1,7 @@
-<!-- <template>
-  <div class="flex justif-center">
-    <Card class="max-w-sm w-full">
-      <template #title>Welcome Back</template>
-      <template #subtitle>Sign in with your email to continue.</template>
-      <template #content>
-        <form class="space-y-6 mt-3">
-          <div class="flex flex-col gap-2">
-            <label for="email">Email</label>
-            <InputText id="email" type="email" />
-          </div>
-          <div class="flex flex-col gap-2">
-            <div class="flex items-center justify-between">
-              <label for="password" class="flex-1">Password</label>
-              <Button variant="link" class="p-0">Forgot Password?</Button>
-            </div>
-          </div>
-        </form>
-      </template>
-    </Card>
-  </div>
-</template> -->
+<route lang="yaml">
+meta:
+  layout: false
+</route>
 
 <!-- contoh penerapan useValidateInput -->
 <script setup lang="ts">
@@ -30,6 +12,7 @@ import { useValidateInput } from '@/composables/useValidateInput'
 import { useAuthStore } from '@/stores/authStore'
 import { useRoute, useRouter } from 'vue-router'
 import { ref } from 'vue'
+import { useToast } from 'primevue'
 
 // --- 1. Definisikan Schema ---
 const schema = z.object({
@@ -48,6 +31,20 @@ const isLoading = ref(false)
 
 const { login } = useAuthStore()
 
+const redirectQuery = route.query.redirect
+
+const redirectPath = Array.isArray(redirectQuery) ? redirectQuery[0] : redirectQuery
+
+const toast = useToast()
+if (redirectPath) {
+  toast.add({
+    severity: 'error',
+    summary: 'Peringatan',
+    detail: 'Sesi anda telah berakhir, harap login kembali',
+    life: 3000,
+  })
+}
+
 // --- 2. Panggil Composable ---
 const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidateInput(
   schema,
@@ -59,17 +56,13 @@ const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidat
 
       console.log('User berhasil disimpan:', localStorage.getItem('user'))
 
-      const redirectQuery = route.query.redirect
-
-      const redirectPath = Array.isArray(redirectQuery) ? redirectQuery[0] : redirectQuery
-
       // 3. Arahkan pengguna ke rute yang sesuai
       router.push(redirectPath || '/')
     } catch (error) {
       // 3. Tangani jika login gagal (misal kredensial salah)
       console.error('Login gagal:', error)
       errorLogin.value = (error as Error).message
-    } finally{
+    } finally {
       isLoading.value = false
     }
   },

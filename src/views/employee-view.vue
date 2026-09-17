@@ -1,3 +1,9 @@
+<route lang="yaml">
+meta:
+  title: Employee
+  requiresAuth: true
+</route>
+
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Tag from 'primevue/tag'
@@ -48,12 +54,6 @@ const columns = computed(() => [
   },
   { field: 'status', header: 'Status', sortable: true, align: 'center' as const, slot: 'status' },
 ])
-// tambahan viko
-const exportColumns = columns.value.map(({ field, header }) => ({
-  key: field,
-  header,
-}))
-// akhir
 
 // filter select + filter
 const filters = [
