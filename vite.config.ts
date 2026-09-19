@@ -11,6 +11,13 @@ export default defineConfig({
   plugins: [
     VueRouter({
       routesFolder: 'src/views',
+      // routesFolder: [
+      //   {
+      //     src: 'src/features',
+      //     filePatterns: '*/pages/**/*.vue',
+      //     path: (file) => file.replace(/\/views\//, '/'),
+      //   },
+      // ],
       dts: 'src/route-map.d.ts',
     }),
     vue(),

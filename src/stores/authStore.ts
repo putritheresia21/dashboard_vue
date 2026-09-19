@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
 import type { AuthRequest, User } from '@/dummy/userData'
 import { getAuthenticate } from '@/dummy/userData'
 
@@ -46,7 +45,6 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       // Opsional: Beritahu backend untuk menghapus HttpOnly cookie di sisi server
-      await axios.post('/api/logout')
     } catch (error) {
       console.log('Logout API gagal, tapi tetap hapus sesi di frontend')
     } finally {

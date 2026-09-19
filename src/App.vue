@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import type { Component } from 'vue'
 
-import AppLayout from '@/components/layouts/AppLayout.vue'
+import AppLayout from '@/shared/layouts/AppLayout.vue'
 
 const layouts: Record<string, Component> = {
   default: AppLayout,

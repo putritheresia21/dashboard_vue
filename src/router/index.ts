@@ -12,12 +12,25 @@ import { routes } from 'vue-router/auto-routes'
 declare module 'vue-router' {
   interface RouteMeta {
     layout?: string | false
+    title?: string
   }
 }
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes: [
+    ...routes,
+    {
+      path: '/aplikasi',
+      name: 'aplikasi',
+      component: () => import('@/views/index.vue'),
+      meta: { title: 'Aplikasi Saya', requiresAuth: true },
+    },
+    {
+      path: '/aplikasi/:pathMatch(.*)*',
+      redirect: '/aplikasi',
+    },
+  ],
   // routes: [
   //   // {
   //   //   path: '/',
