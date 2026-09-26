@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Avatar from 'primevue/avatar'
 import BellIcon from '@primeicons/vue/bell'
 import ChevronDownIcon from '@primeicons/vue/chevron-down'
@@ -11,9 +11,13 @@ import { useAuthStore } from '@/stores/authStore'
 import { ref } from 'vue'
 import SearchInput from '@/components/SearchInput.vue'
 import companyLogo from '@/assets/logo/logo-bernofarm.svg'
+import { storeToRefs } from 'pinia'
 
 const route = useRoute()
-const { user } = useAuthStore()
+const router = useRouter()
+
+const auth = useAuthStore()
+const { user, role } = storeToRefs(auth)
 
 const tabs = [
   { label: 'Portal Perusahaan', to: '/' },
@@ -21,6 +25,14 @@ const tabs = [
 ]
 
 const search = ref('')
+
+const opRole = ref()
+const toggleRole = (e: Event) => opRole.value.toggle(e)
+
+function pickRole(r: typeof role.value) {
+  auth.switchRole(r)
+  opRole.value.hide()
+}
 
 // mengatur notifikasi
 // const opNotification = ref()
@@ -54,7 +66,7 @@ const search = ref('')
 </script>
 
 <template>
-  <header class="sticky top-0 z-10 bg-white h-15">
+  <header class="sticky top-0 z-10 bg-white h-15 shrink-0">
     <div
       class="flex items-center justify-between h-full pl-3 pr-2 lg:pl-6 lg:pr-12 gap-1.5 lg:gap-4"
     >
@@ -83,6 +95,7 @@ const search = ref('')
         <div class="w-40 sm:w-60 lg:w-64">
           <SearchInput v-model="search" placeholder="Cari..." variant="light" rounded="2xl" />
         </div>
+
         <div class="flex items-center gap-1 lg:gap-3 flex-shrink-0 ml-auto lg:ml-auto">
           <button
             class="relative w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 flex-shrink-0"
@@ -90,15 +103,37 @@ const search = ref('')
             <BellIcon size="18" color="#64748b" />
             <span class="absolute top-1.5 right-2 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
           </button>
-          <div class="hidden sm:block text-right leading-tight">
-            <p class="text-sm font-medium text-slate-800">{{ user?.name }}</p>
-            <p class="text-xs text-slate-400">Sales Rep</p>
-          </div>
-          <Avatar
-            :image="`https://ui-avatars.com/api/?name=${user?.name}&background=1d4ed8&color=fff`"
-            shape="circle"
-            class="w-8 h-8"
-          />
+
+          <button
+            class="flex items-center gap-2 lg:gap-3 rounded-xl px-1.5 py-1 hover:bg-slate-50 transition-colors"
+            @click="toggleRole"
+          >
+            <div class="hidden sm:block text-right leading-tight">
+              <p class="text-sm font-medium text-slate-800">{{ user?.name }}</p>
+              <p class="text-xs text-slate-400">Sales Rep</p>
+            </div>
+            <Avatar
+              :image="`https://ui-avatars.com/api/?name=${user?.name}&background=1d4ed8&color=fff`"
+              shape="circle"
+              class="w-8 h-8"
+            />
+            <ChevronDownIcon size="14" color="#94a3b8" class="hidden sm:block" />
+          </button>
+
+          <Popover ref="opRole">
+            <div class="w-44 flex flex-col gap-1">
+              <p class="text-xs text-slate-400 px-2 pb-1">Ganti Role</p>
+              <button
+                v-for="r in auth.roles"
+                :key="r"
+                class="text-left text-sm px-2 py-1.5 rounded-md hover:bg-slate-50 transition-colors"
+                :class="r === role ? 'text-blue-600 fot-medium bg-blue-50' : 'text-slate-700'"
+                @click="pickRole(r)"
+              >
+                {{ auth.roleLabels[r] }}
+              </button>
+            </div>
+          </Popover>
         </div>
       </div>
 

@@ -5,16 +5,31 @@ import { getAuthenticate } from '@/dummy/userData'
 
 type GeneralIdentity = Omit<User, 'password'>
 
+const roles = ['dm', 'sm', 'mr'] as const
+type Role = (typeof roles)[number]
+
+const roleLabels: Record<Role, string> = {
+  dm: 'dm',
+  sm: 'sm',
+  mr: 'mr',
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // Mengambil data dari localStorage saat aplikasi pertama kali dimuat
   const temp = localStorage.getItem('user')
   const user = ref<GeneralIdentity | null>(temp ? JSON.parse(temp) : null)
   const expiresAt = ref(localStorage.getItem('expiresAt') || null)
 
+  const savedRole = localStorage.getItem('role') as Role | null
+  const role = ref<Role>(savedRole && roles.includes(savedRole) ? savedRole : 'dm')
+
   // Cek apakah user valid: Data user ada DAN waktu saat ini belum melewati expiresAt
-  const isAuthenticated = computed<boolean>(() => {
-    return !!user.value
-  })
+  const isAuthenticated = computed(() => !!user.value)
+
+  const switchRole = (newRole: Role) => {
+    role.value = newRole
+    localStorage.setItem('role', newRole)
+  }
 
   const login = async (credentials: AuthRequest) => {
     // Pastikan axios dikonfigurasi untuk menerima cookie
@@ -80,5 +95,9 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     checkSession,
+    role,
+    roles,
+    roleLabels,
+    switchRole,
   }
 })

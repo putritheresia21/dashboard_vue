@@ -38,6 +38,55 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/aplikasi/': RouteRecordInfo<
+      '/aplikasi/',
+      '/aplikasi',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/aplikasi/approval': RouteRecordInfo<
+      '/aplikasi/approval',
+      '/aplikasi/approval',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/aplikasi/visit/': RouteRecordInfo<
+      '/aplikasi/visit/',
+      '/aplikasi/visit',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/aplikasi/visit/mcl/': RouteRecordInfo<
+      '/aplikasi/visit/mcl/',
+      '/aplikasi/visit/mcl',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/aplikasi/visit/mcl/add-mcl': RouteRecordInfo<
+      '/aplikasi/visit/mcl/add-mcl',
+      '/aplikasi/visit/mcl/add-mcl',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/aplikasi/visit/rencana': RouteRecordInfo<
+      '/aplikasi/visit/rencana',
+      '/aplikasi/visit/rencana',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/aplikasi/visit/rencana-mingguan': RouteRecordInfo<
+      '/aplikasi/visit/rencana-mingguan',
+      '/aplikasi/visit/rencana-mingguan',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/category-view': RouteRecordInfo<
       '/category-view',
       '/category-view',
@@ -110,6 +159,62 @@ declare module 'vue-router/auto-routes' {
     'src/views/index.vue': {
       routes:
         | '/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/views/aplikasi/index.vue': {
+      routes:
+        | '/aplikasi/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/views/aplikasi/approval.vue': {
+      routes:
+        | '/aplikasi/approval'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/views/aplikasi/visit/index.vue': {
+      routes:
+        | '/aplikasi/visit/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/views/aplikasi/visit/mcl/index.vue': {
+      routes:
+        | '/aplikasi/visit/mcl/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/views/aplikasi/visit/mcl/add-mcl.vue': {
+      routes:
+        | '/aplikasi/visit/mcl/add-mcl'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/views/aplikasi/visit/rencana.vue': {
+      routes:
+        | '/aplikasi/visit/rencana'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/views/aplikasi/visit/rencana-mingguan.vue': {
+      routes:
+        | '/aplikasi/visit/rencana-mingguan'
       views:
         | never
       pathParamNames:

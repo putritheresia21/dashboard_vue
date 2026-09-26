@@ -1,32 +1,30 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
-import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import type { Component } from 'vue'
-
-import AppLayout from '@/shared/layouts/AppLayout.vue'
-
-const layouts: Record<string, Component> = {
-  default: AppLayout,
-}
+import { useIsMobile } from './composables/useIsMobile.ts'
+import AppLayoutDesktop from './layouts/desktop/AppLayoutDesktop.vue'
+import AppLayoutMobile from './layouts/mobile/AppLayoutMobile.vue'
 
 const route = useRoute()
+const isMobile = useIsMobile()
+
+const layouts = computed<Record<string, Component>>(() => ({
+  default: isMobile.value ? AppLayoutMobile : AppLayoutDesktop,
+}))
 
 const layout = computed(() => {
   const name = route.meta.layout
   if (name === false || name === 'none') return null
-  return layouts[name ?? 'default']
+  return layouts.value[name ?? 'default'] ?? layouts.value.default
 })
 </script>
 
 <template>
   <!-- jika dengan layout -->
-  <component v-if="layout" :is="layout">
-    <RouterView />
-  </component>
-  <!-- jika diatur tanpa layout -->
+  <component v-if="layout" :is="layout"> </component>
   <RouterView v-else />
 
   <Toast />

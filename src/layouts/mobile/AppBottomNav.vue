@@ -8,6 +8,13 @@ const tabs = [
   { label: 'Portal', icon: HomeIcon, to: '/' },
   { label: 'Aplikasi', icon: ThLargeIcon, to: '/aplikasi' },
 ]
+
+function isActive(to: string) {
+  if (to === '/') {
+    return route.path === '/'
+  }
+  return route.path === to || route.path.startsWith(to + '/')
+}
 </script>
 
 <template>
@@ -20,12 +27,12 @@ const tabs = [
         :key="tab.to"
         :to="tab.to"
         class="flex flex-col items-center justify-center gap-1 px-6 py-1.5 rounded-xl transition-colors"
-        :class="route.path === tab.to ? 'text-blue-400' : 'text-white/50'"
+        :class="isActive(tab.to) ? 'text-blue-400' : 'text-white/50'"
       >
         <component
           :is="tab.icon"
           size="20"
-          :color="route.path === tab.to ? '#60a5fa' : 'rgba(255,255,255,0.5)'"
+          :color="isActive(tab.to) ? '#60a5fa' : 'rgba(255,255,255,0.5)'"
         />
         <span class="text-xs font-medium">{{ tab.label }}</span>
       </router-link>

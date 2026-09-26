@@ -2,75 +2,47 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SearchInput from '@/components/SearchInput.vue'
-import ChevronDownIcon from '@primeicons/vue/chevron-down'
 import ChevronRightIcon from '@primeicons/vue/chevron-right'
 import { sidebarMenu } from '@/config/sidebarMenu'
+import type { SidebarMenuItem, SidebarChild } from '@/config/sidebarMenu'
 
 const route = useRoute()
 
-const isInAplikasi = computed(() => route.path.startsWith('/aplikasi'))
-
-interface SubMenu {
-  label: string
-  to: string
-}
-
-interface Menu {
-  label: string
-  icon: unknown
-  children: SubMenu[]
-}
-
-const filterMenuRecursive = (menus: Menu[], query: string): Menu[] => {
+const filterMenuRecursive = (menus: SidebarMenuItem[], query: string): SidebarMenuItem[] => {
   if (!query) return menus
-
-  return menus.reduce((result: Menu[], menu) => {
+  return menus.reduce((result: SidebarMenuItem[], menu) => {
     const isMatch = menu.label.toLowerCase().includes(query)
-
     if (isMatch) {
       result.push(menu)
     } else {
       const filteredChildren = menu.children.filter((child) =>
         child.label.toLowerCase().includes(query),
       )
-      if (filteredChildren.length > 0) {
-        result.push({ ...menu, children: filteredChildren })
-      }
+      if (filteredChildren.length > 0) result.push({ ...menu, children: filteredChildren })
     }
-
     return result
   }, [])
 }
 
 const search = ref('')
+const filteredMenu = computed(() => filterMenuRecursive(sidebarMenu, search.value.toLowerCase()))
 
-const filteredMenu = computed(() => {
-  const query = search.value.toLowerCase()
-  return filterMenuRecursive(sidebarMenu, query)
-})
-
-function isChildActive(child: SubMenu) {
+function isChildActive(child: SidebarChild) {
   return route.path === child.to || route.path.startsWith(child.to + '/')
 }
-
-function hasActiveChild(item: Menu) {
-  return item.children.some(isChildActive)
+function hasActiveChild(item: SidebarMenuItem) {
+  return item.children.some(isChildActive) || route.path.startsWith(item.parentRoute)
 }
 
 const expandedMenus = ref<Set<string>>(new Set())
-
 sidebarMenu.forEach((item) => {
   if (hasActiveChild(item)) expandedMenus.value.add(item.label)
 })
 
 function toggleExpand(label: string) {
-  if (expandedMenus.value.has(label)) {
-    expandedMenus.value.delete(label)
-  } else {
-    expandedMenus.value.add(label)
-  }
+  if (expandedMenus.value.has(label)) expandedMenus.value.delete(label)
+  else expandedMenus.value.add(label)
 }
-
 function isExpanded(label: string) {
   return expandedMenus.value.has(label)
 }
@@ -78,7 +50,6 @@ function isExpanded(label: string) {
 
 <template>
   <aside
-    v-if="isInAplikasi"
     class="flex flex-col w-64 bg-[#0d2551] p-4 gap-1 overflow-y-auto flex-shrink-0"
     style="scrollbar-gutter: stable"
   >
@@ -139,14 +110,3 @@ function isExpanded(label: string) {
     </div>
   </aside>
 </template>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

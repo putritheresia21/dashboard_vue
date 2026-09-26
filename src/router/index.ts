@@ -1,18 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import DashboardView from '../views/DashboardView.vue'
-// import AppLayout from '../components/layouts/AppLayout.vue'
-// import EmployeeView from '../views/EmployeeView.vue'
-// import ProductView from '../views/ProductView.vue'
-// import ReportView from '@/views/ReportView.vue'
-// import LoginView from '@/views/LoginView.vue'
-// import CategoryView from '@/views/CategoryView.vue'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { routes } from 'vue-router/auto-routes'
 
 declare module 'vue-router' {
   interface RouteMeta {
-    layout?: string | false
     title?: string
+    layout?: string | false
+    requiresAuth: true
   }
 }
 
@@ -20,12 +14,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     ...routes,
-    {
-      path: '/aplikasi',
-      name: 'aplikasi',
-      component: () => import('@/views/index.vue'),
-      meta: { title: 'Aplikasi Saya', requiresAuth: true },
-    },
+
     {
       path: '/aplikasi/:pathMatch(.*)*',
       redirect: '/aplikasi',
@@ -101,7 +90,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   const authStore = useAuthStore()
   authStore.checkSession()
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+  if (!to.meta.public && !authStore.isAuthenticated) {
     return {
       path: '/login',
       query: {
@@ -110,7 +99,7 @@ router.beforeEach((to) => {
     }
   }
   if (to.path === '/login' && authStore.isAuthenticated) {
-    return { path: '/' }
+    return { path: '/aplikasi' }
   }
 })
 
