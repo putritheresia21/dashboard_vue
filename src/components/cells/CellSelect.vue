@@ -3,6 +3,10 @@ import { computed } from 'vue'
 import Select from 'primevue/select'
 import type { any } from 'zod'
 
+defineOptions({
+  inheritAttrs: false
+})
+
 const props = defineProps<{
   modelValue?: string | null
   options: Array<string | { value: string; label: string }>
@@ -24,6 +28,7 @@ function onChange(value: string) {
 
 <template>
   <Select
+    v-bind="$attrs"
     :model-value="modelValue"
     :options="normalized"
     option-label="label"

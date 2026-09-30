@@ -2,6 +2,10 @@
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 
+defineOptions({
+  inheritAttrs: false
+})
+
 withDefaults(
   defineProps<{
     modelValue?: string | number | null
@@ -37,6 +41,7 @@ const textClass = `${base} w-full px-2 py-0 text-left font-semibold`
 <template>
   <InputNumber
     v-if="type === 'number'"
+    v-bind="$attrs"
     :model-value="Number(modelValue ?? 0)"
     :min="min ?? 0"
     :max="max"
@@ -49,6 +54,7 @@ const textClass = `${base} w-full px-2 py-0 text-left font-semibold`
 
   <InputText
     v-else
+    v-bind="$attrs"
     :model-value="String(modelValue ?? '')"
     :disabled="disabled"
     :class="textClass"

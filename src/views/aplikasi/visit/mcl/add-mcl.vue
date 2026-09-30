@@ -12,6 +12,8 @@ import SearchInput from '@/components/SearchInput.vue'
 import FormCell from '@/components/FormCell.vue'
 import CustomDataTable from '@/components/CustomDataTable.vue'
 import SummaryCard from '@/components/SummaryCard.vue'
+import CellInput from '@/components/cells/CellInput.vue'
+import CellSelect from '@/components/cells/CellSelect.vue'
 import DynamicList from '@/components/DynamicList.vue'
 import { formatRupiah } from '@/utils/formatter'
 import { useIsMobile } from '@/composables/useIsMobile'
@@ -316,12 +318,11 @@ const toggleExpand = (index: number) => {
                 class="flex flex-col items-center gap-1"
               >
                 <label :for="`mr-${index}`" class="text-[11px] text-[#64748B]">MR</label>
-                <InputNumber
+                <CellInput
                   :id="`mr-${index}`"
+                  type="number"
                   v-bind="$field"
                   input-id="integeronly"
-                  class="h-7.5 w-12.5"
-                  input-class="w-full h-full py-0 px-1 text-center text-[13px] font-bold text-[#0B1F3A]"
                 />
               </FormField>
 
@@ -332,12 +333,11 @@ const toggleExpand = (index: number) => {
                 class="flex flex-col items-center gap-1"
               >
                 <label :for="`spv-${index}`" class="text-[11px] text-[#64748B]">SPV</label>
-                <InputNumber
+                <CellInput
                   :id="`spv-${index}`"
+                  type="number"
                   v-bind="$field"
                   input-id="integeronly"
-                  class="h-7.5 w-12.5"
-                  input-class="w-full h-full py-0 px-1 text-center text-[13px] font-bold text-[#0B1F3A]"
                 />
               </FormField>
 
@@ -348,12 +348,11 @@ const toggleExpand = (index: number) => {
                 class="flex flex-col items-center gap-1"
               >
                 <label :for="`dm-${index}`" class="text-[11px] text-[#64748B]">DM</label>
-                <InputNumber
+                <CellInput
                   :id="`dm-${index}`"
+                  type="number"
                   v-bind="$field"
                   input-id="integeronly"
-                  class="h-7.5 w-12.5"
-                  input-class="w-full h-full py-0 px-1 text-center text-[13px] font-bold text-[#0B1F3A]"
                 />
               </FormField>
 
@@ -364,14 +363,7 @@ const toggleExpand = (index: number) => {
                 class="flex flex-col items-center gap-1"
               >
                 <label :for="`shift-${index}`" class="text-[11px] text-[#64748B]">SHIFT</label>
-                <Select
-                  :id="`shift-${index}`"
-                  v-bind="$field"
-                  :options="shiftOptions"
-                  class="w-22.5 h-7.5"
-                  :pt="{ dropdownIcon: { class: 'w-3 h-3' } }"
-                  input-class="flex items-center justify-center w-full h-full py-0 px-1 text-center text-[13px] font-bold text-[#0B1F3A]"
-                />
+                <CellSelect :id="`shift-${index}`" v-bind="$field" :options="shiftOptions" />
               </FormField>
             </div>
 
