@@ -7,6 +7,7 @@ const props = withDefaults(
     placeholder?: string
     variant?: 'light' | 'dark'
     rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+    h?: number //dalam ukuran px
   }>(),
   {
     rounded: 'lg',
@@ -41,7 +42,8 @@ const roundedClass: Record<string, string> = {
       type="text"
       :placeholder="placeholder || 'Search...'"
       :class="[
-        'pl-9 pr-3 py-1 sm:py-2 text-sm outline-none w-full transition-colors',
+        'pl-9 pr-3 text-sm outline-none w-full transition-colors',
+        h ? `h-[${h}px]` : 'py-1 sm:py-2',
         roundedClass[props.rounded],
         variant === 'dark'
           ? 'bg-white/10 border border-white/10 text-white placeholder-slate-400 focus:border-blue-400'

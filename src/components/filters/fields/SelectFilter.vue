@@ -7,7 +7,7 @@ defineProps<{
     key: string
     row?: number
     placeholder: string
-    options?: string[]
+    [key: string]: any
   }
   modelValue: string | null
 }>()
@@ -21,8 +21,7 @@ const emit = defineEmits<{
   <Select
     :model-value="modelValue"
     @update:model-value="emit('update:modelValue', $event)"
-    :options="filter.options"
-    :placeholder="filter.placeholder"
+    v-bind="filter"
     show-clear
     size="small"
     class="flex-1 min-w-[10rem] max-w-xs"

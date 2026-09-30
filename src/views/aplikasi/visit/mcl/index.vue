@@ -10,6 +10,7 @@ import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import { computed, ref } from 'vue'
 import DynamicList from '@/components/DynamicList.vue'
 import { useRouter } from 'vue-router'
+import StatusTabs from '@/components/filters/fields/StatusTabs.vue'
 
 const router = useRouter()
 const { role } = storeToRefs(useAuthStore())
@@ -17,7 +18,7 @@ const { role } = storeToRefs(useAuthStore())
 const canManage = computed((): boolean => ['dm', 'sm'].includes(role.value))
 
 type MclStatus = 'draft' | 'menunggu_approval' | 'disetujui'
-type FilterKey = 'semua' | MclStatus
+type FilterKey = MclStatus | null
 
 interface MclItem {
   id: number
@@ -104,6 +105,33 @@ const statusMeta: Record<MclStatus, { label: string; dot: string; badge: string 
   },
 }
 
+const statusTabDefs = [
+  { label: 'Semua', value: null, activeColor: '#0a1e42' },
+  {
+    label: 'Draft',
+    value: 'draft',
+    color: '#fbbf24',
+    activeColor: '#0a1e42',
+    compute: (data: MclItem[]) => data.filter((i) => i.status === 'draft').length,
+  },
+  {
+    label: 'Menunggu Approval',
+    value: 'menunggu_approval',
+    color: '#f97316',
+    activeColor: '#0a1e42',
+    compute: (data: MclItem[]) => data.filter((i) => i.status === 'menunggu_approval').length,
+  },
+  {
+    label: 'Disetujui',
+    value: 'disetujui',
+    color: '#10b981',
+    activeColor: '#0a1e42',
+    compute: (data: MclItem[]) => data.filter((i) => i.status === 'disetujui').length,
+  },
+]
+
+const activeFilter = ref<FilterKey>(null)
+
 const filters: { key: 'semua' | MclStatus; label: string }[] = [
   { key: 'semua', label: 'Semua' },
   { key: 'draft', label: 'Draft' },
@@ -111,31 +139,20 @@ const filters: { key: 'semua' | MclStatus; label: string }[] = [
   { key: 'disetujui', label: 'Disetujui' },
 ]
 
-const activeFilter = ref<FilterKey>('semua')
-
 //Mr hanya lihat yg disetujui
 const baseItems = computed((): MclItem[] =>
   canManage.value ? items.value : items.value.filter((i) => i.status === 'disetujui'),
 )
 
-const filterCounts = computed((): Record<string, number> => {
-  const counts: Record<string, number> = { semua: baseItems.value.length }
-  for (const f of filters) {
-    if (f.key === 'semua') continue
-    counts[f.key] = baseItems.value.filter((i) => i.status === f.key).length
-  }
-  return counts
-})
-
 const filteredItems = computed((): MclItem[] => {
   if (!canManage.value) return baseItems.value
-  if (activeFilter.value === 'semua') return baseItems.value
+  if (activeFilter.value === null) return baseItems.value
   return baseItems.value.filter((i) => i.status === activeFilter.value)
 })
 
 function handleItemClick(item: unknown) {
   const mcl = item as MclItem
-  router.push(`/aplikasi/visit/mcl/${mcl.id}`) //route detailnya atur disini
+  router.push({ path: `/aplikasi/visit/mcl/${mcl.id}`, query: { status: mcl.status } }) //route detailnya atur disini
 }
 
 function handleCreateNew() {
@@ -163,28 +180,7 @@ function handleCreateNew() {
       <p class="mb-3 text-sm font-semibold text-gray-700">List MCL</p>
 
       <div v-if="canManage" class="mb-4 overflow-x-auto scrollbar-hide">
-        <div class="flex flex-nowrap gap-2 w-max sm:w-auto sm:flex-wrap">
-          <button
-            v-for="f in filters"
-            :key="f.key"
-            type="button"
-            class="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap"
-            :class="
-              activeFilter === f.key
-                ? 'bg-[#0a1e42] text-white'
-                : 'bg-white text-gray-600 border border-gray-200'
-            "
-            @click="activeFilter = f.key"
-          >
-            <span
-              v-if="f.key !== 'semua'"
-              class="h-1.5 w-1.5 rounded-full"
-              :class="statusMeta[f.key].dot"
-            ></span>
-            {{ f.label }}
-            <span v-if="filterCounts[f.key] !== undefined">({{ filterCounts[f.key] }})</span>
-          </button>
-        </div>
+        <StatusTabs v-model="activeFilter" :tabs="statusTabDefs" :data="baseItems" />
       </div>
 
       <DynamicList

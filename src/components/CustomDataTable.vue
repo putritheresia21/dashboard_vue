@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import DataTable from 'primevue/datatable'
-import { ref, computed, watch, nextTick, useSlots } from 'vue'
 import Column from 'primevue/column'
-import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
-import SearchInput from '@/components/SearchInput.vue'
-import FilterBar from '@/components/filters/FilterBar.vue'
-import ExcelExport from './export/ExcelExport.vue'
+import { computed, ref, useSlots, watch } from 'vue'
+import CellInput from './cells/CellInput.vue'
+import CellSelect from './cells/CellSelect.vue'
+
+type Flag = boolean | ((row: any) => boolean)
 
 interface ColumnDef {
   field: string
@@ -14,46 +14,43 @@ interface ColumnDef {
   sortable?: boolean
   width?: string
   align?: 'left' | 'center' | 'right'
+  headerAlign?: 'left' | 'center' | 'right'
   slot?: string
-  hideOnMobile?: boolean
-  type?: 'text' | 'icon-text'
-  format?: (value: any, row: any) => string
+  type?: 'text' | 'number' | 'select' | 'badge' | 'index' | 'dot'
+  badgeMap?: Record<string, { label?: string; bg: string; text: string }>
 
-  iconField?: string
-  titleField?: string
-  subtitleField?: string
+  boxed?: Flag
+  editable?: Flag
+
+  options?: Array<string | { value: string; label: string }>
+  min?: number
+  max?: number
+  dotColor?: (row: any) => string | null
 }
 
 const props = withDefaults(
   defineProps<{
-    title: string
+    title?: string
     subtitle?: string
     data: any[]
     columns: ColumnDef[]
-    searchFields?: string[]
-    searchPlaceholder?: string
-    filters?: any[]
     rows?: number
-    rowsPerPageOptions?: number[]
     showActions?: boolean
     showView?: boolean
     showEdit?: boolean
     showDelete?: boolean
-    showExport?: boolean
-    exportFileName?: string
+    rowKey?: string
+    readonly?: boolean
+    rowEditable?: (row: any) => boolean
   }>(),
   {
-    searchFields: () => [],
-    searchPlaceholder: () => 'Search...',
-    filters: () => [],
     rows: 10,
-    rowsPerPageOptions: () => [5, 10, 20, 50],
-    showActions: true,
+    showActions: false,
     showView: false,
     showEdit: false,
     showDelete: false,
-    showExport: false,
-    exportFileName: 'export',
+    rowKey: 'id',
+    readonly: false,
   },
 )
 
@@ -61,6 +58,8 @@ const emit = defineEmits<{
   view: [row: any]
   edit: [row: any]
   delete: [row: any]
+  'update:data': [rows: any[]]
+  change: [payload: { row: any; key: string; value: any; rows: any[] }]
 }>()
 
 const slots = useSlots()
@@ -70,212 +69,270 @@ const hasActionsColumn = computed(
     props.showActions && (!!slots.actions || props.showView || props.showEdit || props.showDelete),
 )
 
-const searchQuery = ref('')
-const activeFilters = ref<Record<string, any>>({})
-
-watch(
-  () => props.filters,
-  (newFilters) => {
-    const next: Record<string, any> = {}
-    newFilters.forEach((f) => {
-      next[f.key] =
-        activeFilters.value[f.key] ?? (f.type === 'range' ? [f.min ?? 0, f.max ?? 100] : null)
-    })
-    activeFilters.value = next
-  },
-  { immediate: true },
-)
-
-function matchesFilter(item: any, filter: any, value: any): boolean {
-  if (!value) return true
-  if (filter.type === 'select') return item[filter.key] === value
-  const [min, max] = value as [number, number]
-  const actual = filter.compute ? filter.compute(item) : item[filter.key]
-  return actual >= min && actual <= max
-}
-
-const filteredData = computed(() => {
-  return props.data.filter((item) => {
-    const matchesSearch =
-      !searchQuery.value ||
-      props.searchFields.some((field) =>
-        String(item[field] ?? '')
-          .toLowerCase()
-          .includes(searchQuery.value.toLowerCase()),
-      )
-    const matchesFilters = props.filters.every((f) =>
-      matchesFilter(item, f, activeFilters.value[f.key]),
-    )
-    return matchesSearch && matchesFilters
-  })
-})
-
-const exportColumns = computed(() => props.columns.map((c) => ({ key: c.field, header: c.header })))
-
-function alignClass(align?: ColumnDef['align']) {
+function alignClass(align?: 'left' | 'center' | 'right') {
   if (align === 'center') return 'text-center'
   if (align === 'right') return 'text-right'
   return undefined
 }
 
-function columnClass(col: ColumnDef) {
-  const classes = [alignClass(col.align)]
-  if (col.hideOnMobile) classes.push('hide-on-mobile')
-  return classes.filter(Boolean).join(' ')
+const defaultBadgeColor = { bg: '#dbeafe', text: '#1d4ed8' }
+
+function badgeStyle(col: ColumnDef, value: any) {
+  const key = String(value)
+  const custom = col.badgeMap?.[key]
+  if (custom) return { backgroundColor: custom.bg, color: custom.text }
+  return { backgroundColor: defaultBadgeColor.bg, color: defaultBadgeColor.text }
 }
 
-const scrollContainer = ref<HTMLElement | null>(null)
-watch(filteredData, () => {
-  nextTick(() => {
-    if (scrollContainer.value) scrollContainer.value.scrollLeft = 0
-  })
+function badgeLabel(col: ColumnDef, value: any) {
+  return col.badgeMap?.[String(value)]?.label ?? value
+}
+
+//kotak dan editable
+function flag(f: Flag | undefined, row: any) {
+  return typeof f === 'function' ? !!f(row) : !!f
+}
+
+function isBoxed(col: ColumnDef, row: any) {
+  return col.boxed == undefined ? flag(col.editable, row) : flag(col.boxed, row)
+}
+
+function canEdit(col: ColumnDef, row: any) {
+  if (!isBoxed(col, row)) return false
+  if (props.readonly) return false
+  if (props.rowEditable && !props.rowEditable(row)) return false
+  return flag(col.editable, row)
+}
+
+function updateCell(row: any, key: string, value: any) {
+  const id = row[props.rowKey]
+  const rows = props.data.map((r) => (r[props.rowKey] === id ? { ...r, [key]: value } : r))
+  emit('update:data', rows)
+  emit('change', { row: { ...row, [key]: value }, key, value, rows })
+}
+
+//custom paggination state
+const currentPage = ref(1)
+
+const totalPages = computed(() => Math.max(1, Math.ceil(props.data.length / props.rows)))
+
+const pagedData = computed(() => {
+  const start = (currentPage.value - 1) * props.rows
+  return props.data.slice(start, start + props.rows)
+})
+
+const rangeStart = computed(() =>
+  props.data.length === 0 ? 0 : (currentPage.value - 1) * props.rows + 1,
+)
+const rangeEnd = computed(() => Math.min(currentPage.value * props.rows, props.data.length))
+
+watch(
+  () => props.data.length,
+  () => {
+    currentPage.value = 1
+  },
+)
+
+watch(totalPages, (newTotal) => {
+  if (currentPage.value > newTotal) currentPage.value = newTotal
+})
+
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+}
+
+const visiblePages = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+  const maxButtons = 5
+
+  if (total <= maxButtons) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+
+  let start = Math.max(1, current - 2)
+  let end = Math.min(total, start + maxButtons - 1)
+  start = Math.max(1, end - maxButtons + 1)
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <!--card filter-->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-w-0">
-      <div
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-5"
-        :class="filters.length ? 'border-b border-slate-100' : ''"
-      >
-        <div>
-          <h3 class="text-sm font-semibold text-slate-700">{{ title }}</h3>
-          <p v-if="subtitle" class="text-xs text-slate-400 mt-0.5">{{ subtitle }}</p>
-        </div>
-        <SearchInput
-          v-if="searchFields.length"
-          v-model="searchQuery"
-          :placeholder="searchPlaceholder"
-        />
-      </div>
-      <div v-if="filters.length" class="p-5">
-        <FilterBar :filters="filters" v-model="activeFilters" :data="data" />
-      </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-w-0">
+    <div class="p-5 border-b border-slate-100" v-if="title || subtitle">
+      <h3 class="text-sm font-semibold text-slate-700">{{ title }}</h3>
+      <p v-if="subtitle" class="text-xs text-slate-400 mt-0.5">{{ subtitle }}</p>
     </div>
 
-    <div v-if="showExport" class="flex justify-end">
-      <ExcelExport
-        v-if="showExport"
-        :data="filteredData"
-        :columns="exportColumns"
-        :file-name="exportFileName"
-        button-class="w-auto"
-      />
-    </div>
-
-    <!--Card 2: tabel-->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-w-0">
-      <div class="overflow-x-auto w-full" ref="scrollContainer">
-        <DataTable
-          :value="filteredData"
-          paginator
-          :rows="rows"
-          :rows-per-page-options="rowsPerPageOptions"
-          table-style="min-width: 40rem"
+    <div class="overflow-x-auto w-full">
+      <DataTable :value="pagedData" table-style="width: 100%">
+        <Column
+          v-for="col in columns"
+          :key="col.field"
+          :field="col.field"
+          :header="col.header"
+          :sortable="col.sortable"
+          :style="col.width ? { width: col.width, minWidth: col.width } : { width: 'auto' }"
+          :header-class="alignClass(col.headerAlign ?? col.align)"
+          :body-class="alignClass(col.align)"
         >
-          <Column
-            v-for="col in columns"
-            :key="col.field"
-            :field="col.field"
-            :header="col.header"
-            :sortable="col.sortable"
-            :style="col.width ? { minWidth: col.width } : undefined"
-            :header-class="columnClass(col)"
-            :body-class="columnClass(col)"
-          >
-            <template #body="slotProps">
-              <slot v-if="col.slot" :name="col.slot" v-bind="slotProps">
-                {{ slotProps.data[col.field] }}
-              </slot>
+          <template #body="slotProps">
+            <span v-if="col.type === 'index'">{{
+              (currentPage - 1) * rows + slotProps.index + 1
+            }}</span>
 
-              <div v-else-if="col.type === 'icon-text'" class="flex items-center gap-3">
-                <Avatar
-                  :image="slotProps.data[col.iconField || `${col.field}Icon`]"
-                  shape="circle"
+            <slot v-else-if="col.slot" :name="col.slot" v-bind="slotProps">
+              {{ slotProps.data[col.field] }}
+            </slot>
+
+            <span
+              v-else-if="col.type === 'badge'"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap"
+              :style="badgeStyle(col, slotProps.data[col.field])"
+            >
+              {{ badgeLabel(col, slotProps.data[col.field]) }}
+            </span>
+
+            <!--dot-->
+            <span
+              v-else-if="col.type === 'dot'"
+              class="inline-block h-2.5 w-2.5 rounded-full"
+              :style="{ background: col.dotColor?.(slotProps.data) ?? 'transparent' }"
+            ></span>
+
+            <template v-else-if="isBoxed(col, slotProps.data)">
+              <CellSelect
+                v-if="col.type === 'select'"
+                :model-value="slotProps.data[col.field]"
+                :options="col.options ?? []"
+                @update:model-value="updateCell(slotProps.data, col.field, $event)"
+              />
+              <CellInput
+                v-else
+                :type="col.type === 'number' ? 'number' : 'text'"
+                :model-value="slotProps.data[col.field]"
+                :min="col.min"
+                :max="col.max"
+                :disabled="!canEdit(col, slotProps.data)"
+                @update:model-value="updateCell(slotProps.data, col.field, $event)"
+              />
+            </template>
+
+            <span v-else :title="slotProps.data[col.field]">
+              {{ slotProps.data[col.field] }}
+            </span>
+          </template>
+        </Column>
+
+        <Column v-if="hasActionsColumn" header="" style="width: 6rem">
+          <template #body="slotProps">
+            <div class="flex items-center justify-end gap-1">
+              <slot v-if="$slots.actions" name="actions" v-bind="slotProps" />
+              <template v-else>
+                <Button
+                  v-if="showView"
+                  label="Review"
+                  icon="pi pi-eye"
+                  severity="info"
+                  rounded
+                  size="small"
+                  class="!bg-slate-800 !border-slate-800 !text-xs !py-1 !px-3"
+                  @click="emit('view', slotProps.data)"
                 />
-                <div class="flex flex-col">
-                  <span class="font-medium text-slate-800">
-                    {{ slotProps.data[col.titleField || col.field] }}
-                  </span>
-                  <span v-if="col.subtitleField" class="text-xs text-slate-400">
-                    {{ slotProps.data[col.subtitleField] }}
-                  </span>
-                </div>
-              </div>
-              <span v-else>
-                {{
-                  col.format
-                    ? col.format(slotProps.data[col.field], slotProps.data)
-                    : slotProps.data[col.field]
-                }}
-              </span>
-            </template>
-          </Column>
+                <Button
+                  v-if="showEdit"
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  text
+                  rounded
+                  size="small"
+                  @click="emit('edit', slotProps.data)"
+                />
+                <Button
+                  v-if="showDelete"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  text
+                  rounded
+                  size="small"
+                  @click="emit('delete', slotProps.data)"
+                />
+              </template>
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
+  </div>
+  <!--custom paginator-->
+  <div class="mt-4 flex w-full items-center justify-end gap-3 text-sm text-gray-400">
+    <span class="text-xs text-slate-400">
+      Menampilkan {{ rangeStart }}-{{ rangeEnd }} dari {{ data.length }} data
+    </span>
 
-          <Column v-if="hasActionsColumn" header="" style="width: 6rem">
-            <template #body="slotProps">
-              <div class="flex items-center justify-end gap-1">
-                <slot v-if="$slots.actions" name="actions" v-bind="slotProps" />
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        class="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent"
+        :disabled="currentPage === 1"
+        @click="goToPage(currentPage - 1)"
+      >
+        <i class="pi pi-chevron-left text-xs"></i>
+      </button>
 
-                <template v-else>
-                  <Button
-                    v-if="showView"
-                    icon="pi pi-eye"
-                    severity="info"
-                    text
-                    rounded
-                    size="small"
-                    aria-label="Detail"
-                    @click="emit('view', slotProps.data)"
-                  />
-                  <Button
-                    v-if="showEdit"
-                    icon="pi pi-pencil"
-                    severity="secondary"
-                    text
-                    rounded
-                    size="small"
-                    aria-label="Edit"
-                    @click="emit('edit', slotProps.data)"
-                  />
-                  <Button
-                    v-if="showDelete"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    text
-                    rounded
-                    size="small"
-                    aria-label="Delete"
-                    @click="emit('delete', slotProps.data)"
-                  />
-                </template>
-              </div>
-            </template>
-          </Column>
-        </DataTable>
-      </div>
+      <button
+        v-for="page in visiblePages"
+        :key="page"
+        type="button"
+        class="min-w-8 h-8 px-2 rounded-full text-sm font-medium transition-colors"
+        :class="
+          page === currentPage
+            ? 'bg-slate-800 text-white'
+            : 'bg-slate-100 text-slate-600 hiver:bg-slate-200'
+        "
+        @click="goToPage(page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        type="button"
+        class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+        :disabled="currentPage == totalPages"
+        @click="goToPage(currentPage + 1)"
+      >
+        <i class="pi pi-chevron-right text-xs"></i>
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
+:deep(.p-datatable-table) {
+  table-layout: auto;
+  width: 100%;
+}
+
 :deep(.p-datatable-thead > tr > th) {
   background: #fafbfc;
   border: none;
   border-bottom: 1px solid #f1f5f9;
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 14px 20px;
+  letter-spacing: 0.02em;
+  padding: 10px 14px;
 }
 :deep(.p-datatable-tbody > tr > td) {
   border: none;
   border-bottom: 1px solid #f1f5f9;
-  padding: 16px 20px;
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  color: #334155;
+  vertical-align: top;
 }
 :deep(.p-datatable-tbody > tr:last-child > td) {
   border-bottom: none;
@@ -286,6 +343,7 @@ watch(filteredData, () => {
 :deep(.p-datatable-tbody > tr:hover) {
   background-color: #f8fafc;
 }
+
 :deep(.text-center) {
   text-align: center;
 }
@@ -297,11 +355,5 @@ watch(filteredData, () => {
 }
 :deep(.text-right .p-datatable-column-header-content) {
   justify-content: flex-end;
-}
-
-@media (max-width: 639px) {
-  :deep(.hide-on-mobile) {
-    display: none;
-  }
 }
 </style>

@@ -1,14 +1,14 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 import { computed, ref, watch } from 'vue'
 import { ChevronRightIcon, ChevronLeftIcon } from '@primevue/icons'
 
 type Layout = 'grid' | 'column'
 type Columns = 1 | 2 | 3 | 4
 type Gap = 1 | 2 | 3 | 4 | 6
-type Padding = 2 | 3 | 4 | 5 | 6
+type Padding = 0 | 2 | 3 | 4 | 5 | 6 | 8
 
 interface Props {
-  items: unknown[]
+  items: T[]
   layout?: Layout
   columns?: Columns
   gap?: Gap
@@ -18,6 +18,8 @@ interface Props {
   paginate?: boolean
   pageSize?: number
   emptyText?: string
+  background?: string | ((item: T, index: number) => string)
+  rounded?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -30,10 +32,12 @@ const props = withDefaults(defineProps<Props>(), {
   paginate: false,
   pageSize: 10,
   emptyText: 'Tidak ada data',
+  background: 'bg-white',
+  rounded: 'rounded-xl',
 })
 
 const emit = defineEmits<{
-  'item-click': [item: unknown, index: number]
+  'item-click': [item: T, index: number]
   'page-change': [page: number]
 }>()
 
@@ -44,7 +48,7 @@ const totalPages = computed((): number => {
   return Math.max(1, Math.ceil(props.items.length / props.pageSize))
 })
 
-const pagedItems = computed((): unknown[] => {
+const pagedItems = computed((): T[] => {
   if (!props.paginate) return props.items
   const start = (currentPage.value - 1) * props.pageSize
   return props.items.slice(start, start + props.pageSize)
@@ -95,15 +99,17 @@ const gapClass = computed<string>(
 const paddingClass = computed<string>(
   () =>
     ({
+      0: 'p-0',
       2: 'p-2',
       3: 'p-3',
       4: 'p-4',
       5: 'p-5',
       6: 'p-6',
+      8: 'p-8',
     })[props.padding] ?? 'p-3',
 )
 
-const handleItemClick = (item: unknown, index: number) => {
+const handleItemClick = (item: T, index: number) => {
   if (props.clickable) emit('item-click', item, index)
 }
 </script>
@@ -114,8 +120,10 @@ const handleItemClick = (item: unknown, index: number) => {
       :is="clickable ? 'button' : 'div'"
       v-for="(item, index) in pagedItems"
       :key="(item as any)?.id ?? index"
-      class="relative flex w-full bg-white rounded-xl"
+      class="relative flex w-full"
       :class="[
+        typeof background === 'function' ? background(item, index) : background,
+        rounded,
         layout === 'grid'
           ? 'flex-col items-center text-center gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:text-left'
           : 'flex-row items-center justify-between text-left',

@@ -12,7 +12,6 @@ const componentMap: Record<string, any> = {
 const props = withDefaults(
   defineProps<{
     filters: any[]
-    modelValue: Record<string, any>
     data?: any[]
     showReset?: boolean
   }>(),
@@ -22,9 +21,7 @@ const props = withDefaults(
   },
 )
 
-const emit = defineEmits<{
-  'update:modelValue': [value: Record<string, any>]
-}>()
+const model = defineModel<Record<string, any>>({ required: true })
 
 const resolvedFilters = computed(() =>
   props.filters.map((f) => {
@@ -47,7 +44,7 @@ const groupedRows = computed(() => {
 })
 
 function updateValue(key: string, value: any) {
-  emit('update:modelValue', { ...props.modelValue, [key]: value })
+  model.value = { ...model.value, [key]: value }
 }
 
 function resetAll() {
@@ -55,7 +52,8 @@ function resetAll() {
   props.filters.forEach((f) => {
     reset[f.key] = f.type === 'range' ? [f.min ?? 0, f.max ?? 100] : null
   })
-  emit('update:modelValue', reset)
+  // emit('update:modelValue', reset)
+  model.value = reset
 }
 </script>
 

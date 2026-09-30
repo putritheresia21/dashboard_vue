@@ -1,44 +1,44 @@
 <script setup lang="ts">
-import ArrowUpIcon from '@primeicons/vue/arrow-up'
-import ArrowDownIcon from '@primeicons/vue/arrow-down'
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import { storeToRefs } from 'pinia'
 
-withDefaults(
-  defineProps<{
-    cards: {
-      label: string
-      value: string
-      change?: string
-      positive?: boolean
-    }[]
-    columns?: 2 | 3 | 4
-  }>(),
-  { columns: 4 },
+const auth = useAuthStore()
+const { role } = storeToRefs(auth)
+
+const targetVisits = computed(() =>
+  role.value === 'dm'
+    ? [
+        { role: 'MR', amount: 12 },
+        { role: 'SPV', amount: 4 },
+        { role: 'DM', amount: 4 },
+      ]
+    : [{ role: 'SM', amount: 12 }],
 )
 </script>
 
 <template>
-  <div
-    class="grid grid-cols-2 gap-4"
-    :class="columns === 2 ? 'lg:grid-cols-2' : columns === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'"
-    style="margin-bottom: 22px; margin-top: 22px"
-  >
+  <div class="flex flex-row flex-wrap gap-2 bg-[#0B1734] rounded-2xl p-5 shadow-sm mt-3 mb-3">
     <div
-      v-for="card in cards"
-      :key="card.label"
-      class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
+      v-for="targetVisit in targetVisits"
+      :key="targetVisit.role"
+      class="flex grow basis-25 flex-col items-center"
     >
-      <p class="text-sm text-slate-500">{{ card.label }}</p>
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-xl sm:text-2xl font-bold text-slate-800">{{ card.value }}</span>
-        <span
-          v-if="card.change"
-          class="flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full"
-          :class="card.positive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'"
-        >
-          <component :is="card.positive ? ArrowUpIcon : ArrowDownIcon" size="10" />
-          {{ card.change }}
-        </span>
-      </div>
+      <span class="text-[11px]">TARGET VISIT {{ targetVisit.role }}</span>
+      <span class="text-base text-white font-bold">{{ targetVisit.amount }}</span>
+    </div>
+
+    <div class="flex grow basis-25 flex-col items-center">
+      <span class="text-[11px]">SIANG / MALAM</span>
+      <span class="text-base text-white font-bold">8 / 9</span>
+    </div>
+    <div class="flex grow basis-25 flex-col items-center">
+      <span class="text-[11px]">{{ role === 'dm' ? 'TOTAL USER' : 'USER / OUTLET' }}</span>
+      <span class="text-base text-white font-bold">{{ role === 'dm' ? 7 : '7/3' }}</span>
+    </div>
+    <div v-if="role === 'dm'" class="flex grow basis-25 flex-col items-center">
+      <span class="text-[11px]">TOTAL OUTLET</span>
+      <span class="text-base text-white font-bold">3</span>
     </div>
   </div>
 </template>

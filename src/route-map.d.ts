@@ -66,6 +66,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/aplikasi/visit/mcl/[id]': RouteRecordInfo<
+      '/aplikasi/visit/mcl/[id]',
+      '/aplikasi/visit/mcl/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/aplikasi/visit/mcl/add-mcl': RouteRecordInfo<
       '/aplikasi/visit/mcl/add-mcl',
       '/aplikasi/visit/mcl/add-mcl',
@@ -195,6 +202,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/views/aplikasi/visit/mcl/[id].vue': {
+      routes:
+        | '/aplikasi/visit/mcl/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/views/aplikasi/visit/mcl/add-mcl.vue': {
       routes:

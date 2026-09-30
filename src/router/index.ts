@@ -6,7 +6,7 @@ declare module 'vue-router' {
   interface RouteMeta {
     title?: string
     layout?: string | false
-    requiresAuth: true
+    requiresAuth?: boolean
   }
 }
 
@@ -90,7 +90,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   const authStore = useAuthStore()
   authStore.checkSession()
-  if (!to.meta.public && !authStore.isAuthenticated) {
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return {
       path: '/login',
       query: {
