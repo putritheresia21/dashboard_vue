@@ -1,6 +1,8 @@
 export function formatRupiah(v: number | string | null | undefined): string {
-  if (v == null || v === '') return '-'
-  return 'Rp' + new Intl.NumberFormat('id-ID').format(Number(v))
+  if (v === null || v === undefined || v === '') {
+    return '-'
+  }
+  return `Rp${new Intl.NumberFormat('id-ID').format(Number(v))}`
 }
 
 export const formatDate = (dateStr: string) =>
@@ -13,10 +15,10 @@ export const formatDate = (dateStr: string) =>
 export const getAge = (birthDate: string) => {
   const birth = new Date(birthDate)
   const today = new Date()
-  let age = today.getFullYear() - birth.getFullYear()
+  const age = today.getFullYear() - birth.getFullYear()
   const monthDiff = today.getMonth() - birth.getMonth()
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    return age--
+    return age - 1
   }
   return age
 }
@@ -31,7 +33,9 @@ export const getTenure = (joinDate: string) => {
     years--
     months += 12
   }
-  if (years === 0) return `${months} bulan`
+  if (years === 0) {
+    return `${months} bulan`
+  }
   return months === 0 ? `${years} tahun` : `${years} tahun ${months} bulan`
 }
 

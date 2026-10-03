@@ -16,7 +16,10 @@ const props = withDefaults(
     width?: string
   }>(),
   {
+    modelValue: null,
     type: 'text',
+    min: undefined,
+    max: undefined,
     width: 'w-8',
   },
 )

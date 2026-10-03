@@ -6,10 +6,12 @@ meta:
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import PageWrapper from '@/layouts/shared/PageWrapper.vue'
+
+import type { ColumnDef, DataRow } from '@/components/custom-data-table.types'
 import CustomDataTable from '@/components/CustomDataTable.vue'
-import StepIndicator from '@/components/StepIndicator.vue'
 import * as Filter from '@/components/Filter'
+import StepIndicator from '@/components/StepIndicator.vue'
+import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import { formatRupiah } from '@/utils/formatter'
 
 const route = useRoute()
@@ -31,7 +33,22 @@ const statusMeta = {
 type Status = keyof typeof statusMeta
 
 const mcl = ref<{ id: number; triwulan: string; status: Status } | null>(null)
-const rows = ref<any[]>([])
+interface MclRow extends DataRow {
+  id: number
+  user: string
+  aktif: boolean
+  jabatan: string
+  outlet: string
+  tipe: string
+  mr: number
+  spv: number
+  dm: number
+  shift: string
+  salesUser: number | null
+  salesOutlet: number | null
+}
+
+const rows = ref<MclRow[]>([])
 const loading = ref(false)
 
 const dummyRows = [
@@ -292,14 +309,14 @@ const tipeMap = {
   Apotek: { bg: '#fde3ea', text: '#c81e4d' },
 }
 
-const columns = [
+const columns: ColumnDef[] = [
   { field: 'user', header: 'User', width: '11rem' },
   {
     field: 'aktif',
     header: '',
     type: 'dot',
     width: '2rem',
-    dotColor: (r: any) => (r.aktif ? '#16a34a' : null),
+    dotColor: (r) => (r.aktif === true ? '#16a34a' : null),
   },
   { field: 'jabatan', header: 'Jabatan', type: 'badge', width: '10rem' },
   { field: 'outlet', header: 'Outlet' },
@@ -342,11 +359,11 @@ const columns = [
   },
   { field: 'salesUser', header: 'Sales User\n(3 bln)', align: 'right', width: '10rem' },
   { field: 'salesOutlet', header: 'Sales Outlet\n(3 bln)', align: 'right', width: '10rem' },
-] as any[]
+]
 
-const col = (field: string) => columns.find((c) => c.field === field)
+const col = (field: string): ColumnDef => columns.find((c) => c.field === field)!
 
-const outletColumns = [
+const outletColumns: ColumnDef[] = [
   col('outlet'),
   { ...col('tipe'), uniqueField: 'uniqueTipe' },
   col('user'),
@@ -358,7 +375,7 @@ const outletColumns = [
   col('jabatan'),
   col('salesUser'),
   col('salesOutlet'),
-] as any[]
+]
 
 const tableRows = computed(() =>
   [...rows.value]
@@ -375,21 +392,30 @@ const tableRows = computed(() =>
     })),
 )
 
-function onChange({ row, key, value }: { row: any; key: string; value: any }) {
-  if (isReadOnly.value) return
+function onChange({ row, key, value }: { row: DataRow; key: string; value: unknown }) {
+  if (isReadOnly.value) {
+    return
+  }
+  let nextValue = value
   if (['mr', 'spv', 'dm'].includes(key)) {
-    value = Math.max(0, Math.floor(Number(value) || 0))
+    nextValue = Math.max(0, Math.floor(Number(value) || 0))
   }
   const target = rows.value.find((r) => r.id === row.id)
-  if (target) target[key] = value
+  if (target) {
+    target[key] = nextValue
+  }
 }
 
 const saving = ref(false)
 async function runAction(key: 'save' | 'submit') {
-  if (!mcl.value || isReadOnly.value) return
+  if (!mcl.value || isReadOnly.value) {
+    return
+  }
   saving.value = true
   try {
-    if (key === 'submit') mcl.value.status = 'menunggu_approval'
+    if (key === 'submit') {
+      mcl.value.status = 'menunggu_approval'
+    }
   } finally {
     saving.value = false
   }

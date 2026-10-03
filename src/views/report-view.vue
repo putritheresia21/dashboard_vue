@@ -5,14 +5,13 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import Tag from 'primevue/tag'
+import ArrowDownIcon from '@primeicons/vue/arrow-down'
+import ArrowUpIcon from '@primeicons/vue/arrow-up'
 import CalendarIcon from '@primeicons/vue/calendar'
 import DownloadIcon from '@primeicons/vue/download'
-import ArrowUpIcon from '@primeicons/vue/arrow-up'
-import ArrowDownIcon from '@primeicons/vue/arrow-down'
-import ChartCard from '@/components/ChartCard.vue'
-import SummaryCard from '@/components/SummaryCard.vue'
+import Tag from 'primevue/tag'
+import { ref } from 'vue'
+
 import CustomDataTable from '@/components/CustomDataTable.vue'
 
 interface TopProduct {
@@ -33,123 +32,6 @@ const topProducts: TopProduct[] = [
 ]
 
 const selectedPeriod = ref('This Year')
-
-//buat summary cards
-const summaryCards = [
-  { label: 'Total Revenue', value: '$284,320', change: '+18.2%', positive: true },
-  { label: 'Total Orders', value: '4,821', change: '+9.4%', positive: true },
-  { label: 'Avg Order Value', value: '$59.00', change: '+3.1%', positive: true },
-  { label: 'Product Returns', value: '3.2%', change: '-0.8%', positive: true },
-]
-
-// Revenue trend — 12 bulan
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const revenueTrend = [
-  18000, 21000, 19500, 24000, 22500, 26000, 25000, 28500, 27000, 30500, 29000, 32000,
-]
-
-const trendChartData = computed(() => ({
-  labels: months,
-  datasets: [
-    {
-      label: 'Revenue',
-      data: revenueTrend,
-      borderColor: '#0d9488',
-      backgroundColor: 'rgba(13, 148, 136, 0.08)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 0,
-      pointHoverRadius: 5,
-      pointBackgroundColor: '#0d9488',
-      borderWidth: 2.5,
-    },
-  ],
-}))
-
-const trendChartOptions = {
-  maintainAspectRatio: false,
-  animation: { duration: 700 },
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      backgroundColor: '#1e293b',
-      padding: 10,
-      cornerRadius: 8,
-      displayColors: false,
-      callbacks: { label: (ctx: any) => `$${ctx.parsed.y.toLocaleString()}` },
-    },
-  },
-  scales: {
-    x: {
-      grid: { display: false },
-      border: { display: false },
-      ticks: { color: '#94a3b8', font: { size: 11 } },
-    },
-    y: {
-      beginAtZero: true,
-      grid: { color: '#f1f5f9' },
-      border: { display: false },
-      ticks: { color: '#94a3b8', font: { size: 11 }, callback: (v: number) => `$${v / 1000}k` },
-    },
-  },
-}
-
-const categoryData = [
-  { name: 'Electronics', revenue: 98400 },
-  { name: 'Accessories', revenue: 64200 },
-  { name: 'Clothing', revenue: 41100 },
-  { name: 'Fitness', revenue: 28900 },
-]
-
-const categoryChartData = computed(() => ({
-  labels: categoryData.map((c) => c.name),
-  datasets: [
-    {
-      data: categoryData.map((c) => c.revenue),
-      backgroundColor: '#0d9488',
-      borderRadius: 999,
-      categoryPercentage: 0.55,
-      barPercentage: 0.5,
-    },
-  ],
-}))
-
-const categoryChartOptions = {
-  maintainAspectRatio: false,
-  indexAxis: 'y' as const,
-  animation: { duration: 600 },
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      backgroundColor: '#1e293b',
-      padding: 10,
-      cornerRadius: 8,
-      displayColors: false,
-      callbacks: { label: (ctx: any) => `$${ctx.parsed.x.toLocaleString()}` },
-    },
-  },
-  scales: {
-    x: {
-      beginAtZero: true,
-      grid: { color: '#f1f5f9' },
-      border: { display: false },
-      ticks: { color: '#94a3b8', font: { size: 11 }, callback: (v: number) => `$${v / 1000}k` },
-    },
-    y: {
-      grid: { display: false },
-      border: { display: false },
-      ticks: { color: '#64748b', font: { size: 12 } },
-    },
-  },
-}
-
-const stockStatus = { inStock: 132, lowStock: 24, outOfStock: 11 }
-
-const stockSegments = [
-  { label: 'In Stock', value: stockStatus.inStock, status: 'success' as const },
-  { label: 'Low Stock', value: stockStatus.lowStock, status: 'warning' as const },
-  { label: 'Out of Stock', value: stockStatus.outOfStock, status: 'danger' as const },
-]
 </script>
 
 <template>
@@ -220,7 +102,7 @@ const stockSegments = [
         { field: 'trend', header: 'Trend', align: 'center' },
       ]"
       :rows="6"
-      :showActions="false"
+      :show-actions="false"
     >
       <template #category="{ data }">
         <Tag :value="data.category" severity="secondary" />

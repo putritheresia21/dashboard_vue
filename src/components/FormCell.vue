@@ -2,27 +2,32 @@
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import { computed } from 'vue'
-import { any } from 'zod'
+
+type FormCellValue = string | number | null | undefined
 
 const props = withDefaults(
   defineProps<{
-    value: any
+    value: FormCellValue
     editable?: boolean
     type?: 'number' | 'select' | 'text'
-    options?: any[]
+    options?: unknown[]
     min?: number
     placeholder?: string
   }>(),
   {
     editable: false,
     type: 'text',
+    options: () => [],
+    min: undefined,
+    placeholder: '',
   },
 )
 
 const emit = defineEmits<{
-  'update:value': [value: any]
+  'update:value': [value: FormCellValue]
 }>()
 
+const numericValue = computed(() => (typeof props.value === 'number' ? props.value : null))
 const displayValue = computed(() => props.value ?? '-')
 </script>
 
@@ -31,27 +36,27 @@ const displayValue = computed(() => props.value ?? '-')
 
   <InputNumber
     v-else-if="type === 'number'"
-    :model-value="value"
-    @update:model-value="emit('update:value', $event ?? 0)"
+    :model-value="numericValue"
     :min="min ?? 0"
     size="small"
     input-class="!w-12 !text-center !py-1"
+    @update:model-value="emit('update:value', $event ?? 0)"
   />
 
   <Select
     v-else-if="type === 'select'"
     :model-value="value"
-    @update:model-value="emit('update:value', $event)"
     :options="options"
     :placeholder="placeholder"
     size="small"
     class="w-full max-w-[8rem]"
+    @update:model-value="emit('update:value', $event)"
   />
 
   <input
     v-else
     :value="value"
-    @input="emit('update:value', ($event.target as HTMLInputElement).value)"
     class="border borderslate-200 rounded px-2 py-1 text-sm w-full"
+    @input="emit('update:value', ($event.target as HTMLInputElement).value)"
   />
 </template>

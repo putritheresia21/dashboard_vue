@@ -5,12 +5,13 @@ meta:
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/authStore'
-import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import { computed, ref } from 'vue'
-import DynamicList from '@/components/DynamicList.vue'
 import { useRouter } from 'vue-router'
+
+import DynamicList from '@/components/DynamicList.vue'
 import * as Filter from '@/components/Filter'
+import PageWrapper from '@/layouts/shared/PageWrapper.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
 const { role } = storeToRefs(useAuthStore())
@@ -112,32 +113,26 @@ const statusTabDefs = [
     value: 'draft',
     color: '#fbbf24',
     activeColor: '#0a1e42',
-    compute: (data: MclItem[]) => data.filter((i) => i.status === 'draft').length,
+    compute: (data: unknown[]) => data.filter((i) => (i as MclItem).status === 'draft').length,
   },
   {
     label: 'Menunggu Approval',
     value: 'menunggu_approval',
     color: '#f97316',
     activeColor: '#0a1e42',
-    compute: (data: MclItem[]) => data.filter((i) => i.status === 'menunggu_approval').length,
+    compute: (data: unknown[]) =>
+      data.filter((i) => (i as MclItem).status === 'menunggu_approval').length,
   },
   {
     label: 'Disetujui',
     value: 'disetujui',
     color: '#10b981',
     activeColor: '#0a1e42',
-    compute: (data: MclItem[]) => data.filter((i) => i.status === 'disetujui').length,
+    compute: (data: unknown[]) => data.filter((i) => (i as MclItem).status === 'disetujui').length,
   },
 ]
 
 const activeFilter = ref<FilterKey>(null)
-
-const filters: { key: 'semua' | MclStatus; label: string }[] = [
-  { key: 'semua', label: 'Semua' },
-  { key: 'draft', label: 'Draft' },
-  { key: 'menunggu_approval', label: 'Menunggu Approval' },
-  { key: 'disetujui', label: 'Disetujui' },
-]
 
 //Mr hanya lihat yg disetujui
 const baseItems = computed((): MclItem[] =>
@@ -145,8 +140,12 @@ const baseItems = computed((): MclItem[] =>
 )
 
 const filteredItems = computed((): MclItem[] => {
-  if (!canManage.value) return baseItems.value
-  if (activeFilter.value === null) return baseItems.value
+  if (!canManage.value) {
+    return baseItems.value
+  }
+  if (activeFilter.value === null) {
+    return baseItems.value
+  }
   return baseItems.value.filter((i) => i.status === activeFilter.value)
 })
 

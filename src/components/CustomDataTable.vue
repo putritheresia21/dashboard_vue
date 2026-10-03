@@ -1,39 +1,20 @@
-<script setup lang="ts">
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
+<script setup lang="ts" generic="T">
 import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
 import { computed, ref, useSlots, watch } from 'vue'
+
 import CellInput from './cells/CellInput.vue'
 import CellSelect from './cells/CellSelect.vue'
+import type { ColumnDef, DataRow } from './custom-data-table.types'
 
-type Flag = boolean | ((row: any) => boolean)
-
-interface ColumnDef {
-  field: string
-  header: string
-  sortable?: boolean
-  width?: string
-  align?: 'left' | 'center' | 'right'
-  headerAlign?: 'left' | 'center' | 'right'
-  slot?: string
-  type?: 'text' | 'number' | 'select' | 'badge' | 'index' | 'dot'
-  badgeMap?: Record<string, { label?: string; bg: string; text: string }>
-  uniqueField?: string
-
-  boxed?: Flag
-  editable?: Flag
-
-  options?: Array<string | { value: string; label: string }>
-  min?: number
-  max?: number
-  dotColor?: (row: any) => string | null
-}
+type Flag = boolean | ((row: DataRow) => boolean)
 
 const props = withDefaults(
   defineProps<{
     title?: string
     subtitle?: string
-    data: any[]
+    data: T[]
     columns: ColumnDef[]
     rows?: number
     showActions?: boolean
@@ -46,6 +27,8 @@ const props = withDefaults(
     // rowEditable?: (row: any) => boolean
   }>(),
   {
+    title: '',
+    subtitle: '',
     rows: 10,
     showActions: false,
     showView: false,
@@ -53,15 +36,16 @@ const props = withDefaults(
     showDelete: false,
     rowKey: 'id',
     readonly: false,
+    groupRowsBy: undefined,
   },
 )
 
 const emit = defineEmits<{
-  view: [row: any]
-  edit: [row: any]
-  delete: [row: any]
-  'update:data': [rows: any[]]
-  change: [payload: { row: any; key: string; value: any; rows: any[] }]
+  view: [row: T]
+  edit: [row: T]
+  delete: [row: T]
+  'update:data': [rows: T[]]
+  change: [payload: { row: T; key: string; value: unknown; rows: T[] }]
 }>()
 
 const slots = useSlots()
@@ -72,43 +56,57 @@ const hasActionsColumn = computed(
 )
 
 function alignClass(align?: 'left' | 'center' | 'right') {
-  if (align === 'center') return 'text-center'
-  if (align === 'right') return 'text-right'
+  if (align === 'center') {
+    return 'text-center'
+  }
+  if (align === 'right') {
+    return 'text-right'
+  }
   return undefined
 }
 
 const defaultBadgeColor = { bg: '#dbeafe', text: '#1d4ed8' }
 
-function badgeStyle(col: ColumnDef, value: any) {
+function badgeStyle(col: ColumnDef, value: unknown) {
   const key = String(value)
   const custom = col.badgeMap?.[key]
-  if (custom) return { backgroundColor: custom.bg, color: custom.text }
+  if (custom) {
+    return { backgroundColor: custom.bg, color: custom.text }
+  }
   return { backgroundColor: defaultBadgeColor.bg, color: defaultBadgeColor.text }
 }
 
-function badgeLabel(col: ColumnDef, value: any) {
+function badgeLabel(col: ColumnDef, value: unknown) {
   return col.badgeMap?.[String(value)]?.label ?? value
 }
 
 //kotak dan editable
-function flag(f: Flag | undefined, row: any) {
+function flag(f: Flag | undefined, row: DataRow) {
   return typeof f === 'function' ? !!f(row) : !!f
 }
 
-function isBoxed(col: ColumnDef, row: any) {
-  return col.boxed == undefined ? flag(col.editable, row) : flag(col.boxed, row)
+function isBoxed(col: ColumnDef, row: DataRow) {
+  return col.boxed === undefined ? flag(col.editable, row) : flag(col.boxed, row)
 }
 
-function canEdit(col: ColumnDef, row: any) {
-  if (!isBoxed(col, row)) return false
-  if (props.readonly) return false
+function canEdit(col: ColumnDef, row: DataRow) {
+  if (!isBoxed(col, row)) {
+    return false
+  }
+  if (props.readonly) {
+    return false
+  }
   // if (props.rowEditable && !props.rowEditable(row)) return false
   return flag(col.editable, row)
 }
 
-function updateCell(row: any, key: string, value: any) {
-  const id = row[props.rowKey]
-  const rows = props.data.map((r) => (r[props.rowKey] === id ? { ...r, [key]: value } : r))
+function updateCell(row: T, key: string, value: unknown) {
+  const rowRecord = row as DataRow
+  const id = rowRecord[props.rowKey]
+  const rows = props.data.map((r) => {
+    const record = r as DataRow
+    return record[props.rowKey] === id ? ({ ...record, [key]: value } as T) : r
+  })
   emit('update:data', rows)
   emit('change', { row: { ...row, [key]: value }, key, value, rows })
 }
@@ -136,11 +134,15 @@ watch(
 )
 
 watch(totalPages, (newTotal) => {
-  if (currentPage.value > newTotal) currentPage.value = newTotal
+  if (currentPage.value > newTotal) {
+    currentPage.value = newTotal
+  }
 })
 
 function goToPage(page: number) {
-  if (page < 1 || page > totalPages.value) return
+  if (page < 1 || page > totalPages.value) {
+    return
+  }
   currentPage.value = page
 }
 
@@ -154,7 +156,7 @@ const visiblePages = computed(() => {
   }
 
   let start = Math.max(1, current - 2)
-  let end = Math.min(total, start + maxButtons - 1)
+  const end = Math.min(total, start + maxButtons - 1)
   start = Math.max(1, end - maxButtons + 1)
 
   return Array.from({ length: end - start + 1 }, (_, i) => start + i)
@@ -163,7 +165,7 @@ const visiblePages = computed(() => {
 
 <template>
   <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-w-0">
-    <div class="p-5 border-b border-slate-100" v-if="title || subtitle">
+    <div v-if="title || subtitle" class="p-5 border-b border-slate-100">
       <h3 class="text-sm font-semibold text-slate-700">{{ title }}</h3>
       <p v-if="subtitle" class="text-xs text-slate-400 mt-0.5">{{ subtitle }}</p>
     </div>
@@ -172,8 +174,8 @@ const visiblePages = computed(() => {
       <DataTable
         :value="pagedData"
         table-style="width: 100%"
-        rowGroupMode="rowspan"
-        :groupRowsBy="groupRowsBy"
+        row-group-mode="rowspan"
+        :group-rows-by="groupRowsBy"
       >
         <Column
           v-for="col in columns"
@@ -308,7 +310,7 @@ const visiblePages = computed(() => {
       <button
         type="button"
         class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
-        :disabled="currentPage == totalPages"
+        :disabled="currentPage === totalPages"
         @click="goToPage(currentPage + 1)"
       >
         <i class="pi pi-chevron-right text-xs"></i>

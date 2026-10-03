@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+
 import Colors from '@/utils/colors'
 
 interface Props {

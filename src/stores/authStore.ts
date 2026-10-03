@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { AuthRequest, User } from '@/dummy/userData'
-import { getAuthenticate } from '@/dummy/userData'
+import { computed, ref } from 'vue'
+
+import { type AuthRequest, getAuthenticate, type User } from '@/dummy/userData'
 
 type GeneralIdentity = Omit<User, 'password'>
 
@@ -58,19 +58,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const logout = async () => {
-    try {
-      // Opsional: Beritahu backend untuk menghapus HttpOnly cookie di sisi server
-    } catch (error) {
-      console.log('Logout API gagal, tapi tetap hapus sesi di frontend')
-    } finally {
-      // 1. Bersihkan State Pinia
-      user.value = null
-      expiresAt.value = null
+    user.value = null
+    expiresAt.value = null
 
-      // 2. Bersihkan Local Storage
-      localStorage.removeItem('user')
-      localStorage.removeItem('expiresAt')
-    }
+    localStorage.removeItem('user')
+    localStorage.removeItem('expiresAt')
   }
 
   // Fungsi utilitas untuk mengecek dan membersihkan sesi jika sudah expired

@@ -29,8 +29,12 @@ const categories = [
 ]
 
 function statusFromQty(qty: number): InventoryStatus {
-  if (qty === 0) return 'OUTOFSTOCK'
-  if (qty <= 10) return 'LOWSTOCK'
+  if (qty === 0) {
+    return 'OUTOFSTOCK'
+  }
+  if (qty <= 10) {
+    return 'LOWSTOCK'
+  }
   return 'INSTOCK'
 }
 

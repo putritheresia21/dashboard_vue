@@ -5,7 +5,8 @@ meta:
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+
 import DynamicList from '@/components/DynamicList.vue'
 import { useIsMobile } from '@/composables/useIsMobile'
 import { sidebarMenu } from '@/config/sidebarMenu'

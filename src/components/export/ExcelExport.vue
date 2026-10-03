@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Checkbox from 'primevue/checkbox'
-import { useToast } from 'primevue/usetoast'
-import ExcelJS from 'exceljs'
-import { ref, computed, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
+import ExcelJS from 'exceljs'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
+import Dialog from 'primevue/dialog'
+import { useToast } from 'primevue/usetoast'
+import { computed, ref, watch } from 'vue'
 
 interface ExportColumnDef {
   key: string
@@ -110,7 +110,7 @@ async function handleExport() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     visible.value = false
-  } catch (err) {
+  } catch {
     toast.add({
       severity: 'error',
       summary: 'Gagal',
@@ -125,11 +125,11 @@ async function handleExport() {
 
 <template>
   <Button
-    @click="visible = true"
     severity="success"
     icon="pi pi-file-excel"
     label="Ekspor Excel"
     :class="props.buttonClass"
+    @click="visible = true"
   />
 
   <Dialog
@@ -161,7 +161,7 @@ async function handleExport() {
           <div v-for="column of columns" :key="column.key" class="flex items-center gap-2">
             <Checkbox
               v-model="selectedColumns"
-              :inputId="String(column.key)"
+              :input-id="String(column.key)"
               name="columns"
               :value="column"
             />
@@ -189,9 +189,9 @@ async function handleExport() {
             :value="data"
             :paginator="true"
             :rows="5"
-            responsiveLayout="scroll"
+            responsive-layout="scroll"
             size="small"
-            :pageLinkSize="isMobile ? 3 : 5"
+            :page-link-size="isMobile ? 3 : 5"
             class="w-full text-sm"
           >
             <Column
@@ -229,8 +229,8 @@ async function handleExport() {
           icon="pi pi-times"
           severity="secondary"
           text
-          @click="visible = false"
           class="w-auto"
+          @click="visible = false"
         />
         <Button
           label="Unduh Excel"
@@ -238,8 +238,8 @@ async function handleExport() {
           severity="success"
           :loading="isExporting"
           :disabled="!selectedColumns.length"
-          @click="handleExport"
           class="w-auto whitespace-nowrap"
+          @click="handleExport"
         />
       </div>
     </template>

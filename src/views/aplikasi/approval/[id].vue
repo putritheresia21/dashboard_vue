@@ -4,23 +4,23 @@ meta:
 </route>
 
 <script setup lang="ts">
-import PageWrapper from '@/layouts/shared/PageWrapper.vue'
-import AdditionalInformation from '@/components/AdditionalInformation.vue'
+import { storeToRefs } from 'pinia'
 import { Select } from 'primevue'
-import { ref, computed, watch, onMounted } from 'vue'
-import SearchInput from '@/components/SearchInput.vue'
-import FormCell from '@/components/FormCell.vue'
-import CustomDataTable from '@/components/CustomDataTable.vue'
-import SummaryCard from '@/components/SummaryCard.vue'
+import { computed, onMounted, ref, watch } from 'vue'
+
+import AdditionalInformation from '@/components/AdditionalInformation.vue'
 import CellInput from '@/components/cells/CellInput.vue'
 import CellSelect from '@/components/cells/CellSelect.vue'
+import type { ColumnDef, DataRow } from '@/components/custom-data-table.types'
+import CustomDataTable from '@/components/CustomDataTable.vue'
 import DynamicList from '@/components/DynamicList.vue'
-import { formatRupiah } from '@/utils/formatter'
+import SearchInput from '@/components/SearchInput.vue'
+import SummaryCard from '@/components/SummaryCard.vue'
 import { useIsMobile } from '@/composables/useIsMobile'
-import type { FormSubmitEvent } from '@primevue/forms'
-import { visitorList, outlets } from '@/dummy/customerData'
+import { outlets, type Visitor, visitorList } from '@/dummy/customerData'
+import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import { useAuthStore } from '@/stores/authStore'
-import { storeToRefs } from 'pinia'
+import { formatRupiah } from '@/utils/formatter'
 
 const auth = useAuthStore()
 const { role } = storeToRefs(auth)
@@ -52,12 +52,6 @@ const targetVisits = computed(() => [
     : [{ detail: 'USER / OUTLET', value: '7/3' }]),
 ])
 
-const tipeBadgeMap = {
-  RS: { bg: '#dbeafe', text: '#1d4ed8' },
-  Klinik: { bg: '#dcfce7', text: '#15803d' },
-  Apotek: { bg: '#fce7f3', text: '#be185d' },
-}
-
 const shiftOptions = ['Siang', 'Malam']
 
 const tipeMap = {
@@ -73,7 +67,7 @@ const userColumns = [
     header: '',
     type: 'dot',
     width: '2rem',
-    dotColor: (r: any) => (r.aktif ? '#16a34a' : null),
+    dotColor: (r: DataRow) => (r.aktif === true ? '#16a34a' : null),
   },
   { field: 'jabatan', header: 'Jabatan', type: 'badge', width: '10rem' },
   { field: 'outlet', header: 'Outlet' },
@@ -130,7 +124,7 @@ const userColumns = [
   },
   { field: 'salesUser', header: 'Sales User\n(3 bln)', align: 'right', width: '10rem' },
   { field: 'salesOutlet', header: 'Sales Outlet\n(3 bln)', align: 'right', width: '10rem' },
-] as any
+] as ColumnDef[]
 
 const outletColumns = [
   { field: 'outlet', header: 'Outlet' },
@@ -148,7 +142,7 @@ const outletColumns = [
     header: '',
     type: 'dot',
     width: '2rem',
-    dotColor: (r: any) => (r.aktif ? '#16a34a' : null),
+    dotColor: (r: DataRow) => (r.aktif === true ? '#16a34a' : null),
   },
   ...(role.value === 'dm'
     ? [
@@ -203,7 +197,7 @@ const outletColumns = [
   { field: 'jabatan', header: 'Jabatan', type: 'badge', width: '10rem' },
   { field: 'salesUser', header: 'Sales User\n(3 bln)', align: 'right', width: '10rem' },
   { field: 'salesOutlet', header: 'Sales Outlet\n(3 bln)', align: 'right', width: '10rem' },
-] as any
+] as ColumnDef[]
 
 const currentYear = new Date().getFullYear()
 
@@ -245,7 +239,7 @@ const quarters = computed(() => {
       value: q.value,
       disabled: !isEligible,
       // Opsional: Anda bisa menyimpan tanggal batas untuk ditampilkan di UI
-      ruleDate: ruleDate,
+      ruleDate,
     }
   })
 })
@@ -277,10 +271,10 @@ const options = [
 const search = ref('')
 
 const handleSubmit = () => {
-  console.log(visitorList)
+  return undefined
 }
 
-const salesData = ref<any[]>([])
+const salesData = ref<Visitor[]>([])
 
 onMounted(() => {
   // PROSES TRANSFORMASI DATA (Flattening)
@@ -318,7 +312,7 @@ onMounted(() => {
           <label for="year" class="font-semibold text-slate-500 mb-1 text-[11.5px] md:text-[13px]"
             >Periode Tahun</label
           >
-          <Select id="year" size="small" :options="years" v-model="selectedYear" class="w-full" />
+          <Select id="year" v-model="selectedYear" size="small" :options="years" class="w-full" />
         </div>
 
         <div class="flex flex-col flex-1">
@@ -329,13 +323,13 @@ onMounted(() => {
           >
           <Select
             id="quarter"
+            v-model="selectedQuarter"
             size="small"
             placeholder="Tidak ada triwulan..."
             :options="quarters"
             option-value="value"
             option-label="label"
             option-disabled="disabled"
-            v-model="selectedQuarter"
             class="w-full"
           />
         </div>
@@ -355,11 +349,11 @@ onMounted(() => {
           <button
             v-for="option in options"
             :key="option.value"
-            @click="selected = option.value"
             :class="[
               'flex-1 rounded-md py-1.5 font-bold transition text-sm h-full',
               selected === option.value ? 'bg-[#0B1838] text-white shadow-sm' : 'text-[#475467]',
             ]"
+            @click="selected = option.value"
           >
             {{ option.label }}
           </button>
@@ -430,8 +424,8 @@ onMounted(() => {
                   <label :for="`mr-${index}`" class="text-[11px] text-[#64748B]">MR</label>
                   <CellInput
                     :id="`mr-${index}`"
-                    type="number"
                     v-model="item.mr"
+                    type="number"
                     input-id="integeronly"
                   />
                 </div>
@@ -440,8 +434,8 @@ onMounted(() => {
                   <label :for="`spv-${index}`" class="text-[11px] text-[#64748B]">SPV</label>
                   <CellInput
                     :id="`spv-${index}`"
-                    type="number"
                     v-model="item.spv"
+                    type="number"
                     input-id="integeronly"
                   />
                 </div>
@@ -450,8 +444,8 @@ onMounted(() => {
                   <label :for="`dm-${index}`" class="text-[11px] text-[#64748B]">DM</label>
                   <CellInput
                     :id="`dm-${index}`"
-                    type="number"
                     v-model="item.dm"
+                    type="number"
                     input-id="integeronly"
                   />
                 </div>
@@ -469,8 +463,8 @@ onMounted(() => {
                   >
                   <CellInput
                     :id="`sm-${index}`"
-                    type="number"
                     v-model="item.dm"
+                    type="number"
                     width="w-full"
                     input-id="integeronly"
                   />
@@ -597,8 +591,8 @@ onMounted(() => {
                           <label :for="`mr-${index}`" class="text-[11px] text-[#64748B]">MR</label>
                           <CellInput
                             :id="`mr-${index}`"
-                            type="number"
                             v-model="visitor.mr"
+                            type="number"
                             input-id="integeronly"
                           />
                         </div>
@@ -609,8 +603,8 @@ onMounted(() => {
                           >
                           <CellInput
                             :id="`spv-${index}`"
-                            type="number"
                             v-model="visitor.spv"
+                            type="number"
                             input-id="integeronly"
                           />
                         </div>
@@ -619,8 +613,8 @@ onMounted(() => {
                           <label :for="`dm-${index}`" class="text-[11px] text-[#64748B]">DM</label>
                           <CellInput
                             :id="`dm-${index}`"
-                            type="number"
                             v-model="visitor.dm"
+                            type="number"
                             input-id="integeronly"
                           />
                         </div>
@@ -646,8 +640,8 @@ onMounted(() => {
                           >
                           <CellInput
                             :id="`sm-${index}`"
-                            type="number"
                             v-model="visitor.dm"
+                            type="number"
                             width="w-full"
                             input-id="integeronly"
                           />
@@ -692,7 +686,7 @@ onMounted(() => {
       <CustomDataTable
         v-else
         :data="selected === 'user' ? visitorList : salesData"
-        :groupRowsBy="['outlet', 'uniqueTipe']"
+        :group-rows-by="['outlet', 'uniqueTipe']"
         :columns="selected === 'user' ? userColumns : outletColumns"
         :rows="10"
         :loading="loading"

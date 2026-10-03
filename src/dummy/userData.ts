@@ -40,8 +40,8 @@ export type AuthResponse = Omit<User, 'password'> & {
 }
 
 export function getAuthenticate(userInput: AuthRequest): AuthResponse | null {
-  const user = users.find((user) => user.nik === userInput.nik)
-  if (user?.password !== userInput.password) {
+  const authenticatedUser = users.find((user) => user.nik === userInput.nik)
+  if (authenticatedUser?.password !== userInput.password) {
     return null
   }
 
@@ -50,8 +50,8 @@ export function getAuthenticate(userInput: AuthRequest): AuthResponse | null {
   expiredDate.setDate(expiredDate.getDate() + 7)
 
   return {
-    nik: user.nik,
-    name: user.name,
+    nik: authenticatedUser.nik,
+    name: authenticatedUser.name,
     expired: expiredDate.toISOString(),
   }
 }

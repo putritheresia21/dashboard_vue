@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import type { RouteLocationRaw } from 'vue-router'
+import { type RouteLocationRaw, useRoute, useRouter } from 'vue-router'
 
 const props = withDefaults(
   defineProps<{
@@ -9,14 +8,21 @@ const props = withDefaults(
     showBack?: boolean // default true
     backTo?: RouteLocationRaw // cadangan jika tidak ada history
   }>(),
-  { showBack: true },
+  {
+    title: undefined,
+    description: undefined,
+    showBack: true,
+    backTo: undefined,
+  },
 )
 
 const route = useRoute()
 const router = useRouter()
 
 function goBack() {
-  if (window.history.state?.back) return router.back()
+  if (window.history.state?.back) {
+    return router.back()
+  }
   router.push(props.backTo ?? '/aplikasi')
 }
 </script>

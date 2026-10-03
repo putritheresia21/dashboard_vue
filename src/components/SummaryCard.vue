@@ -4,7 +4,7 @@ interface Summary {
   value: number | string
 }
 
-const props = defineProps<{
+defineProps<{
   summaries: Summary[]
 }>()
 </script>

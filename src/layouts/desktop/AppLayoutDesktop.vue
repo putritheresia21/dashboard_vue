@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+
 import AppTopbar from '../shared/AppTopbar.vue'
 import AppSidebar from './AppSidebar.vue'
-import AppBreadcrumb from '../shared/AppBreadcrumb.vue'
 
 const route = useRoute()
 const isInAplikasi = computed(() => route.path.startsWith('/aplikasi'))

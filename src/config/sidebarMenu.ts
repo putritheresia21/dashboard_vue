@@ -1,15 +1,15 @@
-import visitIcon from '@/assets/icons/visit.svg'
-import transaksiIcon from '@/assets/icons/transaksi.svg'
 import approvalIcon from '@/assets/icons/approval.svg'
-import pengajuanIcon from '@/assets/icons/pengajuan.svg'
-import masterIcon from '@/assets/icons/master.svg'
-import laporanIcon from '@/assets/icons/laporan.svg'
-import personIcon from '@/assets/icons/person.svg'
 import calendarIcon from '@/assets/icons/calendar.svg'
 import checklistIcon from '@/assets/icons/checklist.svg'
 import docklightIcon from '@/assets/icons/docklight.svg'
+import laporanIcon from '@/assets/icons/laporan.svg'
 import locationIcon from '@/assets/icons/location.svg'
+import masterIcon from '@/assets/icons/master.svg'
+import pengajuanIcon from '@/assets/icons/pengajuan.svg'
+import personIcon from '@/assets/icons/person.svg'
 import refreshIcon from '@/assets/icons/refresh.svg'
+import transaksiIcon from '@/assets/icons/transaksi.svg'
+import visitIcon from '@/assets/icons/visit.svg'
 
 export interface SidebarChild {
   label: string

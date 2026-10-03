@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+
 import { dummyVisits } from '@/dummy/visitData'
-import { ref, watch, computed } from 'vue'
 // import FilterBar from '@/components/filters/FilterBar.vue'
 import getWeeksInMonth from '@/utils/weeksInMonthHelper'
-const activeFilters = ref<Record<string, any>>({
+interface WeeklyFilters {
+  tahun: number | null
+  bulan: number | null
+  week: unknown
+}
+
+const activeFilters = ref<WeeklyFilters>({
   tahun: null,
   bulan: null,
   week: null,
@@ -21,10 +28,12 @@ const months = Array.from({ length: 12 }, (_, i) => ({
 }))
 
 const weeks = computed(() => {
-  if (activeFilters.value['tahun'] == null || activeFilters.value['bulan'] == null) return []
+  if (activeFilters.value.tahun === null || activeFilters.value.bulan === null) {
+    return []
+  }
   const tempWeeks = getWeeksInMonth(activeFilters.value['tahun'], activeFilters.value['bulan'])
   return tempWeeks.map((temp) => ({
-    label: 'Minggu ke-' + temp.week,
+    label: `Minggu ke-${temp.week}`,
     value: temp,
   }))
 })
@@ -60,15 +69,11 @@ const filters = computed(() => [
     options: weeks.value,
     optionLabel: 'label',
     optionValue: 'value',
-    disabled: activeFilters.value['bulan'] == null,
+    disabled: activeFilters.value.bulan === null,
   },
 ])
-
-watch(activeFilters, (filters) => {
-  console.log(filters)
-})
 </script>
 
 <template>
-  <FilterBar :filters="filters" v-model="activeFilters" :data="dummyVisits" :show-reset="false" />
+  <FilterBar v-model="activeFilters" :filters="filters" :data="dummyVisits" :show-reset="false" />
 </template>

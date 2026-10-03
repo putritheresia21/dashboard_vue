@@ -5,14 +5,14 @@ meta:
 
 <!-- contoh penerapan useValidateInput -->
 <script setup lang="ts">
-import { z } from 'zod'
 import { Form, FormField } from '@primevue/forms'
-import { InputText, Message, Password, Button } from 'primevue'
+import { Button, InputText, Message, Password, useToast } from 'primevue'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { z } from 'zod'
+
 import { useValidateInput } from '@/composables/useValidateInput'
 import { useAuthStore } from '@/stores/authStore'
-import { useRoute, useRouter } from 'vue-router'
-import { ref } from 'vue'
-import { useToast } from 'primevue'
 
 // --- 1. Definisikan Schema ---
 const schema = z.object({
@@ -54,13 +54,9 @@ const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidat
       // 1. Tunggu proses login (API call & penyimpanan LocalStorage) selesai
       await login(values)
 
-      console.log('User berhasil disimpan:', localStorage.getItem('user'))
-
       // 3. Arahkan pengguna ke rute yang sesuai
       router.push(redirectPath || '/')
     } catch (error) {
-      // 3. Tangani jika login gagal (misal kredensial salah)
-      console.error('Login gagal:', error)
       errorLogin.value = (error as Error).message
     } finally {
       isLoading.value = false
@@ -83,14 +79,14 @@ const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidat
       <!-- Form Utama -->
       <Form
         :resolver="resolver"
-        :validateOnBlur="true"
-        :validateOnValueUpdate="fieldsToValidateOnUpdate"
-        :validateOnSubmit="true"
-        @submit="onSubmit"
+        :validate-on-blur="true"
+        :validate-on-value-update="fieldsToValidateOnUpdate"
+        :validate-on-submit="true"
         class="flex flex-col gap-5"
+        @submit="onSubmit"
       >
         <!-- NIK -->
-        <FormField name="nik" v-slot="$field" class="flex flex-col gap-1.5">
+        <FormField v-slot="$field" name="nik" class="flex flex-col gap-1.5">
           <label for="nik" class="text-sm font-semibold text-gray-700"
             >Nomor Induk Karyawan (NIK)</label
           >
@@ -111,16 +107,16 @@ const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidat
         </FormField>
 
         <!-- Password -->
-        <FormField name="password" v-slot="$field" class="flex flex-col gap-1.5">
+        <FormField v-slot="$field" name="password" class="flex flex-col gap-1.5">
           <label for="password" class="text-sm font-semibold text-gray-700">Password</label>
           <Password
             id="password"
             v-bind="$field"
             placeholder="Masukan password anda"
             class="w-full [&>input]:w-full"
-            inputClass="w-full"
+            input-class="w-full"
             :feedback="false"
-            toggleMask
+            toggle-mask
             @blur="markTouched('password')"
           />
           <Message v-if="$field.invalid" severity="error" size="small" variant="simple">

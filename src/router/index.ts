@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore.ts'
 import { routes } from 'vue-router/auto-routes'
+
+import { useAuthStore } from '@/stores/authStore.ts'
 
 declare module 'vue-router' {
   interface RouteMeta {

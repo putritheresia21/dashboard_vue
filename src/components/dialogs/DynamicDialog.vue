@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
 import { Select } from 'primevue'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
+import { computed, ref, watch } from 'vue'
 
 type FieldType = 'text' | 'number' | 'currency' | 'select'
 type DialogMode = 'add' | 'edit' | 'delete' | null
@@ -23,10 +23,12 @@ type FieldDef = {
   placeholder?: string
 }
 
+type FormValue = string | number
+
 const props = defineProps<{
   mode: DialogMode
   fields?: FieldDef[]
-  initialData?: Record<string, any>
+  initialData?: Record<string, FormValue>
   itemLabel?: string //buat pesan delete
   entityName?: string //buat judul otomatis berdasarkan halaman yg dibuka
   loading?: boolean
@@ -34,11 +36,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
-  submit: [data: Record<string, any>]
+  submit: [data: Record<string, FormValue>]
   confirmDelete: []
 }>()
 
-const form = ref<Record<string, any>>({})
+const form = ref<Record<string, FormValue>>({})
 const errorMessage = ref('')
 
 watch(
@@ -110,8 +112,13 @@ function handleConfirm() {
   switch (props.mode) {
     case 'add':
     case 'edit':
-      if (!validate()) return
-      emit('submit', { ...form.value, id: props.initialData?.id })
+      if (!validate()) {
+        return
+      }
+      emit('submit', {
+        ...form.value,
+        ...(props.initialData?.id !== undefined ? { id: props.initialData.id } : {}),
+      })
       break
     case 'delete':
       emit('confirmDelete')
@@ -127,38 +134,46 @@ function close() {
 <template>
   <Dialog
     :visible="dialogConfig.visible"
-    @update:visible="close"
     :header="dialogConfig.header"
     modal
     :style="{ width: mode === 'delete' ? '24rem' : '28rem' }"
+    @update:visible="close"
   >
     <!--add/edit form dialog-->
     <div v-if="dialogConfig.showForm" class="flex flex-col gap-4">
       <div v-for="field in fields" :key="field.key">
         <label class="text-sm fonnt-medium text-slate-700 mb-1 block">{{ field.label }}</label>
 
-        <InputText v-if="field.type === 'text'" v-model="form[field.key]" class="w-full" :min="0" />
-        <InputNumber
-          v-else-if="field.type === 'number'"
-          v-model="form[field.key]"
+        <InputText
+          v-if="field.type === 'text'"
+          :model-value="String(form[field.key] ?? '')"
           class="w-full"
           :min="0"
+          @update:model-value="form[field.key] = String($event ?? '')"
+        />
+        <InputNumber
+          v-else-if="field.type === 'number'"
+          :model-value="Number(form[field.key] ?? 0)"
+          class="w-full"
+          :min="0"
+          @update:model-value="form[field.key] = Number($event ?? 0)"
         />
         <InputNumber
           v-else-if="field.type === 'currency'"
-          v-model="form[field.key]"
+          :model-value="Number(form[field.key] ?? 0)"
           class="w-full"
           :min="0"
           mode="currency"
           currency="IDR"
           locale="id-ID"
+          @update:model-value="form[field.key] = Number($event ?? 0)"
         />
         <Select
           v-else-if="field.type === 'select'"
           v-model="form[field.key]"
           :options="field.options"
-          optionLabel="label"
-          optionValue="value"
+          option-label="label"
+          option-value="value"
           :placeholder="field.placeholder"
           class="w-full"
         />

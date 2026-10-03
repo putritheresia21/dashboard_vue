@@ -1,7 +1,8 @@
 import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+
 // import { useToast } from 'primevue'
 import router from '@/router'
+import { useAuthStore } from '@/stores/authStore'
 
 export const api = axios.create({
   baseURL: 'http://localhost:8080/api',

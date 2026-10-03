@@ -4,15 +4,16 @@ meta:
 </route>
 
 <script setup lang="ts">
-import PageWrapper from '@/layouts/shared/PageWrapper.vue'
+import { Button } from 'primevue'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 import CustomDataTable from '@/components/CustomDataTable.vue'
 import DynamicList from '@/components/DynamicList.vue'
-import { Button } from 'primevue'
-import { useIsMobile } from '@/composables/useIsMobile'
-import { useRouter } from 'vue-router'
-import SearchInput from '@/components/SearchInput.vue'
 import * as Filter from '@/components/Filter'
+import SearchInput from '@/components/SearchInput.vue'
+import { useIsMobile } from '@/composables/useIsMobile'
+import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 
 const isMobile = useIsMobile()
 
@@ -337,7 +338,7 @@ const columns = [
   },
 ]
 
-function handleView(row: any) {
+function handleView(row: { noApproval: string }) {
   router.push(`/aplikasi/approval/${row.noApproval}`)
 }
 

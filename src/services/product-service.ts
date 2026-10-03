@@ -1,5 +1,6 @@
+import type { ApiProduct, CreateProductPayload, Product } from '@/types/product'
+
 import { api } from './axios'
-import type { Product, ApiProduct, CreateProductPayload } from '@/types/product'
 
 function mapApiProduct(p: ApiProduct): Product {
   return {

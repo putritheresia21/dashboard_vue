@@ -5,14 +5,16 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { Badge, Button, Select, SelectButton, Tag } from 'primevue'
 import 'primeicons/primeicons.css'
-import { ref, computed, watch } from 'vue'
-import getWeeksInMonth from '@/utils/weeksInMonthHelper'
-import { dummyVisits } from '@/dummy/visitData' //dummy data
-import DynamicList from '@/components/DynamicList.vue'
+
+import { Badge, Button, Tag } from 'primevue'
+import { computed, ref, watch } from 'vue'
+
 // import FilterBar from '@/components/filters/FilterBar.vue'
 import AdditionalInformation from '@/components/AdditionalInformation.vue'
+import DynamicList from '@/components/DynamicList.vue'
+import { dummyVisits } from '@/dummy/visitData' //dummy data
+import getWeeksInMonth from '@/utils/weeksInMonthHelper'
 
 interface VisitSchedule {
   day: string
@@ -41,17 +43,25 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   value: i, // 1 = Januari, 12 = Desember
 }))
 
-const activeFilters = ref<Record<string, any>>({
+interface WeeklyFilters {
+  tahun: number | null
+  bulan: number | null
+  week: unknown
+}
+
+const activeFilters = ref<WeeklyFilters>({
   tahun: null,
   bulan: null,
   week: null,
 })
 
 const weeks = computed(() => {
-  if (activeFilters.value['tahun'] == null || activeFilters.value['bulan'] == null) return []
+  if (activeFilters.value.tahun === null || activeFilters.value.bulan === null) {
+    return []
+  }
   const tempWeeks = getWeeksInMonth(activeFilters.value['tahun'], activeFilters.value['bulan'])
   return tempWeeks.map((temp) => ({
-    label: 'Minggu ke-' + temp.week,
+    label: `Minggu ke-${temp.week}`,
     value: temp,
   }))
 })
@@ -78,7 +88,7 @@ const selectFilters = computed(() => [
     options: months,
     optionLabel: 'label',
     optionValue: 'value',
-    disabled: activeFilters.value['tahun'] == null,
+    disabled: activeFilters.value.tahun === null,
   },
   {
     type: 'select' as const,
@@ -87,30 +97,42 @@ const selectFilters = computed(() => [
     options: weeks.value,
     optionLabel: 'label',
     optionValue: 'value',
-    disabled: activeFilters.value['bulan'] == null,
+    disabled: activeFilters.value.bulan === null,
   },
 ])
 
-watch(activeFilters, (filters) => {
-  console.log(filters)
-})
-
 const getScheduleIcon = (status: string) => {
-  if (status === 'visited') return 'pi pi-check'
-  if (status === 'pending') return 'pi pi-clock'
-  if (status === 'planned') return 'pi pi-calendar'
-  if (status === 'empty') return 'pi pi-circle'
+  if (status === 'visited') {
+    return 'pi pi-check'
+  }
+  if (status === 'pending') {
+    return 'pi pi-clock'
+  }
+  if (status === 'planned') {
+    return 'pi pi-calendar'
+  }
+  if (status === 'empty') {
+    return 'pi pi-circle'
+  }
   return 'pi pi-circle'
 }
 
 const getScheduleClass = (status: string) => {
-  if (status === 'visited') return 'bg-[#283593] text-white hover:bg-blue-800'
-  if (status === 'pending') return 'bg-[#FFF3CD] text-[#D99A00] border border-[#F5C542]'
+  if (status === 'visited') {
+    return 'bg-[#283593] text-white hover:bg-blue-800'
+  }
+  if (status === 'pending') {
+    return 'bg-[#FFF3CD] text-[#D99A00] border border-[#F5C542]'
+  }
   // Gaya untuk "rencana" (Biru/ungu pastel yang senada dengan image_0fc01d.png)
-  if (status === 'planned') return 'bg-[#EAEAFF] text-[#283593] border border-[#C5CAE9]'
+  if (status === 'planned') {
+    return 'bg-[#EAEAFF] text-[#283593] border border-[#C5CAE9]'
+  }
 
   // Gaya untuk "belum" (Putih bersih dengan border abu-abu yang senada dengan image_0fc03b.png)
-  if (status === 'empty') return 'bg-white text-gray-400 border border-gray-200'
+  if (status === 'empty') {
+    return 'bg-white text-gray-400 border border-gray-200'
+  }
 
   return 'bg-white text-gray-400 border border-gray-300' // Fallback default
 }
@@ -170,8 +192,8 @@ const statuses = ref([
     </div>
 
     <FilterBar
-      :filters="selectFilters"
       v-model="activeFilters"
+      :filters="selectFilters"
       :data="dummyVisits"
       :show-reset="false"
     />
@@ -183,13 +205,13 @@ const statuses = ref([
         v-for="filter in filters"
         :key="filter"
         type="button"
-        @click="selectedFilter = filter"
         class="px-2.5 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-150 cursor-pointer outline-none"
         :class="
           selectedFilter === filter
             ? 'bg-[#10365d] border-[#10365d] text-white'
             : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-50'
         "
+        @click="selectedFilter = filter"
       >
         {{ filter }}
       </button>

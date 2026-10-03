@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import ChevronRightIcon from '@primeicons/vue/chevron-right'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+
 import SearchInput from '@/components/SearchInput.vue'
-import ChevronRightIcon from '@primeicons/vue/chevron-right'
-import { sidebarMenu } from '@/config/sidebarMenu'
-import type { SidebarMenuItem, SidebarChild } from '@/config/sidebarMenu'
+import { type SidebarChild, sidebarMenu, type SidebarMenuItem } from '@/config/sidebarMenu'
 
 const route = useRoute()
 
 const filterMenuRecursive = (menus: SidebarMenuItem[], query: string): SidebarMenuItem[] => {
-  if (!query) return menus
+  if (!query) {
+    return menus
+  }
   return menus.reduce((result: SidebarMenuItem[], menu) => {
     const isMatch = menu.label.toLowerCase().includes(query)
     if (isMatch) {
@@ -18,7 +20,9 @@ const filterMenuRecursive = (menus: SidebarMenuItem[], query: string): SidebarMe
       const filteredChildren = menu.children.filter((child) =>
         child.label.toLowerCase().includes(query),
       )
-      if (filteredChildren.length > 0) result.push({ ...menu, children: filteredChildren })
+      if (filteredChildren.length > 0) {
+        result.push({ ...menu, children: filteredChildren })
+      }
     }
     return result
   }, [])
@@ -28,7 +32,7 @@ const search = ref('')
 const filteredMenu = computed(() => filterMenuRecursive(sidebarMenu, search.value.toLowerCase()))
 
 function isChildActive(child: SidebarChild) {
-  return route.path === child.to || route.path.startsWith(child.to + '/')
+  return route.path === child.to || route.path.startsWith(`${child.to}/`)
 }
 function hasActiveChild(item: SidebarMenuItem) {
   return item.children.some(isChildActive) || route.path.startsWith(item.parentRoute)
@@ -36,12 +40,17 @@ function hasActiveChild(item: SidebarMenuItem) {
 
 const expandedMenus = ref<Set<string>>(new Set())
 sidebarMenu.forEach((item) => {
-  if (hasActiveChild(item)) expandedMenus.value.add(item.label)
+  if (hasActiveChild(item)) {
+    expandedMenus.value.add(item.label)
+  }
 })
 
 function toggleExpand(label: string) {
-  if (expandedMenus.value.has(label)) expandedMenus.value.delete(label)
-  else expandedMenus.value.add(label)
+  if (expandedMenus.value.has(label)) {
+    expandedMenus.value.delete(label)
+  } else {
+    expandedMenus.value.add(label)
+  }
 }
 function isExpanded(label: string) {
   return expandedMenus.value.has(label)
@@ -75,8 +84,8 @@ function isExpanded(label: string) {
             class="flex-shrink-0"
           />
           <component
-            v-else
             :is="item.icon"
+            v-else
             size="18"
             :color="hasActiveChild(item) ? '#f59e0b' : '#ffffff'"
           />

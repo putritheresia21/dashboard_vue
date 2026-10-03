@@ -1,5 +1,6 @@
-import { api } from './axios'
 import type { Category, CategoryPayload } from '@/types/category'
+
+import { api } from './axios'
 
 export const getCategories = () => api.get<Category[]>('/categories').then((res) => res.data)
 

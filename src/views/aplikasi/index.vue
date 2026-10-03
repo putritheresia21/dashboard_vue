@@ -5,15 +5,16 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { useIsMobile } from '@/composables/useIsMobile'
-import { getPercent, formatRupiah } from '@/utils/formatter'
-import ProgressBar from '@/components/ProgressBar.vue'
-import DynamicList from '@/components/DynamicList.vue'
-import Colors from '@/utils/colors'
 import { computed } from 'vue'
-import { sidebarMenu } from '@/config/sidebarMenu'
 import { useRouter } from 'vue-router'
+
+import DynamicList from '@/components/DynamicList.vue'
+import ProgressBar from '@/components/ProgressBar.vue'
+import { useIsMobile } from '@/composables/useIsMobile'
+import { sidebarMenu } from '@/config/sidebarMenu'
 import PageWrapper from '@/layouts/shared/PageWrapper.vue'
+import Colors from '@/utils/colors'
+import { formatRupiah, getPercent } from '@/utils/formatter'
 
 const isMobile = useIsMobile()
 const router = useRouter()
@@ -205,7 +206,7 @@ function goToMenu(item: unknown) {
         :columns="2"
         :padding="6"
         clickable
-        :showArrow="!isMobile"
+        :show-arrow="!isMobile"
         @item-click="goToMenu"
       >
         <template #item="{ item }">

@@ -5,24 +5,24 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import Tag from 'primevue/tag'
-import Button from 'primevue/button'
 import PlusIcon from '@primeicons/vue/plus'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
-import Select from 'primevue/select'
-import { Message } from 'primevue'
-import CustomDataTable from '@/components/CustomDataTable.vue'
-import { ArrowUpIcon } from '@primevue/icons'
-import { productsData, categoryOptionsDummy, type Product } from '@/dummy/productsData'
-// import { useConfirmDelete } from '@/composables/useConfirmDelete'
-import { getPercent } from '@/utils/formatter'
-import { useValidateInput } from '@/composables/useValidateInput'
 import { Form, FormField } from '@primevue/forms'
+import { ArrowUpIcon } from '@primevue/icons'
+import { Message } from 'primevue'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import Tag from 'primevue/tag'
+import { computed, ref } from 'vue'
 import z from 'zod'
-// TODO: kalau backend sudah siap, ganti productsData dengan hasil getProducts()/getCategories()
+
+import CustomDataTable from '@/components/CustomDataTable.vue'
+import { useValidateInput } from '@/composables/useValidateInput'
+import { categoryOptionsDummy, type Product, productsData } from '@/dummy/productsData'
+// import { useConfirmDelete } from '@/composables/useConfirmDelete'
+// Catatan: kalau backend sudah siap, ganti productsData dengan hasil getProducts()/getCategories()
 // import { getProducts, createProduct } from '@/services/product-service'
 // import { getCategories } from '@/services/category-service'
 
@@ -83,8 +83,6 @@ const columns = computed(() => [
   },
 ])
 
-const exportColumns = columns.value.map(({ field, header }) => ({ key: field, header }))
-
 const filters = [
   { type: 'select' as const, key: 'category', placeholder: 'Filter Category' },
   { type: 'select' as const, key: 'inventoryStatus', placeholder: 'Filter Status' },
@@ -130,7 +128,7 @@ const summaryCards = computed(() => [
 
 // --- Actions ---
 const editProduct = (product: Product) => {
-  console.log('Edit:', product)
+  void product
 }
 
 const deleteProduct = (product: Product) => {
@@ -160,13 +158,22 @@ const schema = z.object({
   price: z.int('Harga harus diisi'),
 })
 
-const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidateInput(
+const { resolver, fieldsToValidateOnUpdate, onSubmit } = useValidateInput(
   schema,
   async (values) => {
     saving.value = true
 
     const cat = categories.value.find((c) => c.id === values.category)!
     const qty = values.quantity
+
+    let inventoryStatus: Product['inventoryStatus']
+    if (qty === 0) {
+      inventoryStatus = 'OUTOFSTOCK'
+    } else if (qty <= 10) {
+      inventoryStatus = 'LOWSTOCK'
+    } else {
+      inventoryStatus = 'INSTOCK'
+    }
 
     products.value.push({
       id: products.value.length + 1,
@@ -177,7 +184,7 @@ const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidat
       quantity: qty,
       price: values.price,
       image: `https://placehold.co/100x100/0d9488/white?text=${values.name.charAt(0)}`,
-      inventoryStatus: qty === 0 ? 'OUTOFSTOCK' : qty <= 10 ? 'LOWSTOCK' : 'INSTOCK',
+      inventoryStatus,
       rating: 4,
       description: '',
       stockHistory: [],
@@ -288,20 +295,20 @@ const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidat
         :validate-on-submit="true"
         @submit="onSubmit"
       >
-        <FormField name="name" v-slot="$field">
+        <FormField v-slot="$field" name="name">
           <label class="text-sm font-medium text-slate-700 mb-1 block">Product Name</label>
           <InputText v-bind="$field" class="w-full" placeholder="e.g Bamboo Watch" />
           <Message v-if="$field.invalid" severity="error" size="small" variant="simple">
             {{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField name="category" v-slot="$field">
+        <FormField v-slot="$field" name="category">
           <label class="text-sm font-medium text-slate-700 mb-1 block">Category</label>
           <Select
             v-bind="$field"
             :options="categories"
-            optionLabel="name"
-            optionValue="id"
+            option-label="name"
+            option-value="id"
             placeholder="Pilih Kategori"
             class="w-full"
           />
@@ -310,14 +317,14 @@ const { resolver, fieldsToValidateOnUpdate, markTouched, onSubmit } = useValidat
           </Message>
         </FormField>
         <div class="grid grid-cols-2 gap-4">
-          <FormField name="quantity" v-slot="$field">
+          <FormField v-slot="$field" name="quantity">
             <label class="text-sm font-medium text-slate-700 mb-1 block">Quantity</label>
             <InputNumber v-bind="$field" class="w-full" :min="0" :default-value="0" />
             <Message v-if="$field.invalid" severity="error" size="small" variant="simple">
               {{ $field.error?.message }}
             </Message>
           </FormField>
-          <FormField name="price" v-slot="$field">
+          <FormField v-slot="$field" name="price">
             <label class="text-sm font-medium text-slate-700 mb-1 block">Price ($)</label>
             <InputNumber
               v-bind="$field"

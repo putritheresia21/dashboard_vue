@@ -1,4 +1,5 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+
 import { BREAKINGPOINTS } from '../constants/config'
 
 const isMobile = ref(window.innerWidth < BREAKINGPOINTS.lg)
@@ -10,13 +11,17 @@ function check() {
 
 export function useIsMobile() {
   onMounted(() => {
-    if (listenerCount === 0) window.addEventListener('resize', check)
+    if (listenerCount === 0) {
+      window.addEventListener('resize', check)
+    }
     listenerCount++
   })
 
   onUnmounted(() => {
     listenerCount--
-    if (listenerCount === 0) window.removeEventListener('resize', check)
+    if (listenerCount === 0) {
+      window.removeEventListener('resize', check)
+    }
   })
 
   return isMobile

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { RouterView, useRoute } from 'vue-router'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
-import { computed } from 'vue'
-import type { Component } from 'vue'
+import { type Component, computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+
 import { useIsMobile } from './composables/useIsMobile.ts'
 import AppLayoutDesktop from './layouts/desktop/AppLayoutDesktop.vue'
 import AppLayoutMobile from './layouts/mobile/AppLayoutMobile.vue'
@@ -17,14 +17,16 @@ const layouts = computed<Record<string, Component>>(() => ({
 
 const layout = computed(() => {
   const name = route.meta.layout
-  if (name === false || name === 'none') return null
+  if (name === false || name === 'none') {
+    return null
+  }
   return layouts.value[name ?? 'default'] ?? layouts.value.default
 })
 </script>
 
 <template>
   <!-- jika dengan layout -->
-  <component v-if="layout" :is="layout"> </component>
+  <component :is="layout" v-if="layout"> </component>
   <RouterView v-else />
 
   <Toast />

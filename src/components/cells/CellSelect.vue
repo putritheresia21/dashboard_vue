@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import Select from 'primevue/select'
-import type { any } from 'zod'
+import { computed } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -42,7 +41,7 @@ function onChange(value: string) {
       },
       dropdown: { class: 'w-7' },
       dropdownIcon: { class: `text-[10px] ${disabled ? 'text-slate-300' : 'text-slate-500'}` },
-      option: ({ context }: any) => ({
+      option: ({ context }: { context: { focused?: boolean; selected?: boolean } }) => ({
         class: [
           'hover:bg-slate-100',
           context.focused && !context.selected ? 'bg-slate-100 text-slate-800' : '',

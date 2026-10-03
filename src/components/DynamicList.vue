@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T">
+import { ChevronLeftIcon, ChevronRightIcon } from '@primevue/icons'
 import { computed, ref, watch } from 'vue'
-import { ChevronRightIcon, ChevronLeftIcon } from '@primevue/icons'
 
 type Layout = 'grid' | 'column'
 type Columns = 1 | 2 | 3 | 4
@@ -45,13 +45,22 @@ const emit = defineEmits<{
 
 const currentPage = ref(1)
 
+function itemKey(item: T, index: number): PropertyKey {
+  const candidate = (item as { id?: unknown })?.id
+  return typeof candidate === 'string' || typeof candidate === 'number' ? candidate : index
+}
+
 const totalPages = computed((): number => {
-  if (!props.paginate) return 1
+  if (!props.paginate) {
+    return 1
+  }
   return Math.max(1, Math.ceil(props.items.length / props.pageSize))
 })
 
 const pagedItems = computed((): T[] => {
-  if (!props.paginate) return props.items
+  if (!props.paginate) {
+    return props.items
+  }
   const start = (currentPage.value - 1) * props.pageSize
   return props.items.slice(start, start + props.pageSize)
 })
@@ -72,7 +81,9 @@ watch(
 )
 
 function goToPage(page: number) {
-  if (page < 1 || page > totalPages.value) return
+  if (page < 1 || page > totalPages.value) {
+    return
+  }
   currentPage.value = page
   emit('page-change', page)
 }
@@ -112,8 +123,11 @@ const paddingClass = computed<string>(
 )
 
 const handleItemClick = (item: T, index: number) => {
-  if (props.clickable && !props.isExpanded) emit('item-click', item, index)
-  else if (props.isExpanded) toggleExpand(index)
+  if (props.clickable && !props.isExpanded) {
+    emit('item-click', item, index)
+  } else if (props.isExpanded) {
+    toggleExpand(index)
+  }
 }
 
 const expandedIndexes = ref<number[]>([])
@@ -130,10 +144,9 @@ const toggleExpand = (index: number) => {
 
 <template>
   <div :class="[layout === 'grid' ? `grid ${gridColsClass}` : 'flex flex-col', gapClass]">
-    <div v-for="(item, index) in pagedItems">
+    <div v-for="(item, index) in pagedItems" :key="itemKey(item, index)">
       <component
         :is="clickable ? 'button' : 'div'"
-        :key="(item as any)?.id ?? index"
         class="relative flex w-full"
         :class="[
           typeof background === 'function' ? background(item, index) : background,

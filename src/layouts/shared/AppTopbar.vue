@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import Avatar from 'primevue/avatar'
 import BellIcon from '@primeicons/vue/bell'
 import ChevronDownIcon from '@primeicons/vue/chevron-down'
-import Bars3Icon from '@primeicons/vue/bars'
-import SearchIcon from '@primeicons/vue/search'
-import Button from 'primevue/button'
-import { Popover } from 'primevue'
-import { useAuthStore } from '@/stores/authStore'
-import { ref } from 'vue'
-import SearchInput from '@/components/SearchInput.vue'
-import companyLogo from '@/assets/logo/logo-bernofarm.svg'
 import { storeToRefs } from 'pinia'
+import { Popover } from 'primevue'
+import Avatar from 'primevue/avatar'
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+import companyLogo from '@/assets/logo/logo-bernofarm.svg'
+import SearchInput from '@/components/SearchInput.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
-const router = useRouter()
 
 const auth = useAuthStore()
 const { user, role } = storeToRefs(auth)

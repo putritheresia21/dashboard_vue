@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import axios from 'axios'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { ref } from 'vue'
-import axios from 'axios'
 
 const toast = useToast()
 const isExporting = ref(false)
@@ -36,7 +36,7 @@ async function handleExport() {
     // Di Axios, data blob ada di response.data
     const blobUrl = URL.createObjectURL(response.data)
     window.open(blobUrl, '_blank')
-  } catch (err) {
+  } catch {
     toast.add({
       severity: 'error',
       summary: 'gagal',

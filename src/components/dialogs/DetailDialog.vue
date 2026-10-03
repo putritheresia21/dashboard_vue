@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Dialog from 'primevue/dialog'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
+import TabList from 'primevue/tablist'
 import TabPanel from 'primevue/tabpanel'
+import TabPanels from 'primevue/tabpanels'
+import Tabs from 'primevue/tabs'
 
 defineProps<{
   visible: boolean
@@ -19,10 +19,10 @@ defineEmits<{ 'update:visible': [value: boolean] }>()
 <template>
   <Dialog
     :visible="visible"
-    @update:visible="$emit('update:visible', $event)"
     modal
     :header="title"
     :style="{ width: width ?? '32rem' }"
+    @update:visible="$emit('update:visible', $event)"
   >
     <div class="flex flex-col gap-4">
       <div v-if="$slots.header" class="flex items-center gap-3">

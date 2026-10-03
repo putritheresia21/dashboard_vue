@@ -1,4 +1,4 @@
-interface Visitor {
+export interface Visitor {
   user: string
   jabatan: string
   outlet?: string

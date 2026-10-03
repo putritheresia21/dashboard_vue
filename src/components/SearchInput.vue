@@ -10,7 +10,10 @@ const props = withDefaults(
     h?: number //dalam ukuran px
   }>(),
   {
+    placeholder: 'Search...',
+    variant: 'light',
     rounded: 'lg',
+    h: undefined,
   },
 )
 
@@ -38,7 +41,6 @@ const roundedClass: Record<string, string> = {
     />
     <input
       :value="modelValue"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       type="text"
       :placeholder="placeholder || 'Search...'"
       :class="[
@@ -49,6 +51,7 @@ const roundedClass: Record<string, string> = {
           ? 'bg-white/10 border border-white/10 text-white placeholder-slate-400 focus:border-blue-400'
           : 'bg-white border border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-400',
       ]"
+      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
   </div>
 </template>

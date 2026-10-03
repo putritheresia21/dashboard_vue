@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import type { RouteLocationRaw } from 'vue-router'
 import Breadcrumb from 'primevue/breadcrumb'
+import { computed } from 'vue'
+import { type RouteLocationRaw, useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()

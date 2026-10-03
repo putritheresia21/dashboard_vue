@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
-import type { Prop } from 'vue'
 
 interface Props {
   itemName: string
-  deleteFn: () => Promise<any>
+  deleteFn: () => Promise<unknown>
   onSuccess: () => void
   icon?: string
   severity?: string
@@ -36,8 +35,7 @@ function handleClick() {
       try {
         await props.deleteFn()
         props.onSuccess()
-      } catch (error) {
-        console.error('Gagal menghapus:', error)
+      } catch {
         alert('Gagal menghapus data')
       }
     },

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import HomeIcon from '@primeicons/vue/home'
 import ThLargeIcon from '@primeicons/vue/th-large'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const tabs = [
@@ -13,7 +13,7 @@ function isActive(to: string) {
   if (to === '/') {
     return route.path === '/'
   }
-  return route.path === to || route.path.startsWith(to + '/')
+  return route.path === to || route.path.startsWith(`${to}/`)
 }
 </script>
 

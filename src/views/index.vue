@@ -5,14 +5,15 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import Chart from 'primevue/chart'
-import Tag from 'primevue/tag'
+import DollarIcon from '@primeicons/vue/dollar'
+import RefreshIcon from '@primeicons/vue/refresh'
 import ShoppingCartIcon from '@primeicons/vue/shopping-cart'
 import UsersIcon from '@primeicons/vue/users'
-import RefreshIcon from '@primeicons/vue/refresh'
-import DollarIcon from '@primeicons/vue/dollar'
-// import RadialGauge from '@/components/charts/RadialGauge.vue'
+import Chart from 'primevue/chart'
+import Tag from 'primevue/tag'
+import { type Component, computed, ref } from 'vue'
+
+import RadialGauge from '@/components/charts/RadialGauge.vue'
 
 interface StatCard {
   key: string
@@ -20,7 +21,7 @@ interface StatCard {
   value: string
   change: string
   last: string
-  icon: any
+  icon: Component
   negative?: boolean
   monthlyData: number[]
   growthPercent: number
@@ -115,31 +116,6 @@ const performanceChartOptions = {
       grid: { color: '#f1f5f9' },
       border: { display: false },
     },
-  },
-}
-
-// Gauge chart
-
-const gaugeChartData = computed(() => ({
-  labels: ['Growth', 'Remaining'],
-  datasets: [
-    {
-      data: [selectedStat.value.growthPercent, 100 - selectedStat.value.growthPercent],
-      backgroundColor: ['#2dd4bf', '#e2e8f0'],
-      borderWidth: 0,
-    },
-  ],
-}))
-
-const gaugeChartOptions = {
-  maintainAspectRatio: false,
-  rotation: -90,
-  circumference: 180,
-  cutout: '75%',
-  animation: { duration: 500 },
-  plugins: {
-    legend: { display: false },
-    tooltip: { enabled: false },
   },
 }
 
@@ -297,10 +273,10 @@ const getStatusSeverity = (status: Order['status']) => {
           </h3>
         </div>
         <Chart
+          :key="selectedKey"
           type="bar"
           :data="performanceChartData"
           :options="performanceChartOptions"
-          :key="selectedKey"
           class="h-64"
         />
       </div>

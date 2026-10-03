@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
-import PageHeader from './PageHeader.vue'
-import PageContent from './PageContent.vue'
+
 import AppBreadcrumb from './AppBreadcrumb.vue'
+import PageContent from './PageContent.vue'
+import PageHeader from './PageHeader.vue'
 
 withDefaults(
   defineProps<{
@@ -12,7 +13,13 @@ withDefaults(
     backTo?: RouteLocationRaw
     maxWidth?: string
   }>(),
-  { showBack: true, maxWidth: 'max-w-2xl' },
+  {
+    title: undefined,
+    description: undefined,
+    showBack: true,
+    backTo: undefined,
+    maxWidth: 'max-w-2xl',
+  },
 )
 </script>
 
