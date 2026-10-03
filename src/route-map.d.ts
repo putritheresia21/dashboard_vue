@@ -45,11 +45,18 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/aplikasi/approval': RouteRecordInfo<
-      '/aplikasi/approval',
+    '/aplikasi/approval/': RouteRecordInfo<
+      '/aplikasi/approval/',
       '/aplikasi/approval',
       Record<never, never>,
       Record<never, never>,
+      | never
+    >,
+    '/aplikasi/approval/[id]': RouteRecordInfo<
+      '/aplikasi/approval/[id]',
+      '/aplikasi/approval/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
       | never
     >,
     '/aplikasi/visit/': RouteRecordInfo<
@@ -94,27 +101,6 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/category-view': RouteRecordInfo<
-      '/category-view',
-      '/category-view',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/CategoryView': RouteRecordInfo<
-      '/CategoryView',
-      '/CategoryView',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/employee-view': RouteRecordInfo<
-      '/employee-view',
-      '/employee-view',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     '/login': RouteRecordInfo<
       '/login',
       '/login',
@@ -125,13 +111,6 @@ declare module 'vue-router/auto-routes' {
     '/product': RouteRecordInfo<
       '/product',
       '/product',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/product-view': RouteRecordInfo<
-      '/product-view',
-      '/product-view',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -179,13 +158,21 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/aplikasi/approval.vue': {
+    'src/views/aplikasi/approval/index.vue': {
       routes:
-        | '/aplikasi/approval'
+        | '/aplikasi/approval/'
       views:
         | never
       pathParamNames:
         | never
+    }
+    'src/views/aplikasi/approval/[id].vue': {
+      routes:
+        | '/aplikasi/approval/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/views/aplikasi/visit/index.vue': {
       routes:
@@ -235,30 +222,6 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/category-view.vue': {
-      routes:
-        | '/category-view'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/views/CategoryView.vue': {
-      routes:
-        | '/CategoryView'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/views/employee-view.vue': {
-      routes:
-        | '/employee-view'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
     'src/views/login.vue': {
       routes:
         | '/login'
@@ -270,14 +233,6 @@ declare module 'vue-router/auto-routes' {
     'src/views/product.vue': {
       routes:
         | '/product'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/views/product-view.vue': {
-      routes:
-        | '/product-view'
       views:
         | never
       pathParamNames:

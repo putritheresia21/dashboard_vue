@@ -13,6 +13,7 @@ interface Props {
   columns?: Columns
   gap?: Gap
   clickable?: boolean
+  isExpanded?: boolean
   showArrow?: boolean
   padding?: Padding
   paginate?: boolean
@@ -27,6 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
   columns: 2,
   gap: 3,
   clickable: false,
+  isExpanded: false,
   showArrow: true,
   padding: 3,
   paginate: false,
@@ -110,43 +112,94 @@ const paddingClass = computed<string>(
 )
 
 const handleItemClick = (item: T, index: number) => {
-  if (props.clickable) emit('item-click', item, index)
+  if (props.clickable && !props.isExpanded) emit('item-click', item, index)
+  else if (props.isExpanded) toggleExpand(index)
+}
+
+const expandedIndexes = ref<number[]>([])
+
+const toggleExpand = (index: number) => {
+  const i = expandedIndexes.value.indexOf(index)
+  if (i > -1) {
+    expandedIndexes.value.splice(i, 1) // Tutup jika sudah ada
+  } else {
+    expandedIndexes.value.push(index) // Buka jika belum ada
+  }
 }
 </script>
 
 <template>
   <div :class="[layout === 'grid' ? `grid ${gridColsClass}` : 'flex flex-col', gapClass]">
-    <component
-      :is="clickable ? 'button' : 'div'"
-      v-for="(item, index) in pagedItems"
-      :key="(item as any)?.id ?? index"
-      class="relative flex w-full"
-      :class="[
-        typeof background === 'function' ? background(item, index) : background,
-        rounded,
-        layout === 'grid'
-          ? 'flex-col items-center text-center gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:text-left'
-          : 'flex-row items-center justify-between text-left',
-        clickable ? 'cursor-pointer active:bg-gray-50' : 'cursor-default',
-        paddingClass,
-      ]"
-      @click="handleItemClick(item, index)"
-    >
-      <div
-        class="flex items-center min-w-0 flex-1"
-        :class="layout === 'grid' ? 'flex-col gap-1.5 sm:flex-row sm:gap-2.5' : 'flex-row gap-2.5'"
+    <div v-for="(item, index) in pagedItems">
+      <component
+        :is="clickable ? 'button' : 'div'"
+        :key="(item as any)?.id ?? index"
+        class="relative flex w-full"
+        :class="[
+          typeof background === 'function' ? background(item, index) : background,
+          rounded,
+          layout === 'grid'
+            ? 'flex-col items-center text-center gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:text-left'
+            : 'flex-row items-center justify-between text-left',
+          clickable ? 'cursor-pointer active:bg-gray-50' : 'cursor-default',
+          paddingClass,
+        ]"
+        @click="handleItemClick(item, index)"
       >
-        <slot name="item" :item="item" :index="index" />
+        <div
+          class="flex items-center min-w-0 flex-1"
+          :class="
+            layout === 'grid' ? 'flex-col gap-1.5 sm:flex-row sm:gap-2.5' : 'flex-row gap-2.5'
+          "
+        >
+          <slot name="item" :item="item" :index="index" />
+        </div>
+
+        <ChevronRightIcon
+          v-if="showArrow"
+          class="text-gray-400 shrink-0 ml-2"
+          :class="layout === 'grid' ? 'hidden sm:block' : 'block'"
+          :style="{ width: '14px', height: '14px' }"
+        />
+        <div v-else-if="isExpanded" class="px-4 text-gray-500 shrink-0">
+          <svg
+            v-if="expandedIndexes.includes(index)"
+            class="w-5 h-5 bg-white rounded shadow-sm p-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 15l7-7 7 7"
+            />
+          </svg>
+          <svg
+            v-else
+            class="w-5 h-5 bg-white rounded shadow-sm p-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+      </component>
+      <div
+        v-show="expandedIndexes.includes(index)"
+        class="flex flex-col w-full cursor-default"
+        :class="paddingClass"
+      >
+        <slot name="expanded" :item="item" :index="index" />
       </div>
-
-      <ChevronRightIcon
-        v-if="showArrow"
-        class="text-gray-400 shrink-0 ml-2"
-        :class="layout === 'grid' ? 'hidden sm:block' : 'block'"
-        :style="{ width: '14px', height: '14px' }"
-      />
-    </component>
-
+    </div>
     <p v-if="items.length === 0" class="py-8 text-center text-sm text-gray-400">
       {{ emptyText }}
     </p>

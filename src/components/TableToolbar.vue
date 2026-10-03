@@ -36,7 +36,7 @@ const props = withDefaults(
     tabsTitle: '',
     searchPlaceHolder: 'Cari....',
     filterLabel: 'FILTER',
-    filterIcon: 'pi-pi-filter',
+    filterIcon: 'pi pi-filter',
     filterOptions: () => [],
   },
 )
@@ -61,11 +61,13 @@ const filterValue = defineModel<any>('filterValue', { default: null })
     />
 
     <div class="flex items-center gap-3 flex-nowrap">
+      <div
+        v-if="filterOptions.length"
+        class="w-px self-stretch bg-slate-200 hidden lg:block shrink-0"
+      />
       <div class="w-full sm:w-64 shrink-0">
         <SearchInput v-model="searchQuery" :placeholder="searchPlaceHolder" />
       </div>
-
-      <div v-if="filterOptions.length" class="w-px h-6 bg-slate-200 hidden sm:block shrink-0" />
 
       <InlineSelectFilter
         v-if="filterOptions.length"

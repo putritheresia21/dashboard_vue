@@ -152,7 +152,10 @@ const filteredItems = computed((): MclItem[] => {
 
 function handleItemClick(item: unknown) {
   const mcl = item as MclItem
-  router.push({ path: `/aplikasi/visit/mcl/${mcl.id}`, query: { status: mcl.status } }) //route detailnya atur disini
+  router.push({
+    path: `/aplikasi/visit/mcl/${mcl.id}`,
+    query: { status: mcl.status, triwulan: mcl.triwulan },
+  }) //route detailnya atur disini
 }
 
 function handleCreateNew() {

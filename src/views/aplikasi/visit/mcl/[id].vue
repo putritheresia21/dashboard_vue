@@ -4,19 +4,24 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, provide, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import CustomDataTable from '@/components/CustomDataTable.vue'
 import { formatRupiah } from '@/utils/formatter'
-import { number } from 'zod'
+import type { RouteLocationNormalized } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/authStore'
+import StepIndicator from '@/components/StepIndicator.vue'
+
+type ActionType = 'save' | 'submit'
 
 const route = useRoute()
 const router = useRouter()
 
 const basePath = '/aplikasi/visit/mcl'
-
 const mclId = computed(() => (route.params as { id: string }).id)
+
 const statusMeta = {
   draft: { label: 'Draft', badge: 'bg-amber-100 text-amber-700', path: 'draft' },
   menunggu_approval: {
@@ -30,14 +35,10 @@ const statusMeta = {
 type Status = keyof typeof statusMeta
 
 const mcl = ref<{ id: number; triwulan: string; status: Status } | null>(null)
+const rows = ref<any[]>([])
+const loading = ref(false)
 
-function handleBack() {
-  router.back()
-}
-
-const isReadOnly = ref(false)
-
-const rows = ref([
+const dummyRows = [
   {
     id: 1,
     user: 'John',
@@ -220,22 +221,52 @@ const rows = ref([
     salesUser: null,
     salesOutlet: 52000000,
   },
-])
+]
 
-const tableRows = computed(() =>
-  rows.value.map((r) => ({
-    ...r,
-    salesUser: formatRupiah(r.salesUser),
-    salesOutlet: formatRupiah(r.salesOutlet),
-  })),
-)
+//data indikator approval
+const approvalSteps = computed(() => {
+  const approved = mcl.value?.status === 'disetujui'
 
-//edit dicatat
-function onChange({ row, key, value }: { row: any; key: string; value: any }) {
-  const target = rows.value.find((r) => r.id === row.id)
-  if (target) (target as any)[key] = value
-  //api nti disini
+  const steps = [
+    {
+      title: 'Diajukan DM (Lucky Chandra)',
+      subtitle: '12 Mar 2026, 14.20 WIB',
+      done: true,
+    },
+    {
+      title: 'Menunggu Disetujui SM (Alvita Rahma)',
+      done: mcl.value?.status === 'disetujui',
+    },
+  ]
+
+  if (approved) {
+    steps.push({
+      title: 'Disetujui SM (Alvita Rahma)',
+      subtitle: '15 Mar 2026, 09.05 WIB',
+      done: true,
+    })
+  }
+  return steps
+})
+
+async function reload() {
+  loading.value = true
+  try {
+    const q = String(route.query.status ?? '')
+    const status = (q in statusMeta ? q : 'draft') as Status
+    mcl.value = {
+      id: Number(mclId.value),
+      triwulan: String(route.query.triwulan ?? ''),
+      status,
+    }
+    rows.value = dummyRows.map((r) => ({ ...r }))
+  } finally {
+    loading.value = false
+  }
 }
+onMounted(reload)
+
+const isReadOnly = computed(() => mcl.value?.status !== 'draft')
 
 const tipeMap = {
   RS: { bg: '#e3e9fb', text: '#2f4ea8' },
@@ -255,7 +286,6 @@ const columns = [
   { field: 'jabatan', header: 'Jabatan', type: 'badge', width: '10rem' },
   { field: 'outlet', header: 'Outlet' },
   { field: 'tipe', header: 'Tipe', type: 'badge', badgeMap: tipeMap, width: '5rem' },
-
   {
     field: 'mr',
     header: 'MR',
@@ -292,21 +322,115 @@ const columns = [
     options: ['Siang', 'Malam'],
     width: '9rem',
   },
-
   { field: 'salesUser', header: 'Sales User\n(3 bln)', align: 'right', width: '10rem' },
   { field: 'salesOutlet', header: 'Sales Outlet\n(3 bln)', align: 'right', width: '10rem' },
 ] as any[]
+
+const tableRows = computed(() =>
+  [...rows.value]
+    .sort((a, b) => a.user.localeCompare(b.user))
+    .map((r) => ({
+      ...r,
+      salesUser: formatRupiah(r.salesUser),
+      salesOutlet: formatRupiah(r.salesOutlet),
+    })),
+)
+
+//edit dicatat
+function onChange({ row, key, value }: { row: any; key: string; value: any }) {
+  if (isReadOnly.value) return
+  if (['mr', 'spv', 'dm'].includes(key)) {
+    value = Math.max(0, Math.floor(Number(value) || 0))
+  }
+  const target = rows.value.find((r) => r.id === row.id)
+  if (target) target[key] = value
+}
+
+const saving = ref(false)
+async function runAction(key: 'save' | 'submit') {
+  if (!mcl.value || isReadOnly.value) return
+  saving.value = true
+  try {
+    if (key === 'submit') mcl.value.status = 'menunggu_approval'
+  } finally {
+    saving.value = false
+  }
+}
+
+const showApprovalSteps = computed(
+  () => mcl.value?.status === 'menunggu_approval' || mcl.value?.status === 'disetujui',
+)
+
+// const approvalSteps = computed(() => {
+//   const approved = mcl.value?.status === 'disetujui'
+//   return [
+//     {
+//       title: 'Diajukan DM (Lucky Chandra)',
+//       subtitle: '20 Des 2025, 11.30 WIB',
+//       done: true,
+//     },
+//     {
+//       title: approved ? 'Disetujui SM (Alvita Rahma)' : 'Menunggu Disetujui SM (Alvita Rahma)',
+//       subtitle: approved ? '21 Des 2025, 09.15 WIB' : undefined,
+//       done: approved,
+//     },
+//   ]
+// })
+
+// const expectedPath = computed(() =>
+//   mcl.value ? `${basePath}/${mclId.value}/${statusMeta[mcl.value.status].path}` : null,
+// )
+
+// watch(
+//   expectedPath,
+//   (target) => {
+//     if (target && route.path !== target) router.replace(target)
+//   },
+//   { immediate: true },
+// )
 </script>
 
 <template>
   <PageWrapper :title="`Detail MCL #${mclId}`" max-width="max-w-8xl">
-    <CustomDataTable
-      :data="tableRows"
-      :columns="columns"
-      :rows="15"
-      :readonly="isReadOnly"
-      :show-actions="false"
-      @change="onChange"
-    />
+    <p v-if="!mcl && loading" class="mt-4 text-sm text-slate-400">Memuat data...</p>
+
+    <div v-else-if="mcl" class="space-y-4">
+      <StepIndicator v-if="showApprovalSteps" :steps="approvalSteps" class="py-2" />
+
+      <CustomDataTable
+        :data="tableRows"
+        :columns="columns"
+        :rows="10"
+        :loading="loading"
+        :readonly="isReadOnly"
+        @change="onChange"
+      />
+
+      <div v-if="mcl.status === 'draft'" class="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          class="min-w-[160px] rounded-lg border-2 border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-500 transitionhover:bg-slate-50"
+          @click="router.push(basePath)"
+        >
+          Batal
+        </button>
+        <button
+          type="button"
+          :disabled="saving"
+          class="min-w-[160px] rounded-lg border-2 border-blue-600 bg-white px-6 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:opacity-50"
+          @click="runAction('save')"
+        >
+          Simpan Draft
+        </button>
+        <button
+          type="button"
+          :disabled="saving"
+          class="min-w-[160px] rounded-lg border-2 border-blue-600 bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+          @click="runAction('save')"
+        >
+          Ajukan
+        </button>
+      </div>
+    </div>
   </PageWrapper>
 </template>

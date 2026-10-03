@@ -8,6 +8,14 @@ import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import { computed, ref } from 'vue'
 import CustomDataTable from '@/components/CustomDataTable.vue'
 import TableToolbar from '@/components/TableToolbar.vue'
+import DynamicList from '@/components/DynamicList.vue'
+import { Button } from 'primevue'
+import { useIsMobile } from '@/composables/useIsMobile'
+import { useRouter } from 'vue-router'
+
+const isMobile = useIsMobile()
+
+const router = useRouter()
 
 const approvals = ref([
   {
@@ -295,7 +303,7 @@ const approvals = ref([
   },
 ])
 
-const statusBadgeMap = {
+const statusBadgeMap: Record<string, { bg: string; text: string }> = {
   DISETUJUI: { bg: '#d1fae5', text: '#059669' },
   MENUNGGU: { bg: '#fef3c7', text: '#d97706' },
   DITOLAK: { bg: '#fee2e2', text: '#dc2626' },
@@ -329,8 +337,7 @@ const columns = [
 ]
 
 function handleView(row: any) {
-  console.log('review', row)
-  //router.push('')
+  router.push(`/aplikasi/approval/${row.noApproval}`)
 }
 
 const statusTabDefs = [
@@ -388,13 +395,69 @@ const filteredData = computed(() => {
       />
 
       <CustomDataTable
+        v-if="!isMobile"
         :data="filteredData"
         :columns="columns"
+        show-actions
         show-view
         action-label="Review"
         action-icon="pi pi-eye"
         @view="handleView"
       />
+      <DynamicList v-else :items="filteredData" layout="column" :gap="4" :show-arrow="false">
+        <template #item="{ item }">
+          <div class="flex flex-col w-full gap-3">
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap w-fit"
+              :style="{
+                backgroundColor: '#dbeafe',
+                color: '#1d4ed8',
+              }"
+            >
+              {{ item.jenisApproval }}
+            </span>
+            <div class="flex w-full justify-between items-center">
+              <div class="flex flex-col gap-2">
+                <span class="text-[#0B1F3D] text-[14px] font-bold">{{ item.noApproval }}</span>
+                <div class="flex items-center gap-2 text-[#4B5563] text-[12.5px]">
+                  <span
+                    >Pengaju: <span class="text-[#111827]">{{ item.pengaju }}</span></span
+                  >
+                  <span>&bull;</span>
+                  <span>{{ item.tanggalPengajuan }}</span>
+                </div>
+              </div>
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap"
+                :style="{
+                  backgroundColor: statusBadgeMap[item.statusApproval]?.bg || '#dbeafe',
+                  color: statusBadgeMap[item.statusApproval]?.text || '#1d4ed8',
+                }"
+              >
+                {{ item.statusApproval }}
+              </span>
+            </div>
+
+            <div class="text-[#4B5563] text-[13px] bg-[#F4F6FA] rounded-md p-2">
+              {{ item.keterangan }}
+            </div>
+
+            <div class="flex w-full justify-between items-center">
+              <span class="text-[11.5px] text-[#9CA3AF]">{{ item.noTransaksi }}</span>
+              <Button
+                as="router-link"
+                :to="`/aplikasi/approval/${item.noApproval}`"
+                label="Review"
+                icon="pi pi-eye"
+                severity="info"
+                rounded
+                size="small"
+                class="bg-slate-800 border-slate-800 text-xs py-1 px-3"
+              />
+            </div>
+          </div>
+        </template>
+      </DynamicList>
     </div>
   </PageWrapper>
 </template>

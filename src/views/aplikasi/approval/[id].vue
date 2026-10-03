@@ -705,21 +705,14 @@ onMounted(() => {
           type="button"
           class="h-[42px] flex-1 max-w-[125px] text-[13px] sm:text-[14px] bg-white border border-gray-300 text-gray-500 font-semibold rounded-lg hover:bg-gray-50 transition-all"
         >
-          Batal
-        </button>
-
-        <button
-          type="submit"
-          class="h-[42px] flex-1 max-w-[125px] text-[13px] sm:text-[14px] bg-white border-2 border-blue-500 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 transition-all leading-tight px-1"
-        >
-          Simpan Draft
+          Tolak
         </button>
 
         <button
           type="submit"
           class="h-[42px] flex-1 max-w-[125px] text-[13px] sm:text-[14px] bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all shadow-sm"
         >
-          Ajukan
+          Setuju
         </button>
       </div>
     </form>
