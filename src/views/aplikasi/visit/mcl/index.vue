@@ -10,7 +10,7 @@ import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import { computed, ref } from 'vue'
 import DynamicList from '@/components/DynamicList.vue'
 import { useRouter } from 'vue-router'
-import StatusTabs from '@/components/filters/fields/StatusTabs.vue'
+import * as Filter from '@/components/Filter'
 
 const router = useRouter()
 const { role } = storeToRefs(useAuthStore())
@@ -182,9 +182,13 @@ function handleCreateNew() {
     <div class="mt-6">
       <p class="mb-3 text-sm font-semibold text-gray-700">List MCL</p>
 
-      <div v-if="canManage" class="mb-4 overflow-x-auto scrollbar-hide">
-        <StatusTabs v-model="activeFilter" :tabs="statusTabDefs" :data="baseItems" />
-      </div>
+      <Filter.Tabs
+        v-if="canManage"
+        v-model="activeFilter"
+        :tabs="statusTabDefs"
+        :data="baseItems"
+        class="mb-4"
+      />
 
       <DynamicList
         :items="filteredItems"

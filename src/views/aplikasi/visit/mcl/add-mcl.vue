@@ -9,7 +9,6 @@ import AdditionalInformation from '@/components/AdditionalInformation.vue'
 import { Select } from 'primevue'
 import { ref, computed, watch, onMounted } from 'vue'
 import SearchInput from '@/components/SearchInput.vue'
-import FormCell from '@/components/FormCell.vue'
 import CustomDataTable from '@/components/CustomDataTable.vue'
 import SummaryCard from '@/components/SummaryCard.vue'
 import CellInput from '@/components/cells/CellInput.vue'
@@ -17,10 +16,10 @@ import CellSelect from '@/components/cells/CellSelect.vue'
 import DynamicList from '@/components/DynamicList.vue'
 import { formatRupiah } from '@/utils/formatter'
 import { useIsMobile } from '@/composables/useIsMobile'
-import type { FormSubmitEvent } from '@primevue/forms'
 import { visitorList, outlets } from '@/dummy/customerData'
 import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
+import * as Filter from '@/components/Filter'
 
 const auth = useAuthStore()
 const { role } = storeToRefs(auth)
@@ -309,63 +308,45 @@ onMounted(() => {
       <strong>Batas pengajuan: 2 minggu sebelum awal periode triwulan</strong>
     </AdditionalInformation>
 
-    <div
-      class="flex flex-col md:flex-row gap-5 md:gap-0 bg-white rounded-2xl p-5 shadow-sm mt-3 items-stretch"
-    >
-      <!-- Bagian Kiri (Isian 50%) -->
-      <div class="flex flex-row gap-4 flex-1">
-        <div class="flex flex-col flex-1">
-          <label for="year" class="font-semibold text-slate-500 mb-1 text-[11.5px] md:text-[13px]"
-            >Periode Tahun</label
-          >
-          <Select id="year" size="small" :options="years" v-model="selectedYear" class="w-full" />
-        </div>
+    <Filter.Bar class="mt-3 !p-5">
+      <Filter.Field
+        label="Periode Tahun"
+        for="year"
+        class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
+      >
+        <Filter.Select
+          id="year"
+          v-model="selectedYear"
+          :options="years"
+          :show-clear="false"
+          class="w-full max-w-none"
+        />
+      </Filter.Field>
 
-        <div class="flex flex-col flex-1">
-          <label
-            for="quarter"
-            class="font-semibold text-slate-500 mb-1 text-[11.5px] md:text-[13px]"
-            >Triwulan</label
-          >
-          <Select
-            id="quarter"
-            size="small"
-            placeholder="Tidak ada triwulan..."
-            :options="quarters"
-            option-value="value"
-            option-label="label"
-            option-disabled="disabled"
-            v-model="selectedQuarter"
-            class="w-full"
-          />
-        </div>
-      </div>
+      <Filter.Field
+        label="Triwulan"
+        for="quarter"
+        class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
+      >
+        <Filter.Select
+          id="quarter"
+          v-model="selectedQuarter"
+          :options="quarters"
+          option-label="label"
+          option-value="value"
+          option-disabled="disabled"
+          placeholder="Tidak ada triwulan..."
+          :show-clear="false"
+          class="w-full max-w-none"
+        />
+      </Filter.Field>
 
-      <!-- Garis Pembatas (Hanya muncul di Desktop saat sejajar) -->
-      <div class="hidden md:block w-[1px] bg-[#E8EDF3] mx-6 self-stretch"></div>
+      <Filter.Divider />
 
-      <!-- Bagian Kanan (Tombol 50%) -->
-      <div class="flex flex-col flex-1">
-        <span
-          class="text-[#475467] text-[11px] sm:text-[13px] uppercase sm:normal-case font-bold sm:font-semibold mb-1"
-        >
-          Lihat berdasarkan
-        </span>
-        <div class="flex rounded-lg bg-[#EEF0F4] md:p-1 h-full items-center">
-          <button
-            v-for="option in options"
-            :key="option.value"
-            @click="selected = option.value"
-            :class="[
-              'flex-1 rounded-md py-1.5 font-bold transition text-sm h-full',
-              selected === option.value ? 'bg-[#0B1838] text-white shadow-sm' : 'text-[#475467]',
-            ]"
-          >
-            {{ option.label }}
-          </button>
-        </div>
-      </div>
-    </div>
+      <Filter.Field label="Lihat berdasarkan" class="basis-full md:basis-0 md:flex-1">
+        <Filter.Segmented v-model="selected" :options="options" />
+      </Filter.Field>
+    </Filter.Bar>
 
     <div class="flex flex-row w-full gap-3 mt-3">
       <SearchInput

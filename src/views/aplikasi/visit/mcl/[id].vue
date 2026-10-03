@@ -4,17 +4,13 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import CustomDataTable from '@/components/CustomDataTable.vue'
-import { formatRupiah } from '@/utils/formatter'
-import type { RouteLocationNormalized } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/authStore'
 import StepIndicator from '@/components/StepIndicator.vue'
-
-type ActionType = 'save' | 'submit'
+import * as Filter from '@/components/Filter'
+import { formatRupiah } from '@/utils/formatter'
 
 const route = useRoute()
 const router = useRouter()
@@ -223,7 +219,7 @@ const dummyRows = [
   },
 ]
 
-//data indikator approval
+// data indikator approval
 const approvalSteps = computed(() => {
   const approved = mcl.value?.status === 'disetujui'
 
@@ -235,7 +231,7 @@ const approvalSteps = computed(() => {
     },
     {
       title: 'Menunggu Disetujui SM (Alvita Rahma)',
-      done: mcl.value?.status === 'disetujui',
+      done: approved,
     },
   ]
 
@@ -267,6 +263,28 @@ async function reload() {
 onMounted(reload)
 
 const isReadOnly = computed(() => mcl.value?.status !== 'draft')
+
+/* ---------------------------- Filter---------------------------- */
+
+const selected = ref('user')
+
+const viewOptions = [
+  { label: 'User', value: 'user' },
+  { label: 'Outlet', value: 'outlet' },
+]
+
+const quarterOptions = [
+  { label: 'Triwulan I (Jan-Mar)', value: 1 },
+  { label: 'Triwulan II (Apr-Jun)', value: 2 },
+  { label: 'Triwulan III (Jul-Sep)', value: 3 },
+  { label: 'Triwulan IV (Okt-Des)', value: 4 },
+]
+// Sesuaikan dengan data asli dari API. Sementara dibaca dari query: ?tahun=2026&triwulan=1
+const yearOptions = computed(() => [Number(route.query.tahun) || new Date().getFullYear()])
+const selectedYear = computed(() => yearOptions.value[0])
+const selectedQuarter = computed(() => Number(route.query.triwulan) || 1)
+
+/* -------------------------------- tabel ----------------------------------- */
 
 const tipeMap = {
   RS: { bg: '#e3e9fb', text: '#2f4ea8' },
@@ -326,17 +344,37 @@ const columns = [
   { field: 'salesOutlet', header: 'Sales Outlet\n(3 bln)', align: 'right', width: '10rem' },
 ] as any[]
 
+const col = (field: string) => columns.find((c) => c.field === field)
+
+const outletColumns = [
+  col('outlet'),
+  { ...col('tipe'), uniqueField: 'uniqueTipe' },
+  col('user'),
+  col('aktif'),
+  col('mr'),
+  col('spv'),
+  col('dm'),
+  col('shift'),
+  col('jabatan'),
+  col('salesUser'),
+  col('salesOutlet'),
+] as any[]
+
 const tableRows = computed(() =>
   [...rows.value]
-    .sort((a, b) => a.user.localeCompare(b.user))
+    .sort((a, b) =>
+      selected.value === 'user'
+        ? a.user.localeCompare(b.user)
+        : a.outlet.localeCompare(b.outlet) || a.user.localeCompare(b.user),
+    )
     .map((r) => ({
       ...r,
+      uniqueTipe: r.tipe + r.outlet,
       salesUser: formatRupiah(r.salesUser),
       salesOutlet: formatRupiah(r.salesOutlet),
     })),
 )
 
-//edit dicatat
 function onChange({ row, key, value }: { row: any; key: string; value: any }) {
   if (isReadOnly.value) return
   if (['mr', 'spv', 'dm'].includes(key)) {
@@ -360,34 +398,6 @@ async function runAction(key: 'save' | 'submit') {
 const showApprovalSteps = computed(
   () => mcl.value?.status === 'menunggu_approval' || mcl.value?.status === 'disetujui',
 )
-
-// const approvalSteps = computed(() => {
-//   const approved = mcl.value?.status === 'disetujui'
-//   return [
-//     {
-//       title: 'Diajukan DM (Lucky Chandra)',
-//       subtitle: '20 Des 2025, 11.30 WIB',
-//       done: true,
-//     },
-//     {
-//       title: approved ? 'Disetujui SM (Alvita Rahma)' : 'Menunggu Disetujui SM (Alvita Rahma)',
-//       subtitle: approved ? '21 Des 2025, 09.15 WIB' : undefined,
-//       done: approved,
-//     },
-//   ]
-// })
-
-// const expectedPath = computed(() =>
-//   mcl.value ? `${basePath}/${mclId.value}/${statusMeta[mcl.value.status].path}` : null,
-// )
-
-// watch(
-//   expectedPath,
-//   (target) => {
-//     if (target && route.path !== target) router.replace(target)
-//   },
-//   { immediate: true },
-// )
 </script>
 
 <template>
@@ -397,9 +407,50 @@ const showApprovalSteps = computed(
     <div v-else-if="mcl" class="space-y-4">
       <StepIndicator v-if="showApprovalSteps" :steps="approvalSteps" class="py-2" />
 
+      <Filter.Bar class="!p-5">
+        <Filter.Field
+          label="Periode Tahun"
+          for="year"
+          class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
+        >
+          <Filter.Select
+            id="year"
+            :model-value="selectedYear"
+            :options="yearOptions"
+            :show-clear="false"
+            disabled
+            class="w-full max-w-none"
+          />
+        </Filter.Field>
+
+        <Filter.Field
+          label="Triwulan"
+          for="quarter"
+          class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
+        >
+          <Filter.Select
+            id="quarter"
+            :model-value="selectedQuarter"
+            :options="quarterOptions"
+            option-label="label"
+            option-value="value"
+            :show-clear="false"
+            disabled
+            class="w-full max-w-none"
+          />
+        </Filter.Field>
+
+        <Filter.Divider />
+
+        <Filter.Field label="Lihat berdasarkan" class="basis-full md:basis-0 md:flex-[2]">
+          <Filter.Segmented v-model="selected" :options="viewOptions" />
+        </Filter.Field>
+      </Filter.Bar>
+
       <CustomDataTable
         :data="tableRows"
-        :columns="columns"
+        :columns="selected === 'user' ? columns : outletColumns"
+        :group-rows-by="selected === 'outlet' ? ['outlet', 'uniqueTipe'] : undefined"
         :rows="10"
         :loading="loading"
         :readonly="isReadOnly"
@@ -409,7 +460,7 @@ const showApprovalSteps = computed(
       <div v-if="mcl.status === 'draft'" class="flex justify-end gap-3 pt-2">
         <button
           type="button"
-          class="min-w-[160px] rounded-lg border-2 border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-500 transitionhover:bg-slate-50"
+          class="min-w-[160px] rounded-lg border-2 border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-50"
           @click="router.push(basePath)"
         >
           Batal
@@ -426,7 +477,7 @@ const showApprovalSteps = computed(
           type="button"
           :disabled="saving"
           class="min-w-[160px] rounded-lg border-2 border-blue-600 bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
-          @click="runAction('save')"
+          @click="runAction('submit')"
         >
           Ajukan
         </button>

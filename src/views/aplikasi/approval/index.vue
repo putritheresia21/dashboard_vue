@@ -7,11 +7,12 @@ meta:
 import PageWrapper from '@/layouts/shared/PageWrapper.vue'
 import { computed, ref } from 'vue'
 import CustomDataTable from '@/components/CustomDataTable.vue'
-import TableToolbar from '@/components/TableToolbar.vue'
 import DynamicList from '@/components/DynamicList.vue'
 import { Button } from 'primevue'
 import { useIsMobile } from '@/composables/useIsMobile'
 import { useRouter } from 'vue-router'
+import SearchInput from '@/components/SearchInput.vue'
+import * as Filter from '@/components/Filter'
 
 const isMobile = useIsMobile()
 
@@ -380,19 +381,31 @@ const filteredData = computed(() => {
     max-width="max-w-8xl"
   >
     <div class="flex flex-col gap-4">
-      <TableToolbar
-        v-model:active-tab="activeTab"
-        v-model:search-query="searchQuery"
-        v-model:filter-value="groupFilter"
-        :tabs="statusTabDefs"
-        :data="approvals"
-        status-field="statusApproval"
-        tabs-title="STATUS APPROVAL"
-        search-placeholder="Cari Approval"
-        filter-label="FILTER"
-        :filter-options="jenisApprovalOptions"
-        filter-placeholder="Jenis Approval"
-      />
+      <Filter.Bar class="lg:items-center lg:justify-between">
+        <Filter.Tabs
+          v-model="activeTab"
+          :tabs="statusTabDefs"
+          :data="approvals"
+          status-field="statusApproval"
+          title="STATUS APPROVAL"
+        />
+
+        <div class="flex items-center gap-3 flex-nowrap">
+          <div class="w-px self-stretch bg-slate-200 hidden lg:block shrink-0" />
+
+          <div class="w-full sm:w-64 shrink-0">
+            <SearchInput v-model="searchQuery" placeholder="Cari Approval" />
+          </div>
+
+          <Filter.InlineSelect
+            v-model="groupFilter"
+            label="FILTER"
+            icon="pi pi-filter"
+            :options="jenisApprovalOptions"
+            placeholder="Jenis Approval"
+          />
+        </div>
+      </Filter.Bar>
 
       <CustomDataTable
         v-if="!isMobile"
