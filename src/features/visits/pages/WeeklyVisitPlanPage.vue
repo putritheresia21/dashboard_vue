@@ -179,7 +179,7 @@ const statuses = ref([
         <Button
           icon="pi pi-plus"
           label="Tambah kunjungan"
-          class="bg-[color:var(--bnf-color-brand-blue)] hover:bg-[color:var(--bnf-color-brand-blue-hover)] border-none text-[11px] text-[color:var(--bnf-color-foreground)] px-3 py-2 rounded-xl font-semibold transition-colors flex justify-center items-center gap-2"
+          class="bg-(--bnf-color-brand-blue) hover:bg-(--bnf-color-brand-blue-hover) border-none text-[11px] text-(--bnf-color-foreground) px-3 py-2 rounded-xl font-semibold transition-colors flex justify-center items-center gap-2"
         />
       </div>
 
@@ -200,7 +200,7 @@ const statuses = ref([
           class="px-2.5 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-150 cursor-pointer outline-none"
           :class="
             selectedFilter === filter
-              ? 'bg-[color:var(--bnf-color-brand-blue)] border-[color:var(--bnf-color-brand-blue)] text-[color:var(--bnf-color-foreground)]'
+              ? 'bg-(--bnf-color-brand-blue) border-(--bnf-color-brand-blue) text-(--bnf-color-foreground)'
               : 'bg-bnf-surface border-bnf-border text-bnf-text-muted hover:bg-bnf-surface-muted'
           "
           @click="selectedFilter = filter"
@@ -250,7 +250,7 @@ const statuses = ref([
                 <h2 class="text-lg font-bold text-bnf-text">{{ (item as VisitItem).name }}</h2>
                 <Badge
                   :value="(item as VisitItem).quota"
-                  class="bg-bnf-primary text-[color:var(--bnf-color-foreground)] px-2 py-0.5 rounded-full text-xs"
+                  class="bg-bnf-primary text-(--bnf-color-foreground) px-2 py-0.5 rounded-full text-xs"
                 />
               </div>
 
@@ -277,7 +277,7 @@ const statuses = ref([
               <div
                 v-for="(schedule, index) in (item as VisitItem).schedules"
                 :key="index"
-                class="flex flex-col items-center gap-2 min-w-[3rem]"
+                class="flex flex-col items-center gap-2 min-w-12"
               >
                 <div class="text-center">
                   <p class="text-xs font-medium text-bnf-text-muted uppercase">
