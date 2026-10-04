@@ -1,94 +1,83 @@
 <script setup lang="ts">
-import ConfirmDialog from 'primevue/confirmdialog'
-import Toast from 'primevue/toast'
-import { type Component, computed } from 'vue'
+import { ConfirmDialog as BernofarmConfirmDialog, Toast as BernofarmToast } from '@bernofarm/core'
+import { AppShell, AuthShell } from '@bernofarm/shell'
+import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 
-import { useIsMobile } from './composables/useIsMobile.ts'
-import AppLayoutDesktop from './layouts/desktop/AppLayoutDesktop.vue'
-import AppLayoutMobile from './layouts/mobile/AppLayoutMobile.vue'
+import { sidebarMenu } from './app/navigation/sidebarMenu'
+import { sidebarRail } from './app/navigation/sidebarRail'
+import companyLogo from './assets/logo/logo-bernofarm.svg'
+import { useAuthStore } from './features/auth/stores/authStore'
 
 const route = useRoute()
-const isMobile = useIsMobile()
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
-const layouts = computed<Record<string, Component>>(() => ({
-  default: isMobile.value ? AppLayoutMobile : AppLayoutDesktop,
-}))
+const isAuthLayout = computed(() => route.meta.layout === false || route.meta.layout === 'none')
 
-const layout = computed(() => {
-  const name = route.meta.layout
-  if (name === false || name === 'none') {
-    return null
+const shellBrand = {
+  name: 'Bernofarm',
+  logo: companyLogo,
+}
+
+const shellUser = computed(() => {
+  if (!user.value) {
+    return undefined
   }
-  return layouts.value[name ?? 'default'] ?? layouts.value.default
+
+  return {
+    name: user.value.name,
+    email: 'Sales Rep',
+  }
 })
+
+const navigation = computed(() => {
+  if (route.path !== '/app' && !route.path.startsWith('/app/')) {
+    return []
+  }
+
+  return sidebarMenu.map((item) => ({
+    label: item.label,
+    icon: item.icon,
+    items: item.children.map((child) => ({
+      label: child.label,
+      to: child.to,
+      badge: child.tag,
+    })),
+  }))
+})
+
+const railNavigation = computed(() =>
+  sidebarRail.map((item) => ({
+    label: item.label,
+    icon: item.icon,
+    to: item.to,
+  })),
+)
 </script>
 
 <template>
-  <!-- jika dengan layout -->
-  <component :is="layout" v-if="layout"> </component>
-  <RouterView v-else />
+  <AuthShell v-if="isAuthLayout" responsive-mode="mobile" :brand="shellBrand">
+    <RouterView />
+  </AuthShell>
 
-  <Toast />
-  <ConfirmDialog />
+  <AppShell
+    v-else
+    responsive-mode="mobile"
+    topbar-variant="dashboard"
+    desktop-layout="topbar-full-width"
+    :navigation="navigation"
+    :mobile-navigation="railNavigation"
+    :topbar-navigation="railNavigation"
+    :brand="shellBrand"
+    :user="shellUser"
+    :topbar-sticky="true"
+    content-max-width="1440px"
+  >
+    <RouterView />
+  </AppShell>
+
+  <BernofarmToast />
+  <BernofarmConfirmDialog />
 </template>
-
-<style>
-.p-confirmdialog {
-  border-radius: 1.5rem !important;
-  overflow: hidden;
-}
-
-.p-confirmdialog .p-dialog-header {
-  padding: 1.5rem 1.5rem 0.75rem !important;
-  border-radius: 1.5rem 1.5rem 0 0 !important;
-}
-
-.p-confirmdialog .p-dialog-content {
-  padding: 0.5rem 1.5rem 1.5rem !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
-}
-
-.p-confirmdialog .p-dialog-content i {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #fee2e2;
-  color: #ef4444 !important;
-  font-size: 1.1rem !important;
-}
-
-.p-confirmdialog .p-dialog-footer {
-  padding: 0.75rem 1.5rem 1.5rem !important;
-  border-radius: 0 0 1.5rem 1.5rem !important;
-}
-
-.p-confirmdialog .p-dialog-content > *:first-child {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #fee2e2;
-  padding: 0 !important;
-  line-height: 1;
-}
-
-.p-confirmdialog .p-dialog-content > *:first-child svg,
-.p-confirmdialog .p-dialog-content > *:first-child i {
-  color: #ef4444 !important;
-  width: 24px !important;
-  height: 24px !important;
-  font-size: 24px !important;
-  font-weight: 700 !important;
-  margin: 0 !important;
-}
-</style>

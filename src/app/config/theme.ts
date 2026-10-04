@@ -1,0 +1,52 @@
+import type { BernofarmThemeConfig } from '@bernofarm/core'
+
+export const bernofarmTheme = {
+  colors: {
+    primary: '#3B6FE0',
+    primaryHover: '#2F5FC6',
+    primaryForeground: '#FFFFFF',
+    primaryMuted: '#D9E5FF',
+    secondary: '#64748B',
+    secondaryHover: '#475569',
+    secondaryForeground: '#FFFFFF',
+    info: '#1E88E5',
+    infoHover: '#1769AA',
+    infoForeground: '#FFFFFF',
+    success: '#16A34A',
+    successForeground: '#FFFFFF',
+    warning: '#D99A00',
+    warningHover: '#B77D00',
+    warningForeground: '#FFFFFF',
+    danger: '#DC2626',
+    dangerHover: '#B91C1C',
+    dangerForeground: '#FFFFFF',
+    neutral: '#64748B',
+    neutralHover: '#475569',
+    neutralForeground: '#FFFFFF',
+    surface: '#FFFFFF',
+    surfaceMuted: '#F8FAFC',
+    text: '#0B1F3F',
+    textMuted: '#64748B',
+    border: '#E8EDF3',
+    ring: '#93A2C8',
+    dangerSurface: '#FEF2F2',
+    sidebar: '#011844',
+    sidebarForeground: '#FFFFFF',
+    sidebarMuted: '#CBD5E1',
+    sidebarBorder: 'rgb(255 255 255 / 0.12)',
+    sidebarHover: 'rgb(255 255 255 / 0.08)',
+    sidebarAccent: '#60A5FA',
+    foreground: '#FFFFFF',
+    accent: '#FF6A00',
+    brandBlue: '#123E6B',
+    brandBlueHover: '#0A2440',
+    brandSoftBlue: '#1E88E5',
+  },
+  radius: 'medium',
+  shadows: 'subtle',
+  animation: 'normal',
+} satisfies BernofarmThemeConfig
+
+export type BernofarmTheme = typeof bernofarmTheme
+
+export default bernofarmTheme

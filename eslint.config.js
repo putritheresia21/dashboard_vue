@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint'
 
 export default [
   {
-    ignores: ['node_modules/**', 'dist/**', 'coverage/**', '.vite/**', 'src/route-map.d.ts'],
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', '.vite/**'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,

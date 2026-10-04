@@ -1,17 +1,23 @@
 import './assets/main.css'
+import '@bernofarm/core/style.css'
+import '@bernofarm/shell/style.css'
 import 'primeicons/primeicons.css'
 
+import {
+  configureBernofarm,
+  ConfirmationService as BernofarmConfirmationService,
+  KeyFilter as BernofarmKeyFilter,
+  ToastService as BernofarmToastService,
+} from '@bernofarm/core'
 import Aura from '@primeuix/themes/aura'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
-import ConfirmationService from 'primevue/confirmationservice'
 import DialogService from 'primevue/dialogservice'
-import KeyFilter from 'primevue/keyfilter'
-import ToastService from 'primevue/toastservice'
-import { createApp } from 'vue'
+import { createApp, type Directive, type Plugin } from 'vue'
 
 import App from './App.vue'
-import router from './router'
+import bernofarmTheme from './app/config/theme'
+import router from './app/router'
 
 const app = createApp(App)
 
@@ -37,9 +43,11 @@ app.use(PrimeVue, {
 app.use(createPinia())
 app.use(router)
 app.use(DialogService)
-app.use(ConfirmationService)
-app.use(ToastService)
+app.use(BernofarmToastService as unknown as Plugin)
+app.use(BernofarmConfirmationService as unknown as Plugin)
 
-app.directive('keyfilter', KeyFilter)
+configureBernofarm(bernofarmTheme)
+
+app.directive('keyfilter', BernofarmKeyFilter as unknown as Directive)
 
 app.mount('#app')

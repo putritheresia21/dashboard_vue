@@ -26,6 +26,8 @@
     ]
   },
   "dependencies": {
+    "@bernofarm/core": "file:../bernofarm-ui/packages/core",
+    "@bernofarm/shell": "file:../bernofarm-ui/packages/shell",
     "@primeicons/vue": "^8.0.0",
     "@primevue/forms": "^5.0.1",
     "@primevue/icons": "^5.0.1",
