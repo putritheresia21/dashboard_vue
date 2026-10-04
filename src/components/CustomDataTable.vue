@@ -18,6 +18,7 @@ interface ColumnDef {
   slot?: string
   type?: 'text' | 'number' | 'select' | 'badge' | 'index' | 'dot'
   badgeMap?: Record<string, { label?: string; bg: string; text: string }>
+  uniqueField?: string
 
   boxed?: Flag
   editable?: Flag
@@ -41,7 +42,8 @@ const props = withDefaults(
     showDelete?: boolean
     rowKey?: string
     readonly?: boolean
-    rowEditable?: (row: any) => boolean
+    groupRowsBy?: string | string[]
+    // rowEditable?: (row: any) => boolean
   }>(),
   {
     rows: 10,
@@ -100,7 +102,7 @@ function isBoxed(col: ColumnDef, row: any) {
 function canEdit(col: ColumnDef, row: any) {
   if (!isBoxed(col, row)) return false
   if (props.readonly) return false
-  if (props.rowEditable && !props.rowEditable(row)) return false
+  // if (props.rowEditable && !props.rowEditable(row)) return false
   return flag(col.editable, row)
 }
 
@@ -167,11 +169,16 @@ const visiblePages = computed(() => {
     </div>
 
     <div class="overflow-x-auto w-full">
-      <DataTable :value="pagedData" table-style="width: 100%">
+      <DataTable
+        :value="pagedData"
+        table-style="width: 100%"
+        rowGroupMode="rowspan"
+        :groupRowsBy="groupRowsBy"
+      >
         <Column
           v-for="col in columns"
           :key="col.field"
-          :field="col.field"
+          :field="col.uniqueField ?? col.field"
           :header="col.header"
           :sortable="col.sortable"
           :style="col.width ? { width: col.width, minWidth: col.width } : { width: 'auto' }"
@@ -207,6 +214,7 @@ const visiblePages = computed(() => {
                 v-if="col.type === 'select'"
                 :model-value="slotProps.data[col.field]"
                 :options="col.options ?? []"
+                :disabled="!canEdit(col, slotProps.data)"
                 @update:model-value="updateCell(slotProps.data, col.field, $event)"
               />
               <CellInput
@@ -226,7 +234,7 @@ const visiblePages = computed(() => {
           </template>
         </Column>
 
-        <Column v-if="hasActionsColumn" header="" style="width: 6rem">
+        <Column v-if="hasActionsColumn" header="AKSI" style="width: 6rem">
           <template #body="slotProps">
             <div class="flex items-center justify-end gap-1">
               <slot v-if="$slots.actions" name="actions" v-bind="slotProps" />

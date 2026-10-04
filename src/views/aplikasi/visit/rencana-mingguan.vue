@@ -11,7 +11,7 @@ import { ref, computed, watch } from 'vue'
 import getWeeksInMonth from '@/utils/weeksInMonthHelper'
 import { dummyVisits } from '@/dummy/visitData' //dummy data
 import DynamicList from '@/components/DynamicList.vue'
-import FilterBar from '@/components/filters/FilterBar.vue'
+// import FilterBar from '@/components/filters/FilterBar.vue'
 import AdditionalInformation from '@/components/AdditionalInformation.vue'
 
 interface VisitSchedule {

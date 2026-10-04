@@ -12,7 +12,7 @@ import ShoppingCartIcon from '@primeicons/vue/shopping-cart'
 import UsersIcon from '@primeicons/vue/users'
 import RefreshIcon from '@primeicons/vue/refresh'
 import DollarIcon from '@primeicons/vue/dollar'
-import RadialGauge from '@/components/charts/RadialGauge.vue'
+// import RadialGauge from '@/components/charts/RadialGauge.vue'
 
 interface StatCard {
   key: string

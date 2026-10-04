@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { dummyVisits } from '@/dummy/visitData'
 import { ref, watch, computed } from 'vue'
-import FilterBar from '@/components/filters/FilterBar.vue'
+// import FilterBar from '@/components/filters/FilterBar.vue'
 import getWeeksInMonth from '@/utils/weeksInMonthHelper'
 const activeFilters = ref<Record<string, any>>({
   tahun: null,

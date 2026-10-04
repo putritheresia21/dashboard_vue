@@ -3,19 +3,21 @@ import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     modelValue?: string | number | null
     type?: 'text' | 'number'
     disabled?: boolean
     min?: number
     max?: number
+    width?: string
   }>(),
   {
     type: 'text',
+    width: 'w-8',
   },
 )
 
@@ -34,7 +36,7 @@ const base =
   'disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 ' +
   'disabled:text-slate-400 disabled:opacity-100 disabled:shadow-none'
 
-const numberClass = `${base} w-8 p-0 text-center font-bold`
+const numberClass = `${base} ${props.width} p-0 text-center font-bold`
 const textClass = `${base} w-full px-2 py-0 text-left font-semibold`
 </script>
 
@@ -42,7 +44,7 @@ const textClass = `${base} w-full px-2 py-0 text-left font-semibold`
   <InputNumber
     v-if="type === 'number'"
     v-bind="$attrs"
-    :model-value="Number(modelValue ?? 0)"
+    :model-value="Number(modelValue ?? $attrs.value ?? 0)"
     :min="min ?? 0"
     :max="max"
     :disabled="disabled"

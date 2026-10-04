@@ -4,7 +4,7 @@ import Select from 'primevue/select'
 import type { any } from 'zod'
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 const props = defineProps<{
