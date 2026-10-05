@@ -34,7 +34,7 @@ function onText(value: string | undefined) {
 }
 
 const base =
-  'h-[26px] rounded-[5px] border border-bnf-border bg-bnf-surface text-[13px] text-bnf-text shadow-sm ' +
+  'h-[26px] rounded-bnf-sm border border-bnf-border bg-bnf-surface text-[13px] text-bnf-text shadow-bnf-sm ' +
   'disabled:cursor-not-allowed disabled:border-bnf-border disabled:bg-bnf-surface-muted ' +
   'disabled:text-bnf-text-muted disabled:opacity-100 disabled:shadow-none'
 

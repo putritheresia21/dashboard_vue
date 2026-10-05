@@ -1,19 +1,22 @@
 <script setup lang="ts">
+import { BadgeInfoIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/vue'
+
 withDefaults(
   defineProps<{
-    icon?: string
+    icon?: object
   }>(),
   {
-    icon: 'pi pi-info-circle',
+    icon: () => BadgeInfoIcon,
   },
 )
 </script>
 
 <template>
   <div
-    class="bg-bnf-warning/10 text-bnf-warning px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-medium"
+    class="flex w-fit max-w-full self-start items-center justify-start gap-bnf-sm rounded-bnf-lg bg-bnf-warning px-bnf-lg py-bnf-md text-left text-sm font-medium text-bnf-warning-foreground"
   >
-    <i :class="[icon, 'text-sm']"></i>
+    <HugeiconsIcon :icon="icon" :size="16" :stroke-width="1.8" class="shrink-0" />
     <span class="text-[11.5px]"><slot /></span>
   </div>
 </template>

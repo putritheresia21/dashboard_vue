@@ -33,7 +33,7 @@ function onChange(value: string) {
     option-label="label"
     option-value="value"
     :disabled="disabled"
-    class="h-7 w-full rounded-md border border-bnf-border bg-bnf-surface shadow-sm"
+    class="h-7 w-full rounded-bnf-sm border border-bnf-border bg-bnf-surface shadow-bnf-sm"
     :class="
       disabled &&
       'cursor-not-allowed border-bnf-border bg-bnf-surface-muted opacity-100 shadow-none'

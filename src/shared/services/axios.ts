@@ -1,6 +1,5 @@
 import axios from 'axios'
 
-// import { useToast } from 'primevue'
 import router from '@/app/router'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 

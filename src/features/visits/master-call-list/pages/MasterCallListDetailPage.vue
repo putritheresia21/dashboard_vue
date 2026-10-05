@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { Button } from '@bernofarm/core'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import MasterCallListTable from '@/features/visits/master-call-list/components/MasterCallListTable.vue'
+import MclPeriodFilter from '@/features/visits/master-call-list/components/MclPeriodFilter.vue'
 import StepIndicator from '@/features/visits/master-call-list/components/StepIndicator.vue'
 import AppHeader from '@/shared/components/layout/AppHeader.vue'
-import * as Filter from '@/shared/forms/Filter'
 import { formatRupiah } from '@/shared/utils/formatter'
 
 const route = useRoute()
@@ -14,17 +15,9 @@ const router = useRouter()
 const basePath = '/app/visits/master-call-list'
 const mclId = computed(() => (route.params as { id: string }).id)
 
-const statusMeta = {
-  draft: { label: 'Draft', badge: 'bg-bnf-warning/10 text-bnf-warning', path: 'draft' },
-  menunggu_approval: {
-    label: 'Menunggu Approval',
-    badge: 'bg-bnf-warning/10 text-bnf-warning',
-    path: 'awaiting-approval',
-  },
-  disetujui: { label: 'Disetujui', badge: 'bg-bnf-success/10 text-bnf-success', path: 'approved' },
-}
+const statuses = ['draft', 'menunggu_approval', 'disetujui'] as const
 
-type Status = keyof typeof statusMeta
+type Status = (typeof statuses)[number]
 
 const mcl = ref<{ id: number; triwulan: string; status: Status } | null>(null)
 interface MclRow extends Record<string, unknown> {
@@ -260,7 +253,7 @@ async function reload() {
   loading.value = true
   try {
     const q = String(route.query.status ?? '')
-    const status = (q in statusMeta ? q : 'draft') as Status
+    const status = (statuses as readonly string[]).includes(q) ? (q as Status) : 'draft'
     mcl.value = {
       id: Number(mclId.value),
       triwulan: String(route.query.triwulan ?? ''),
@@ -290,10 +283,16 @@ const quarterOptions = [
   { label: 'Triwulan III (Jul-Sep)', value: 3 },
   { label: 'Triwulan IV (Okt-Des)', value: 4 },
 ]
-// Sesuaikan dengan data asli dari API. Sementara dibaca dari query: ?tahun=2026&triwulan=1
-const yearOptions = computed(() => [Number(route.query.tahun) || new Date().getFullYear()])
+// Sesuaikan dengan data asli dari API. Sementara dibaca dari query: ?triwulan=Triwulan+IV+2025
+const romanQuarters: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4 }
+const periodMatch = computed(() =>
+  /^Triwulan\s+(I{1,3}|IV)\s+(\d{4})$/.exec(String(route.query.triwulan ?? '').trim()),
+)
+const yearOptions = computed(() => [
+  Number(periodMatch.value?.[2]) || Number(route.query.tahun) || new Date().getFullYear(),
+])
 const selectedYear = computed(() => yearOptions.value[0])
-const selectedQuarter = computed(() => Number(route.query.triwulan) || 1)
+const selectedQuarter = computed(() => romanQuarters[periodMatch.value?.[1] ?? ''] ?? 1)
 
 /* -------------------------------- tabel ----------------------------------- */
 
@@ -357,45 +356,15 @@ const showApprovalSteps = computed(
     <div v-else-if="mcl" class="space-y-4">
       <StepIndicator v-if="showApprovalSteps" :steps="approvalSteps" class="py-2" />
 
-      <Filter.Bar class="p-5!">
-        <Filter.Field
-          label="Periode Tahun"
-          for="year"
-          class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
-        >
-          <Filter.Select
-            id="year"
-            :model-value="selectedYear"
-            :options="yearOptions"
-            :show-clear="false"
-            disabled
-            class="w-full max-w-none"
-          />
-        </Filter.Field>
-
-        <Filter.Field
-          label="Triwulan"
-          for="quarter"
-          class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
-        >
-          <Filter.Select
-            id="quarter"
-            :model-value="selectedQuarter"
-            :options="quarterOptions"
-            option-label="label"
-            option-value="value"
-            :show-clear="false"
-            disabled
-            class="w-full max-w-none"
-          />
-        </Filter.Field>
-
-        <Filter.Divider />
-
-        <Filter.Field label="Lihat berdasarkan" class="basis-full md:basis-0 md:flex-[2]">
-          <Filter.Segmented v-model="selected" :options="viewOptions" />
-        </Filter.Field>
-      </Filter.Bar>
+      <MclPeriodFilter
+        v-model:view="selected"
+        :year="selectedYear"
+        :quarter="selectedQuarter"
+        :year-options="yearOptions"
+        :quarter-options="quarterOptions"
+        :view-options="viewOptions"
+        disabled
+      />
 
       <MasterCallListTable
         :data="tableRows"
@@ -407,30 +376,32 @@ const showApprovalSteps = computed(
         @change="onChange"
       />
 
-      <div v-if="mcl.status === 'draft'" class="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          class="min-w-[160px] rounded-lg border-2 border-bnf-border bg-bnf-surface px-6 py-2.5 text-sm font-semibold text-bnf-text-muted transition hover:bg-bnf-surface-muted"
+      <div
+        v-if="mcl.status === 'draft'"
+        class="grid grid-cols-3 gap-2 pt-2 sm:flex sm:justify-end sm:gap-3"
+      >
+        <Button
+          label="Batal"
+          severity="secondary"
+          outlined
+          class="px-2 sm:min-w-[160px] sm:px-bnf-control-x"
           @click="router.push(basePath)"
-        >
-          Batal
-        </button>
-        <button
-          type="button"
+        />
+        <Button
+          label="Simpan Draft"
+          severity="primary"
+          outlined
           :disabled="saving"
-          class="min-w-[160px] rounded-lg border-2 border-bnf-primary bg-bnf-surface px-6 py-2.5 text-sm font-semibold text-bnf-primary transition hover:bg-bnf-primary/5 disabled:opacity-50"
+          class="px-2 sm:min-w-[160px] sm:px-bnf-control-x"
           @click="runAction('save')"
-        >
-          Simpan Draft
-        </button>
-        <button
-          type="button"
+        />
+        <Button
+          label="Ajukan"
+          severity="primary"
           :disabled="saving"
-          class="min-w-[160px] rounded-lg border-2 border-bnf-primary bg-bnf-primary px-6 py-2.5 text-sm font-semibold text-[color:var(--bnf-color-foreground)] transition hover:bg-bnf-primary-hover disabled:opacity-50"
+          class="px-2 sm:min-w-[160px] sm:px-bnf-control-x"
           @click="runAction('submit')"
-        >
-          Ajukan
-        </button>
+        />
       </div>
     </div>
   </AppHeader>

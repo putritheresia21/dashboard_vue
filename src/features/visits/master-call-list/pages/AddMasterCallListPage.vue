@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Select } from '@bernofarm/core'
+import { Button, Select } from '@bernofarm/core'
+import { Clock01Icon } from '@hugeicons/core-free-icons'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch } from 'vue'
 
@@ -7,13 +8,13 @@ import { useAuthStore } from '@/features/auth/stores/authStore'
 import CellInput from '@/features/visits/master-call-list/components/CellInput.vue'
 import CellSelect from '@/features/visits/master-call-list/components/CellSelect.vue'
 import MasterCallListTable from '@/features/visits/master-call-list/components/MasterCallListTable.vue'
+import MclPeriodFilter from '@/features/visits/master-call-list/components/MclPeriodFilter.vue'
 import SummaryCard from '@/features/visits/master-call-list/components/SummaryCard.vue'
 import AdditionalInformation from '@/shared/components/AdditionalInformation.vue'
 import DynamicList from '@/shared/components/DynamicList.vue'
 import AppHeader from '@/shared/components/layout/AppHeader.vue'
 import SearchInput from '@/shared/components/SearchInput.vue'
 import { useIsMobile } from '@/shared/composables/useIsMobile'
-import * as Filter from '@/shared/forms/Filter'
 import { outlets, type Visitor, visitorList } from '@/shared/mocks/customerData'
 import { formatRupiah } from '@/shared/utils/formatter'
 
@@ -153,53 +154,24 @@ onMounted(() => {
     title="Tambah MCL"
     subtitle="Pilih user yang akan diajukan ke dalam Master Call List untuk periode triwulan berjalan"
     max-width="max-w-8xl"
-    class="pb-5"
+    class="pb-bnf-xl"
   >
-    <AdditionalInformation icon="pi pi-clock">
+    <AdditionalInformation :icon="Clock01Icon">
       <strong>Batas pengajuan: 2 minggu sebelum awal periode triwulan</strong>
     </AdditionalInformation>
 
-    <Filter.Bar class="mt-3 p-5!">
-      <Filter.Field
-        label="Periode Tahun"
-        for="year"
-        class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
-      >
-        <Filter.Select
-          id="year"
-          v-model="selectedYear"
-          :options="years"
-          :show-clear="false"
-          class="w-full max-w-none"
-        />
-      </Filter.Field>
+    <MclPeriodFilter
+      v-model:year="selectedYear"
+      v-model:quarter="selectedQuarter"
+      v-model:view="selected"
+      :year-options="years"
+      :quarter-options="quarters"
+      :view-options="options"
+      quarter-placeholder="Tidak ada triwulan..."
+      class="mt-bnf-md"
+    />
 
-      <Filter.Field
-        label="Triwulan"
-        for="quarter"
-        class="basis-[calc(50%-0.5rem)] md:basis-0 md:flex-1"
-      >
-        <Filter.Select
-          id="quarter"
-          v-model="selectedQuarter"
-          :options="quarters"
-          option-label="label"
-          option-value="value"
-          option-disabled="disabled"
-          placeholder="Tidak ada triwulan..."
-          :show-clear="false"
-          class="w-full max-w-none"
-        />
-      </Filter.Field>
-
-      <Filter.Divider />
-
-      <Filter.Field label="Lihat berdasarkan" class="basis-full md:basis-0 md:flex-1">
-        <Filter.Segmented v-model="selected" :options="options" />
-      </Filter.Field>
-    </Filter.Bar>
-
-    <div class="flex flex-row w-full gap-3 mt-3">
+    <div class="mt-bnf-md flex w-full flex-row gap-bnf-md">
       <SearchInput
         v-model="search"
         placeholder="Cari nama user / outlet"
@@ -207,11 +179,7 @@ onMounted(() => {
         :h="38"
         rounded="lg"
       />
-      <button
-        class="flex items-center justify-center bg-bnf-info w-30.75 h-9.5 rounded-xl text-(--bnf-color-foreground)"
-      >
-        Search
-      </button>
+      <Button label="Search" severity="info" size="small" class="h-9.5 w-30.75" />
     </div>
 
     <SummaryCard :summaries="targetVisits" />
@@ -238,27 +206,27 @@ onMounted(() => {
                 </span>
 
                 <span
-                  class="inline-flex items-center self-start rounded-lg bg-bnf-primary/5 px-3 py-1 text-[10.5px] font-semibold text-bnf-primary"
+                  class="inline-flex items-center self-start rounded-bnf-md bg-bnf-primary/5 px-bnf-md py-bnf-xs text-[10.5px] font-semibold text-bnf-primary"
                 >
                   {{ item.jabatan }}
                 </span>
               </div>
 
-              <hr class="w-full border-bnf-border my-3" />
-              <div class="grid grid-cols-[80px_1fr] gap-y-2 gap-x-4">
+              <hr class="my-bnf-md w-full border-bnf-border" />
+              <div class="grid grid-cols-[80px_1fr] gap-x-bnf-lg gap-y-bnf-sm">
                 <span class="text-bnf-text-muted text-sm">Outlet:</span>
                 <span class="text-[13px] font-bold text-bnf-text">{{ item.outlet }}</span>
 
                 <span class="text-bnf-text-muted text-sm">Tipe:</span>
                 <span
-                  class="w-fit rounded-lg bg-bnf-primary/5 px-3 py-1 text-[11px] font-semibold text-bnf-primary"
+                  class="w-fit rounded-bnf-md bg-bnf-primary/5 px-bnf-md py-bnf-xs text-[11px] font-semibold text-bnf-primary"
                   >{{ item.tipe }}</span
                 >
               </div>
 
-              <hr class="w-full border-bnf-border my-3" />
-              <div v-if="role === 'dm'" class="flex flex-row w-full justify-between">
-                <div class="flex flex-col items-center gap-1">
+              <hr class="my-bnf-md w-full border-bnf-border" />
+              <div v-if="role === 'dm'" class="flex w-full flex-row justify-between">
+                <div class="flex flex-col items-center gap-bnf-xs">
                   <label :for="`mr-${index}`" class="text-[11px] text-bnf-text-muted">MR</label>
                   <CellInput
                     :id="`mr-${index}`"
@@ -268,7 +236,7 @@ onMounted(() => {
                   />
                 </div>
 
-                <div class="flex flex-col items-center gap-1">
+                <div class="flex flex-col items-center gap-bnf-xs">
                   <label :for="`spv-${index}`" class="text-[11px] text-bnf-text-muted">SPV</label>
                   <CellInput
                     :id="`spv-${index}`"
@@ -278,7 +246,7 @@ onMounted(() => {
                   />
                 </div>
 
-                <div class="flex flex-col items-center gap-1">
+                <div class="flex flex-col items-center gap-bnf-xs">
                   <label :for="`dm-${index}`" class="text-[11px] text-bnf-text-muted">DM</label>
                   <CellInput
                     :id="`dm-${index}`"
@@ -288,7 +256,7 @@ onMounted(() => {
                   />
                 </div>
 
-                <div class="flex flex-col items-center gap-1">
+                <div class="flex flex-col items-center gap-bnf-xs">
                   <label :for="`shift-${index}`" class="text-[11px] text-bnf-text-muted"
                     >SHIFT</label
                   >
@@ -296,8 +264,8 @@ onMounted(() => {
                 </div>
               </div>
 
-              <div v-if="role === 'sm'" class="flex flex-row w-full gap-3">
-                <div class="flex flex-col flex-1 items-center gap-1">
+              <div v-if="role === 'sm'" class="flex w-full flex-row gap-bnf-md">
+                <div class="flex flex-1 flex-col items-center gap-bnf-xs">
                   <label :for="`dm-${index}`" class="text-[11px] text-bnf-text-muted"
                     >TARGET VISIT SM</label
                   >
@@ -310,7 +278,7 @@ onMounted(() => {
                   />
                 </div>
 
-                <div class="flex flex-col flex-1 items-center gap-1">
+                <div class="flex flex-1 flex-col items-center gap-bnf-xs">
                   <label :for="`shift-${index}`" class="text-[11px] text-bnf-text-muted"
                     >SHIFT</label
                   >
@@ -325,8 +293,8 @@ onMounted(() => {
                 </div>
               </div>
 
-              <hr class="w-full border-bnf-border my-3" />
-              <div class="flex flex-col gap-1 w-full">
+              <hr class="my-bnf-md w-full border-bnf-border" />
+              <div class="flex w-full flex-col gap-bnf-xs">
                 <div class="flex justify-between">
                   <span class="text-bnf-text-muted font-medium">Sales User (3 Bln):</span>
                   <span class="font-bold text-bnf-text text-[13px]">{{
@@ -357,7 +325,7 @@ onMounted(() => {
         >
           <template #item="{ item, index }">
             <!-- Container utama slot untuk menata posisi elemen berjejer -->
-            <div class="relative flex items-center w-full py-2 cursor-pointer">
+            <div class="relative flex w-full cursor-pointer items-center py-bnf-sm">
               <!-- Garis samping kiri (Absolute Position) -->
               <div
                 class="absolute left-0 top-0 bottom-0 w-1"
@@ -365,22 +333,22 @@ onMounted(() => {
               ></div>
 
               <!-- Area Angka Index (Kiri) -->
-              <div class="w-10 shrink-0 text-center ml-1">
+              <div class="ml-bnf-xs w-10 shrink-0 text-center">
                 <span class="text-bnf-text-muted font-bold text-[13px]">{{ index + 1 }}</span>
               </div>
 
               <!-- Area Teks Tengah (Mengisi sisa ruang dengan flex-1) -->
-              <div class="flex flex-col flex-1 gap-1.5 ml-2">
+              <div class="ml-bnf-sm flex flex-1 flex-col gap-bnf-sm">
                 <!-- Judul Utama -->
                 <span class="text-bnf-text font-extrabold text-[15px] leading-none tracking-tight">
                   {{ item.name }}
                 </span>
 
                 <!-- Area Badge dan Sub-teks -->
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-bnf-sm">
                   <!-- Badge Label ("RS") -->
                   <span
-                    class="bg-bnf-surface-muted border border-bnf-border text-bnf-text font-bold text-sm px-1.5 py-0.5 rounded-md"
+                    class="rounded-bnf-sm border border-bnf-border bg-bnf-surface-muted px-bnf-sm py-bnf-xs text-sm font-bold text-bnf-text"
                   >
                     {{ item.type }}
                   </span>
@@ -396,17 +364,17 @@ onMounted(() => {
           <template #expanded="{ item }">
             <div class="flex flex-col w-full bg-bnf-surface-muted pb-4">
               <!-- Garis putus-putus pembatas -->
-              <div class="border-t border-dashed border-bnf-border w-full mb-3"></div>
+              <div class="mb-bnf-md w-full border-t border-dashed border-bnf-border"></div>
 
               <!-- Label Judul -->
               <div
-                class="text-[10px] font-extrabold text-bnf-text-muted uppercase tracking-wider px-4 mb-3"
+                class="mb-bnf-md px-bnf-lg text-[10px] font-extrabold uppercase tracking-wider text-bnf-text-muted"
               >
                 User PIC Outlet Ini
               </div>
 
               <!-- Nested List Container -->
-              <div class="px-4">
+              <div class="px-bnf-lg">
                 <DynamicList :items="item.visitor" layout="column" :gap="4" :show-arrow="false">
                   <template #item="{ item: visitor, index }">
                     <div class="relative w-full">
@@ -421,15 +389,15 @@ onMounted(() => {
                         </span>
 
                         <span
-                          class="inline-flex items-center self-start rounded-lg bg-bnf-primary/5 px-3 py-1 text-[10.5px] font-semibold text-bnf-primary"
+                          class="inline-flex items-center self-start rounded-bnf-md bg-bnf-primary/5 px-bnf-md py-bnf-xs text-[10.5px] font-semibold text-bnf-primary"
                         >
                           {{ visitor.jabatan }}
                         </span>
                       </div>
 
-                      <hr class="w-full border-bnf-border my-3" />
-                      <div v-if="role === 'dm'" class="flex flex-row w-full justify-between">
-                        <div class="flex flex-col items-center gap-1">
+                      <hr class="my-bnf-md w-full border-bnf-border" />
+                      <div v-if="role === 'dm'" class="flex w-full flex-row justify-between">
+                        <div class="flex flex-col items-center gap-bnf-xs">
                           <label :for="`mr-${index}`" class="text-[11px] text-bnf-text-muted"
                             >MR</label
                           >
@@ -441,7 +409,7 @@ onMounted(() => {
                           />
                         </div>
 
-                        <div class="flex flex-col items-center gap-1">
+                        <div class="flex flex-col items-center gap-bnf-xs">
                           <label :for="`spv-${index}`" class="text-[11px] text-bnf-text-muted"
                             >SPV</label
                           >
@@ -453,7 +421,7 @@ onMounted(() => {
                           />
                         </div>
 
-                        <div class="flex flex-col items-center gap-1">
+                        <div class="flex flex-col items-center gap-bnf-xs">
                           <label :for="`dm-${index}`" class="text-[11px] text-bnf-text-muted"
                             >DM</label
                           >
@@ -465,7 +433,7 @@ onMounted(() => {
                           />
                         </div>
 
-                        <div class="flex flex-col items-center gap-1">
+                        <div class="flex flex-col items-center gap-bnf-xs">
                           <label :for="`shift-${index}`" class="text-[11px] text-bnf-text-muted"
                             >SHIFT</label
                           >
@@ -479,8 +447,8 @@ onMounted(() => {
                           />
                         </div>
                       </div>
-                      <div v-if="role === 'sm'" class="flex flex-row w-full gap-3">
-                        <div class="flex flex-col flex-1 items-center gap-1">
+                      <div v-if="role === 'sm'" class="flex w-full flex-row gap-bnf-md">
+                        <div class="flex flex-1 flex-col items-center gap-bnf-xs">
                           <label :for="`dm-${index}`" class="text-[11px] text-bnf-text-muted"
                             >TARGET VISIT SM</label
                           >
@@ -493,7 +461,7 @@ onMounted(() => {
                           />
                         </div>
 
-                        <div class="flex flex-col flex-1 items-center gap-1">
+                        <div class="flex flex-1 flex-col items-center gap-bnf-xs">
                           <label :for="`shift-${index}`" class="text-[11px] text-bnf-text-muted"
                             >SHIFT</label
                           >
@@ -505,8 +473,8 @@ onMounted(() => {
                         </div>
                       </div>
 
-                      <hr class="w-full border-bnf-border my-3" />
-                      <div class="flex flex-col gap-1 w-full">
+                      <hr class="my-bnf-md w-full border-bnf-border" />
+                      <div class="flex w-full flex-col gap-bnf-xs">
                         <div class="flex justify-between">
                           <span class="text-bnf-text-muted font-medium">Sales User (3 Bln):</span>
                           <span class="font-bold text-bnf-text text-[13px]">{{
@@ -540,28 +508,33 @@ onMounted(() => {
       />
 
       <div
-        class="fixed lg:static bottom-16 left-0 w-full px-4 py-4 flex items-center gap-2 sm:gap-4 z-40 bg-bnf-surface/90 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none border-t border-bnf-border lg:border-transparent justify-center lg:justify-end"
+        class="fixed bottom-16 left-0 z-40 flex w-full items-center justify-center gap-bnf-sm border-t border-bnf-border bg-bnf-surface/90 px-bnf-lg py-bnf-lg backdrop-blur-sm lg:static lg:justify-end lg:gap-bnf-lg lg:border-transparent lg:bg-transparent lg:backdrop-blur-none"
       >
-        <button
+        <Button
           type="button"
-          class="h-10.5 flex-1 max-w-31.25 text-[13px] sm:text-[14px] bg-bnf-surface border border-bnf-border text-bnf-text-muted font-semibold rounded-lg hover:bg-bnf-surface-muted transition-all"
-        >
-          Batal
-        </button>
+          label="Batal"
+          severity="secondary"
+          outlined
+          size="small"
+          class="h-10.5 max-w-31.25 flex-1 text-[13px] sm:text-[14px]"
+        />
 
-        <button
+        <Button
           type="submit"
-          class="h-10.5 flex-1 max-w-31.25 text-[13px] sm:text-[14px] bg-bnf-surface border-2 border-bnf-primary text-bnf-primary font-semibold rounded-lg hover:bg-bnf-primary/5 transition-all leading-tight px-1"
-        >
-          Simpan Draft
-        </button>
+          label="Simpan Draft"
+          severity="primary"
+          outlined
+          size="small"
+          class="h-10.5 max-w-31.25 flex-1 px-1 text-[13px] leading-tight sm:text-[14px]"
+        />
 
-        <button
+        <Button
           type="submit"
-          class="h-10.5 flex-1 max-w-31.25 text-[13px] sm:text-[14px] bg-bnf-primary text-(--bnf-color-foreground) font-semibold rounded-lg hover:bg-bnf-primary transition-all shadow-sm"
-        >
-          Ajukan
-        </button>
+          label="Ajukan"
+          severity="primary"
+          size="small"
+          class="h-10.5 max-w-31.25 flex-1 text-[13px] shadow-bnf-sm sm:text-[14px]"
+        />
       </div>
     </form>
   </AppHeader>

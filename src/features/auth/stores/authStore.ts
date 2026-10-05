@@ -9,9 +9,9 @@ const roles = ['dm', 'sm', 'mr'] as const
 type Role = (typeof roles)[number]
 
 const roleLabels: Record<Role, string> = {
-  dm: 'dm',
-  sm: 'sm',
-  mr: 'mr',
+  dm: 'DM',
+  sm: 'SM',
+  mr: 'MR',
 }
 
 export const useAuthStore = defineStore('auth', () => {

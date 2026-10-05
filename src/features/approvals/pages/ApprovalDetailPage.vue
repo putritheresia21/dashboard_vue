@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Select } from '@bernofarm/core'
+import { Clock01Icon } from '@hugeicons/core-free-icons'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch } from 'vue'
 
@@ -154,7 +155,7 @@ onMounted(() => {
     max-width="max-w-8xl"
     class="pb-5"
   >
-    <AdditionalInformation icon="pi pi-clock">
+    <AdditionalInformation :icon="Clock01Icon">
       <strong>Batas pengajuan: 2 minggu sebelum awal periode triwulan</strong>
     </AdditionalInformation>
 

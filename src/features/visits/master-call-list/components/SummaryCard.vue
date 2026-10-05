@@ -11,15 +11,15 @@ defineProps<{
 
 <template>
   <div
-    class="flex flex-row flex-wrap gap-2 bg-(--bnf-color-sidebar) rounded-2xl p-5 shadow-sm mt-3 mb-3"
+    class="my-bnf-md flex flex-row flex-wrap gap-bnf-sm rounded-bnf-xl bg-bnf-sidebar p-bnf-xl shadow-bnf-sm"
   >
     <div
       v-for="summary in summaries"
       :key="summary.detail"
       class="flex grow basis-25 flex-col items-center"
     >
-      <span class="text-[11px] text-(--bnf-color-sidebar-accent)">{{ summary.detail }}</span>
-      <span class="text-base text-(--bnf-color-foreground) font-bold">{{ summary.value }}</span>
+      <span class="text-[11px] text-bnf-sidebar-accent">{{ summary.detail }}</span>
+      <span class="text-base font-bold text-bnf-sidebar-foreground">{{ summary.value }}</span>
     </div>
   </div>
 </template>

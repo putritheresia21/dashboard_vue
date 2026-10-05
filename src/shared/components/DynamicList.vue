@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T">
-import { ChevronLeftIcon, ChevronRightIcon } from '@primevue/icons'
+import { ChevronLeftIcon, ChevronRightIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/vue'
 import { computed, ref, watch } from 'vue'
 
 type Layout = 'grid' | 'column'
@@ -37,7 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
   pageSize: 10,
   emptyText: 'Tidak ada data',
   background: 'bg-bnf-surface',
-  rounded: 'rounded-xl',
+  rounded: 'rounded-bnf-xl',
   itemOrientation: 'responsive',
 })
 
@@ -104,25 +105,25 @@ const gridColsClass = computed<string>(
 const gapClass = computed<string>(
   () =>
     ({
-      1: 'gap-1',
-      2: 'gap-2',
-      3: 'gap-3',
-      4: 'gap-4',
-      6: 'gap-6',
-    })[props.gap] ?? 'gap-3',
+      1: 'gap-bnf-xs',
+      2: 'gap-bnf-sm',
+      3: 'gap-bnf-md',
+      4: 'gap-bnf-lg',
+      6: 'gap-bnf-xl',
+    })[props.gap] ?? 'gap-bnf-md',
 )
 
 const paddingClass = computed<string>(
   () =>
     ({
       0: 'p-0',
-      2: 'p-2',
-      3: 'p-3',
-      4: 'p-4',
-      5: 'p-5',
-      6: 'p-6',
-      8: 'p-8',
-    })[props.padding] ?? 'p-3',
+      2: 'p-bnf-sm',
+      3: 'p-bnf-md',
+      4: 'p-bnf-lg',
+      5: 'p-bnf-lg',
+      6: 'p-bnf-xl',
+      8: 'p-bnf-xl',
+    })[props.padding] ?? 'p-bnf-md',
 )
 
 const itemOrientationClass = computed<string>(() => {
@@ -131,30 +132,30 @@ const itemOrientationClass = computed<string>(() => {
   }
 
   if (props.itemOrientation === 'horizontal') {
-    return 'flex-row items-center justify-between gap-1.5 text-left'
+    return 'flex-row items-center justify-between gap-bnf-sm text-left'
   }
 
   if (props.itemOrientation === 'vertical') {
-    return 'flex-col items-center gap-1.5 text-center'
+    return 'flex-col items-center gap-bnf-sm text-center'
   }
 
-  return 'flex-col items-center gap-1.5 text-center sm:flex-row sm:justify-between sm:text-left'
+  return 'flex-col items-center gap-bnf-sm text-center sm:flex-row sm:justify-between sm:text-left'
 })
 
 const itemContentOrientationClass = computed<string>(() => {
   if (props.layout !== 'grid') {
-    return 'flex-row gap-2.5'
+    return 'flex-row gap-bnf-md'
   }
 
   if (props.itemOrientation === 'horizontal') {
-    return 'flex-row gap-2.5'
+    return 'flex-row gap-bnf-md'
   }
 
   if (props.itemOrientation === 'vertical') {
-    return 'flex-col gap-1.5'
+    return 'flex-col gap-bnf-sm'
   }
 
-  return 'flex-col gap-1.5 sm:flex-row sm:gap-2.5'
+  return 'flex-col gap-bnf-sm sm:flex-row sm:gap-bnf-md'
 })
 
 const handleItemClick = (item: T, index: number) => {
@@ -196,20 +197,22 @@ const toggleExpand = (index: number) => {
           <slot name="item" :item="item" :index="index" />
         </div>
 
-        <ChevronRightIcon
+        <HugeiconsIcon
           v-if="showArrow"
-          class="text-bnf-text-muted shrink-0 ml-2"
+          :icon="ChevronRightIcon"
+          :size="14"
+          :stroke-width="1.8"
+          class="ml-2 h-3.5 w-3.5 shrink-0 text-bnf-text-muted"
           :class="
             props.layout === 'grid' && props.itemOrientation === 'responsive'
               ? 'hidden sm:block'
               : 'block'
           "
-          :style="{ width: '14px', height: '14px' }"
         />
-        <div v-else-if="isExpanded" class="px-4 text-bnf-text-muted shrink-0">
+        <div v-else-if="isExpanded" class="shrink-0 px-bnf-lg text-bnf-text-muted">
           <svg
             v-if="expandedIndexes.includes(index)"
-            class="w-5 h-5 bg-bnf-surface rounded shadow-sm p-0.5"
+            class="h-5 w-5 rounded-bnf-sm bg-bnf-surface p-0.5 shadow-bnf-sm"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -223,7 +226,7 @@ const toggleExpand = (index: number) => {
           </svg>
           <svg
             v-else
-            class="w-5 h-5 bg-bnf-surface rounded shadow-sm p-0.5"
+            class="h-5 w-5 rounded-bnf-sm bg-bnf-surface p-0.5 shadow-bnf-sm"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -245,35 +248,35 @@ const toggleExpand = (index: number) => {
         <slot name="expanded" :item="item" :index="index" />
       </div>
     </div>
-    <p v-if="items.length === 0" class="py-8 text-center text-sm text-bnf-text-muted">
+    <p v-if="items.length === 0" class="py-bnf-xl text-center text-sm text-bnf-text-muted">
       {{ emptyText }}
     </p>
   </div>
 
   <div
     v-if="paginate && items.length > 0"
-    class="mt-4 flex w-full items-center justify-end gap-3 text-sm text-bnf-text-muted"
+    class="mt-bnf-lg flex w-full items-center justify-end gap-bnf-md text-sm text-bnf-text-muted"
   >
     <span>Menampilkan {{ rangeStart }}-{{ rangeEnd }} dari {{ items.length }} data</span>
 
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-bnf-xs">
       <button
         type="button"
-        class="flex h-7 w-7 items-center justify-center rounded-md text-bnf-text-muted hover:bg-bnf-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
+        class="flex h-7 w-7 items-center justify-center rounded-bnf-sm text-bnf-text-muted hover:bg-bnf-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
         :disabled="currentPage === 1"
         @click="goToPage(currentPage - 1)"
       >
-        <ChevronLeftIcon :style="{ width: '12px', height: '12px' }" />
+        <HugeiconsIcon :icon="ChevronLeftIcon" :size="12" :stroke-width="1.8" class="h-3 w-3" />
       </button>
 
       <button
         v-for="page in totalPages"
         :key="page"
         type="button"
-        class="flex h-7 w-7 items-center justify-center rounded-md text-xs font-medium"
+        class="flex h-7 w-7 items-center justify-center rounded-bnf-sm text-xs font-medium"
         :class="
           page === currentPage
-            ? 'bg-bnf-text text-(--bnf-color-foreground)'
+            ? 'bg-bnf-text text-bnf-primary-foreground'
             : 'text-bnf-text-muted hover:bg-bnf-surface-muted'
         "
         @click="goToPage(page)"
@@ -283,11 +286,11 @@ const toggleExpand = (index: number) => {
 
       <button
         type="button"
-        class="flex h-7 w-7 items-center justify-center rounded-md text-bnf-text-muted hover:bg-bnf-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
+        class="flex h-7 w-7 items-center justify-center rounded-bnf-sm text-bnf-text-muted hover:bg-bnf-surface-muted disabled:opacity-40 disabled:hover:bg-transparent"
         :disabled="currentPage === totalPages"
         @click="goToPage(currentPage + 1)"
       >
-        <ChevronRightIcon :style="{ width: '12px', height: '12px' }" />
+        <HugeiconsIcon :icon="ChevronRightIcon" :size="12" :stroke-width="1.8" class="h-3 w-3" />
       </button>
     </div>
   </div>

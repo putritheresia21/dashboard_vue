@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { Column, DataTable, InputNumber, Select } from '@bernofarm/core'
+import { Card, Column, DataTable, InputNumber, Select, Tag } from '@bernofarm/core'
 import { computed } from 'vue'
 
-import { colorTokens } from '@/shared/utils/colors'
 import { formatRupiah } from '@/shared/utils/formatter'
 
 interface TableRow {
@@ -45,19 +44,13 @@ const emit = defineEmits<{
 
 const shiftOptions = ['Siang', 'Malam']
 
-const tipeMap: Record<string, { bg: string; text: string }> = {
-  RS: {
-    bg: 'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-    text: colorTokens.primary,
-  },
-  Klinik: {
-    bg: 'color-mix(in srgb, var(--bnf-color-success) 12%, transparent)',
-    text: colorTokens.success,
-  },
-  Apotek: {
-    bg: 'color-mix(in srgb, var(--bnf-color-danger) 12%, transparent)',
-    text: colorTokens.danger,
-  },
+// Badge memakai varian soft dari core; warnanya mengikuti token theme.
+const badgeClass = 'whitespace-nowrap px-2 py-0 text-[11px] leading-5'
+
+const tipeSeverity: Record<string, string> = {
+  RS: 'primary',
+  Klinik: 'success',
+  Apotek: 'danger',
 }
 
 const targetColumns = computed(() => {
@@ -85,12 +78,8 @@ function getCellValue(row: TableRow, field: string) {
   return row[field as keyof TableRow]
 }
 
-function badgeStyle(value: unknown) {
-  const type = tipeMap[String(value)] ?? {
-    bg: 'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-    text: colorTokens.primary,
-  }
-  return { backgroundColor: type.bg, color: type.text }
+function tipeBadge(value: unknown) {
+  return tipeSeverity[String(value)] ?? 'primary'
 }
 
 function displaySales(value: unknown) {
@@ -102,9 +91,7 @@ function displaySales(value: unknown) {
 </script>
 
 <template>
-  <div
-    class="min-w-0 overflow-hidden rounded-2xl border border-bnf-border bg-bnf-surface shadow-sm"
-  >
+  <Card class="min-w-0 overflow-hidden">
     <div class="w-full overflow-x-auto">
       <DataTable
         :value="data"
@@ -129,26 +116,17 @@ function displaySales(value: unknown) {
           </Column>
           <Column field="jabatan" header="Jabatan" :style="{ width: '10rem' }">
             <template #body="{ data: row }">
-              <span
-                class="inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium"
-                :style="{
-                  backgroundColor: 'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-                  color: colorTokens.primary,
-                }"
-              >
-                {{ row.jabatan }}
-              </span>
+              <Tag severity="primary" variant="soft" rounded :class="badgeClass">{{
+                row.jabatan
+              }}</Tag>
             </template>
           </Column>
           <Column field="outlet" header="Outlet" />
           <Column field="tipe" header="Tipe" :style="{ width: '5rem' }">
             <template #body="{ data: row }">
-              <span
-                class="inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium"
-                :style="badgeStyle(row.tipe)"
-              >
+              <Tag :severity="tipeBadge(row.tipe)" variant="soft" rounded :class="badgeClass">
                 {{ row.tipe }}
-              </span>
+              </Tag>
             </template>
           </Column>
         </template>
@@ -157,12 +135,9 @@ function displaySales(value: unknown) {
           <Column field="outlet" header="Outlet" />
           <Column field="uniqueTipe" header="Tipe" :style="{ width: '5rem' }">
             <template #body="{ data: row }">
-              <span
-                class="inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium"
-                :style="badgeStyle(row.tipe)"
-              >
+              <Tag :severity="tipeBadge(row.tipe)" variant="soft" rounded :class="badgeClass">
                 {{ row.tipe }}
-              </span>
+              </Tag>
             </template>
           </Column>
           <Column field="user" header="User" :style="{ width: '11rem' }" />
@@ -216,22 +191,17 @@ function displaySales(value: unknown) {
           :style="{ width: '10rem' }"
         >
           <template #body="{ data: row }">
-            <span
-              class="inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium"
-              :style="{
-                backgroundColor: 'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-                color: colorTokens.primary,
-              }"
-            >
-              {{ row.jabatan }}
-            </span>
+            <Tag severity="primary" variant="soft" rounded :class="badgeClass">{{
+              row.jabatan
+            }}</Tag>
           </template>
         </Column>
 
         <Column
           field="salesUser"
           header="Sales User (3 bln)"
-          :style="{ width: '10rem' }"
+          :style="{ width: '11rem' }"
+          header-class="whitespace-nowrap"
           body-class="text-right"
         >
           <template #body="{ data: row }">{{ displaySales(row.salesUser) }}</template>
@@ -239,12 +209,13 @@ function displaySales(value: unknown) {
         <Column
           field="salesOutlet"
           header="Sales Outlet (3 bln)"
-          :style="{ width: '10rem' }"
+          :style="{ width: '11rem' }"
+          header-class="whitespace-nowrap"
           body-class="text-right"
         >
           <template #body="{ data: row }">{{ displaySales(row.salesOutlet) }}</template>
         </Column>
       </DataTable>
     </div>
-  </div>
+  </Card>
 </template>

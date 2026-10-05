@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Button, Card, Tag } from '@bernofarm/core'
+import { Add01Icon, ArrowRight01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/vue'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -88,18 +91,11 @@ const items = ref<MclItem[]>([
   },
 ])
 
-const statusMeta: Record<MclStatus, { label: string; dot: string; badge: string }> = {
-  draft: { label: 'Draft', dot: 'bg-bnf-warning', badge: 'bg-bnf-warning/10 text-bnf-warning' },
-  menunggu_approval: {
-    label: 'Menunggu Approval',
-    dot: 'bg-bnf-warning',
-    badge: 'bg-bnf-warning/10 text-bnf-warning',
-  },
-  disetujui: {
-    label: 'Disetujui',
-    dot: 'bg-bnf-success',
-    badge: 'bg-bnf-success/10 text-bnf-success',
-  },
+// Warna badge status berasal dari varian soft Tag (token theme).
+const statusMeta: Record<MclStatus, { label: string; severity: string }> = {
+  draft: { label: 'Draft', severity: 'secondary' },
+  menunggu_approval: { label: 'Menunggu Approval', severity: 'warn' },
+  disetujui: { label: 'Disetujui', severity: 'success' },
 }
 
 const statusTabDefs = [
@@ -107,14 +103,14 @@ const statusTabDefs = [
   {
     label: 'Draft',
     value: 'draft',
-    color: colorTokens.warning,
+    color: colorTokens.neutral,
     activeColor: colorTokens.brandBlue,
     compute: (data: unknown[]) => data.filter((i) => (i as MclItem).status === 'draft').length,
   },
   {
     label: 'Menunggu Approval',
     value: 'menunggu_approval',
-    color: colorTokens.accent,
+    color: colorTokens.warning,
     activeColor: colorTokens.brandBlue,
     compute: (data: unknown[]) =>
       data.filter((i) => (i as MclItem).status === 'menunggu_approval').length,
@@ -164,15 +160,17 @@ function handleCreateNew() {
     subtitle="Lihat MCL yang sudah diajukan"
     max-width="max-w-8xl"
   >
-    <button
+    <Button
       v-if="canManage"
-      type="button"
-      class="flex w-fit min-w-[200px] items-center gap-2 self-start rounded-lg bg-bnf-primary px-4 py-2.5 text-sm font-medium text-bnf-primary-foreground hover:bg-bnf-primary-hover"
+      label="Buat Pengajuan Baru"
+      severity="primary"
+      class="w-fit min-w-[200px] self-start"
       @click="handleCreateNew"
     >
-      <span class="text-lg leading-none">+</span>
-      Buat Pengajuan Baru
-    </button>
+      <template #icon>
+        <HugeiconsIcon :icon="Add01Icon" :size="16" :stroke-width="1.8" />
+      </template>
+    </Button>
 
     <div class="mt-6">
       <p class="mb-3 text-sm font-semibold text-bnf-text">List MCL</p>
@@ -189,39 +187,55 @@ function handleCreateNew() {
         :items="filteredItems"
         layout="column"
         :gap="3"
-        :padding="4"
+        :padding="0"
+        background="bg-transparent"
+        rounded="rounded-none"
         clickable
-        show-arrow
+        :show-arrow="false"
         paginate
         :page-size="3"
         @item-click="handleItemClick"
       >
         <template #item="{ item }">
-          <div class="flex w-full items-center justify-between gap-1.5 text-left">
+          <Card
+            class="flex w-full items-center justify-between gap-2 p-4 text-left transition-shadow hover:shadow-bnf-md"
+          >
             <div class="min-w-0 flex-1">
               <div class="flex items-baseline gap-1.5">
-                <span class="whitespace-nowrap text-sm font-semibold text-bnf-text! sm:text-base">{{
-                  (item as any).triwulan
-                }}</span>
-                <span class="whitespace-nowrap text-[11px] text-bnf-text-muted sm:text-xs">{{
-                  (item as any).periode
-                }}</span>
+                <span class="whitespace-nowrap text-sm font-semibold text-bnf-text sm:text-base">
+                  {{ item.triwulan }}
+                </span>
+                <span class="whitespace-nowrap text-[11px] text-bnf-text-muted sm:text-xs">
+                  {{ item.periode }}
+                </span>
               </div>
               <p class="mt-1 whitespace-nowrap text-xs text-bnf-text-muted sm:text-sm">
-                {{ (item as any).userCount }}/{{ (item as any).userTotal }} User ·
-                {{ (item as any).outletCount }}/{{ (item as any).outletTotal }} Outlet
+                {{ item.userCount }}/{{ item.userTotal }} User · {{ item.outletCount }}/{{
+                  item.outletTotal
+                }}
+                Outlet
               </p>
               <p class="mt-0.5 whitespace-nowrap text-[11px] text-bnf-text-muted sm:text-xs">
-                {{ (item as any).updatedAt }}
+                {{ item.updatedAt }}
               </p>
             </div>
-            <span
-              class="shrink-0 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px] font-medium sm:px-3 sm:py-1 sm:text-xs"
-              :class="statusMeta[(item as any).status as MclStatus].badge"
+
+            <Tag
+              :severity="statusMeta[item.status].severity"
+              variant="soft"
+              rounded
+              class="shrink-0 whitespace-nowrap px-1.5 py-0 text-[9px] leading-4 sm:px-3 sm:py-0.5 sm:text-xs sm:leading-5"
             >
-              {{ statusMeta[(item as any).status as MclStatus].label }}
-            </span>
-          </div>
+              {{ statusMeta[item.status].label }}
+            </Tag>
+
+            <HugeiconsIcon
+              :icon="ArrowRight01Icon"
+              :size="14"
+              :stroke-width="1.8"
+              class="shrink-0 text-bnf-text-muted"
+            />
+          </Card>
         </template>
       </DynamicList>
     </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Button, Column, DataTable } from '@bernofarm/core'
+import { EyeIcon, FilterIcon } from '@hugeicons/core-free-icons'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -9,6 +10,9 @@ import SearchInput from '@/shared/components/SearchInput.vue'
 import { useIsMobile } from '@/shared/composables/useIsMobile'
 import * as Filter from '@/shared/forms/Filter'
 import { colorTokens } from '@/shared/utils/colors'
+import { createHugeIconComponent } from '@/shared/utils/createHugeIconComponent'
+
+const ReviewIcon = createHugeIconComponent(EyeIcon)
 
 const isMobile = useIsMobile()
 
@@ -378,7 +382,7 @@ const filteredData = computed(() => {
           <Filter.InlineSelect
             v-model="groupFilter"
             label="FILTER"
-            icon="pi pi-filter"
+            :icon="FilterIcon"
             :options="jenisApprovalOptions"
             placeholder="Jenis Approval"
           />
@@ -434,7 +438,7 @@ const filteredData = computed(() => {
           <template #body="{ data }">
             <Button
               label="Review"
-              icon="pi pi-eye"
+              :icon="ReviewIcon"
               severity="info"
               size="small"
               @click="handleView(data)"
@@ -486,7 +490,7 @@ const filteredData = computed(() => {
               <span class="text-[11.5px] text-bnf-text-muted">{{ item.noTransaksi }}</span>
               <Button
                 label="Review"
-                icon="pi pi-eye"
+                :icon="ReviewIcon"
                 severity="info"
                 rounded
                 size="small"

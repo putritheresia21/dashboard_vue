@@ -9,6 +9,7 @@ import { sidebarMenu } from './app/navigation/sidebarMenu'
 import { sidebarRail } from './app/navigation/sidebarRail'
 import companyLogo from './assets/logo/logo-bernofarm.svg'
 import { useAuthStore } from './features/auth/stores/authStore'
+import DashboardTopbar from './shared/components/layout/DashboardTopbar.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -17,7 +18,7 @@ const { user } = storeToRefs(authStore)
 const isAuthLayout = computed(() => route.meta.layout === false || route.meta.layout === 'none')
 
 const shellBrand = {
-  name: 'Bernofarm',
+  name: 'BERNOFARM',
   logo: companyLogo,
 }
 
@@ -55,6 +56,11 @@ const railNavigation = computed(() =>
     to: item.to,
   })),
 )
+
+const topbarNavigation = [
+  { label: 'Portal Perusahaan', to: '/' },
+  { label: 'Aplikasi Saya', to: '/app' },
+]
 </script>
 
 <template>
@@ -66,15 +72,20 @@ const railNavigation = computed(() =>
     v-else
     responsive-mode="mobile"
     topbar-variant="dashboard"
+    :show-navigation-toggle="false"
     desktop-layout="topbar-full-width"
     :navigation="navigation"
     :mobile-navigation="railNavigation"
-    :topbar-navigation="railNavigation"
+    :topbar-navigation="topbarNavigation"
+    sidebar-title="Aplikasi Saya"
     :brand="shellBrand"
     :user="shellUser"
     :topbar-sticky="true"
     content-max-width="1440px"
   >
+    <template #topbar>
+      <DashboardTopbar :brand="shellBrand" :navigation="topbarNavigation" :user="shellUser" />
+    </template>
     <RouterView />
   </AppShell>
 

@@ -1,5 +1,7 @@
 /* eslint-disable vue/one-component-per-file, max-lines-per-function */
-import { Select as BernofarmSelect } from '@bernofarm/core'
+import { Card, Select as BernofarmSelect } from '@bernofarm/core'
+import { FilterIcon, ListViewIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/vue'
 import { defineComponent, type FunctionalComponent, h, type PropType } from 'vue'
 
 import { colorTokens } from '@/shared/utils/colors'
@@ -21,12 +23,9 @@ type FilterModel = string | number | boolean | Record<string, unknown> | unknown
 /* card pembungkus semua filter */
 export const Bar: FunctionalComponent = (_, { slots }) =>
   h(
-    'div',
-    {
-      class:
-        'flex flex-wrap md:flex-nowrap items-stretch gap-4 bg-bnf-surface rounded-2xl shadow-sm border border-bnf-border p-4',
-    },
-    slots.default?.(),
+    Card,
+    { class: 'flex flex-wrap items-stretch gap-bnf-lg p-bnf-lg md:flex-nowrap' },
+    { default: () => slots.default?.() },
   )
 
 /** Label + kontrol apa pun */
@@ -37,7 +36,7 @@ export const Field: FunctionalComponent<{ label?: string; for?: string }> = (pro
         'label',
         {
           for: props.for,
-          class: 'font-semibold text-bnf-text-muted mb-1 text-[11.5px] md:text-[13px]',
+          class: 'mb-bnf-xs font-semibold text-bnf-text-muted text-[11.5px] md:text-[13px]',
         },
         props.label,
       ),
@@ -47,7 +46,7 @@ Field.props = ['label', 'for']
 
 /** Garis pembatas vertikal */
 export const Divider: FunctionalComponent = () =>
-  h('div', { class: 'hidden md:block w-px bg-bnf-surface-muted self-stretch shrink-0 mx-2' })
+  h('div', { class: 'hidden shrink-0 self-stretch mx-bnf-sm w-px bg-bnf-surface-muted md:block' })
 
 export const Select = defineComponent({
   name: 'FilterSelect',
@@ -63,9 +62,8 @@ export const Select = defineComponent({
   setup(props, { emit, attrs }) {
     return () =>
       h(BernofarmSelect, {
-        size: 'small',
         ...attrs,
-        class: ['flex-1 min-w-[10rem] max-w-xs', attrs.class],
+        class: ['min-w-0 max-w-xs flex-1 sm:min-w-[10rem]', attrs.class],
         modelValue: props.modelValue,
         showClear: props.showClear,
         'onUpdate:modelValue': (v: unknown) => emit('update:modelValue', v),
@@ -82,7 +80,7 @@ export const InlineSelect = defineComponent({
       default: null,
     },
     label: { type: String, required: true },
-    icon: { type: String, default: '' },
+    icon: { type: Object, default: () => FilterIcon },
     options: { type: Array as PropType<unknown[]>, required: true },
     placeholder: { type: String, default: '' },
     optionLabel: { type: String, default: undefined },
@@ -91,11 +89,21 @@ export const InlineSelect = defineComponent({
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     return () =>
-      h('div', { class: 'flex items-center gap-2 text-xs text-bnf-text-muted shrink-0' }, [
-        h('span', { class: 'flex items-center gap-1 font-medium whitespace-nowrap' }, [
-          props.icon && h('i', { class: [props.icon, 'text-sm'] }),
-          props.label,
-        ]),
+      h('div', { class: 'flex shrink-0 items-center gap-bnf-sm text-xs text-bnf-text-muted' }, [
+        h(
+          'span',
+          { class: 'flex shrink-0 items-center gap-bnf-xs whitespace-nowrap font-medium' },
+          [
+            props.icon &&
+              h(HugeiconsIcon, {
+                icon: props.icon,
+                size: 14,
+                strokeWidth: 1.8,
+                class: 'shrink-0',
+              }),
+            props.label,
+          ],
+        ),
         h(BernofarmSelect, {
           modelValue: props.modelValue,
           'onUpdate:modelValue': (v: unknown) => emit('update:modelValue', v),
@@ -105,7 +113,7 @@ export const InlineSelect = defineComponent({
           placeholder: props.placeholder,
           showClear: true,
           size: 'small',
-          class: 'min-w-[10rem]',
+          class: 'min-w-0 sm:min-w-[10rem]',
         }),
       ])
   },
@@ -140,7 +148,10 @@ export const Segmented = defineComponent({
         'div',
         {
           ...attrs,
-          class: ['flex flex-1 rounded-lg bg-bnf-surface-muted p-1 items-center', attrs.class],
+          class: [
+            'flex w-full items-center rounded-bnf-md border border-bnf-border bg-bnf-surface-muted p-bnf-xs',
+            attrs.class,
+          ],
         },
         props.options.map((o) =>
           h(
@@ -149,9 +160,9 @@ export const Segmented = defineComponent({
               key: String(getValue(o)),
               type: 'button',
               class: [
-                'flex-1 h-full rounded-md py-1.5 font-bold transition text-sm',
+                'h-full flex-1 rounded-bnf-sm py-bnf-sm text-sm font-bold leading-5 transition',
                 props.modelValue === getValue(o)
-                  ? 'bg-bnf-text text-[color:var(--bnf-color-foreground)] shadow-sm'
+                  ? 'bg-bnf-text text-bnf-primary-foreground shadow-bnf-sm'
                   : 'text-bnf-text-muted',
               ],
               onClick: () => emit('update:modelValue', getValue(o)),
@@ -171,7 +182,7 @@ export const Tabs = defineComponent({
     tabs: { type: Array as PropType<Tab[]>, required: true },
     data: { type: Array as PropType<unknown[]>, default: () => [] },
     statusField: { type: String, default: undefined },
-    icon: { type: String, default: 'pi pi-list' },
+    icon: { type: Object, default: () => ListViewIcon },
     title: { type: String, default: '' },
   },
   emits: ['update:modelValue'],
@@ -202,13 +213,13 @@ export const Tabs = defineComponent({
         flexShrink: 0,
         fontSize: '12px',
         lineHeight: '1.4',
-        padding: '8px 14px',
-        borderRadius: '9999px',
+        padding: 'var(--bnf-spacing-sm) var(--bnf-spacing-md)',
+        borderRadius: 'var(--bnf-radius-pill)',
         fontWeight: 500,
         whiteSpace: 'nowrap',
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '6px',
+        gap: 'var(--bnf-spacing-sm)',
         border: 'none',
         cursor: 'pointer',
         backgroundColor: isActive
@@ -219,22 +230,31 @@ export const Tabs = defineComponent({
     }
 
     return () =>
-      h('div', { class: 'flex items-center gap-2 sm:gap-3 flex-wrap' }, [
+      h('div', { class: 'flex flex-wrap items-center gap-bnf-sm sm:gap-bnf-md' }, [
         props.title &&
           h(
             'span',
             {
               class:
-                'flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-bnf-text-muted shrink-0',
+                'flex shrink-0 items-center gap-bnf-sm text-[11px] font-medium text-bnf-text-muted sm:text-xs',
             },
-            [props.icon && h('i', { class: [props.icon, 'text-xs sm:text-sm'] }), props.title],
+            [
+              props.icon &&
+                h(HugeiconsIcon, {
+                  icon: props.icon,
+                  size: 14,
+                  strokeWidth: 1.8,
+                  class: 'shrink-0',
+                }),
+              props.title,
+            ],
           ),
 
         h(
           'div',
           {
             class:
-              'flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
+              'flex items-center gap-bnf-sm overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
           },
           props.tabs.map((tab) => {
             const count = countFor(tab)
@@ -252,7 +272,7 @@ export const Tabs = defineComponent({
                     style: {
                       width: '6px',
                       height: '6px',
-                      borderRadius: '9999px',
+                      borderRadius: 'var(--bnf-radius-pill)',
                       flexShrink: 0,
                       backgroundColor: tab.color,
                     },

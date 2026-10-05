@@ -1,11 +1,15 @@
 import type { BernofarmThemeConfig } from '@bernofarm/core'
 
+// Navy brand: satu sumber untuk primary dan brandBlue agar tidak pernah berbeda.
+const brandBlue = '#123E6B'
+const brandBlueHover = '#0A2440'
+
 export const bernofarmTheme = {
   colors: {
-    primary: '#3B6FE0',
-    primaryHover: '#2F5FC6',
+    primary: brandBlue,
+    primaryHover: brandBlueHover,
     primaryForeground: '#FFFFFF',
-    primaryMuted: '#D9E5FF',
+    primaryMuted: '#DCE6F2',
     secondary: '#64748B',
     secondaryHover: '#475569',
     secondaryForeground: '#FFFFFF',
@@ -30,6 +34,9 @@ export const bernofarmTheme = {
     border: '#E8EDF3',
     ring: '#93A2C8',
     dangerSurface: '#FEF2F2',
+    warningSurface: '#FEF3C7',
+    successSurface: '#DCFCE7',
+    surfaceSubtle: '#EEF1F5',
     sidebar: '#011844',
     sidebarForeground: '#FFFFFF',
     sidebarMuted: '#CBD5E1',
@@ -38,8 +45,8 @@ export const bernofarmTheme = {
     sidebarAccent: '#60A5FA',
     foreground: '#FFFFFF',
     accent: '#FF6A00',
-    brandBlue: '#123E6B',
-    brandBlueHover: '#0A2440',
+    brandBlue,
+    brandBlueHover,
     brandSoftBlue: '#1E88E5',
   },
   radius: 'medium',
