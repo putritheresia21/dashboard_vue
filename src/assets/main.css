@@ -1,13 +1,20 @@
-@import './base.css';
+/* bagian ini dipindahkan */
+/* @import './base.css'; */
 
-@layer tailwind-theme, tailwind-base, primevue, tailwind-utilities;
+@layer tailwind-theme, tailwind-base, tailwind-utilities;
+
+@theme {
+  --font-sans: 'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
 @layer tailwind-theme {
   @import 'tailwindcss/theme.css';
+  @import '@bernofarm/core/theme.css';
 }
 
 @layer tailwind-base {
   @import 'tailwindcss/preflight.css';
+  @import './base.css';
 }
 
 @layer tailwind-utilities {
@@ -16,11 +23,14 @@
 
 /* Fix universal: flex & grid child defaultnya min-width/min-height: auto,
    yang bikin elemen tidak bisa menyusut walau parent overflow-x-auto.
-   Reset ini ke 0 supaya overflow-x-auto SELALU bekerja, di level manapun. */
-*,
-*::before,
-*::after {
-  min-width: 0;
+   Reset ini ke 0 supaya overflow-x-auto SELALU bekerja, di level manapun.
+   Harus di dalam layer: CSS di luar layer selalu mengalahkan utilitas Tailwind (min-w-*). */
+@layer tailwind-base {
+  *,
+  *::before,
+  *::after {
+    min-width: 0;
+  }
 }
 
 html,
@@ -62,3 +72,11 @@ a,
     padding: 0 2rem;
   }
 } */
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
