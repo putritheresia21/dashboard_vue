@@ -1,0 +1,3 @@
+/* Urutan layer harus dideklarasikan sebelum CSS library, supaya utilitas app (main.css)
+   yang diimpor terakhir menang atas salinan utilitas di core.css dan shell.css. */
+@layer tailwind-theme, tailwind-base, tailwind-utilities;
