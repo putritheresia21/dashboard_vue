@@ -146,11 +146,11 @@ function handleItemClick(item: unknown) {
   router.push({
     path: `/app/visits/master-call-list/${mcl.id}`,
     query: { status: mcl.status, triwulan: mcl.triwulan },
-  }) //route detailnya atur disini
+  })
 }
 
 function handleCreateNew() {
-  router.push('/app/visits/master-call-list/add-master-call-list')
+  router.push('/app/visit/master-call-list/add-master-call-list')
 }
 </script>
 
@@ -164,7 +164,7 @@ function handleCreateNew() {
       v-if="canManage"
       label="Buat Pengajuan Baru"
       severity="primary"
-      class="w-fit min-w-[200px] self-start"
+      class="w-fit min-w-50 self-start"
       @click="handleCreateNew"
     >
       <template #icon>

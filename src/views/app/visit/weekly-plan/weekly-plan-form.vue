@@ -5,9 +5,9 @@ meta:
 </route>
 
 <script setup lang="ts">
-import WeeklyVisitPlanPage from '@/features/visits/pages/WeeklyVisitPlanPage.vue'
+import WeeklyVisitFormPage from '@/features/visits/weekly-visit/pages/WeeklyVisitFormPage.vue'
 </script>
 
 <template>
-  <WeeklyVisitPlanPage />
+  <WeeklyVisitFormPage />
 </template>

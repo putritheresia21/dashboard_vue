@@ -77,6 +77,7 @@ const topbarNavigation = [
     :navigation="navigation"
     :mobile-navigation="railNavigation"
     :topbar-navigation="topbarNavigation"
+    class="app-shell-hide-scroll"
     sidebar-title="Aplikasi Saya"
     :brand="shellBrand"
     :user="shellUser"
@@ -92,3 +93,26 @@ const topbarNavigation = [
   <BernofarmToast />
   <BernofarmConfirmDialog />
 </template>
+
+<style>
+.app-shell-hide-scroll aside,
+.app-shell-hide-scroll aside *,
+.app-shell-hide-scroll nav,
+.app-shell-hide-scroll nav *,
+.app-shell-hide-scroll [class*='sidebar'],
+.app-shell-hide-scroll [class*='sidebar'] * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app-shell-hide-scroll aside::-webkit-scrollbar,
+.app-shell-hide-scroll aside *::-webkit-scrollbar,
+.app-shell-hide-scroll nav::-webkit-scrollbar,
+.app-shell-hide-scroll nav *::-webkit-scrollbar,
+.app-shell-hide-scroll [class*='sidebar']::-webkit-scrollbar,
+.app-shell-hide-scroll [class*='sidebar'] *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+</style>

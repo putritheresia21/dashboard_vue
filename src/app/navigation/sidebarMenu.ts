@@ -29,37 +29,37 @@ export const sidebarMenu: SidebarMenuItem[] = [
   {
     label: 'Visit',
     icon: visitIcon,
-    parentRoute: '/app/visits',
+    parentRoute: '/app/visit',
     children: [
       {
         label: 'Check In / Out',
-        to: '/app/visits/check-in-out',
+        to: '/app/visit/check-in-out',
         icon: locationIcon,
         tag: 'SERING',
       },
       {
         label: 'Rencana Visit Mingguan',
-        to: '/app/visits/weekly-plan',
+        to: '/app/visit/weekly-plan',
         icon: calendarIcon,
       },
       {
         label: 'MCL - Master Call List',
-        to: '/app/visits/master-call-list',
+        to: '/app/visit/master-call-list',
         icon: personIcon,
       },
       {
         label: 'Aktivitas Visit',
-        to: '/app/visits/aktivitas',
+        to: '/app/visit/aktivitas',
         icon: checklistIcon,
       },
       {
         label: 'Registrasi Konsumen',
-        to: '/app/visits/registrasi-konsumen',
+        to: '/app/visit/registrasi-konsumen',
         icon: docklightIcon,
       },
       {
         label: 'Pengkinian Data Konsumen',
-        to: '/app/visits/update-konsumen',
+        to: '/app/visit/update-konsumen',
         icon: refreshIcon,
       },
     ],
@@ -73,8 +73,8 @@ export const sidebarMenu: SidebarMenuItem[] = [
   {
     label: 'Approval',
     icon: approvalIcon,
-    parentRoute: '/app/approvals',
-    children: [{ label: 'List Approval', to: '/app/approvals' }],
+    parentRoute: '/app/approval',
+    children: [{ label: 'List Approval', to: '/app/approval' }],
   },
   {
     label: 'Laporan',
