@@ -94,6 +94,7 @@ function displaySales(value: unknown) {
   <Card class="min-w-0 overflow-hidden">
     <div class="w-full overflow-x-auto">
       <DataTable
+        :key="selected"
         :value="data"
         :data-key="data.some((row) => row.id !== undefined) ? 'id' : 'user'"
         :group-rows-by="selected === 'outlet' ? ['outlet', 'uniqueTipe'] : undefined"

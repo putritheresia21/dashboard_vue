@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { routes } from 'vue-router/auto-routes'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { handleHotUpdate, routes } from 'vue-router/auto-routes'
 
 import { useAuthStore } from '@/features/auth/stores/authStore.ts'
 
@@ -11,30 +11,30 @@ declare module 'vue-router' {
   }
 }
 
+const staticRoutes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    redirect: '/app',
+  },
+
+  {
+    path: '/aplikasi/:pathMatch(.*)*',
+    redirect: (to) => ({
+      path: to.path.replace(/^\/aplikasi(?=\/|$)/, '/app'),
+      query: to.query,
+      hash: to.hash,
+    }),
+  },
+
+  {
+    path: '/app/:pathMatch(.*)*',
+    redirect: '/app',
+  },
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    ...routes,
-
-    {
-      path: '/',
-      redirect: '/app',
-    },
-
-    {
-      path: '/aplikasi/:pathMatch(.*)*',
-      redirect: (to) => ({
-        path: to.path.replace(/^\/aplikasi(?=\/|$)/, '/app'),
-        query: to.query,
-        hash: to.hash,
-      }),
-    },
-
-    {
-      path: '/app/:pathMatch(.*)*',
-      redirect: '/app',
-    },
-  ],
+  routes: [...routes, ...staticRoutes],
   // routes: [
   //   // {
   //   //   path: '/',
@@ -117,5 +117,12 @@ router.beforeEach((to) => {
     return { path: '/app' }
   }
 })
+
+if (import.meta.hot) {
+  // HMR mengganti semua route; daftarkan ulang route statis di atas.
+  handleHotUpdate(router, () => {
+    staticRoutes.forEach((route) => router.addRoute(route))
+  })
+}
 
 export default router
