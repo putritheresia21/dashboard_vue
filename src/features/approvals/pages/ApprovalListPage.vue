@@ -1,357 +1,329 @@
 <script setup lang="ts">
-import { Button, Column, DataTable } from '@bernofarm/core'
-import { EyeIcon, FilterIcon } from '@hugeicons/core-free-icons'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import DynamicList from '@/shared/components/DynamicList.vue'
 import AppHeader from '@/shared/components/layout/AppHeader.vue'
-import SearchInput from '@/shared/components/SearchInput.vue'
-import { useIsMobile } from '@/shared/composables/useIsMobile'
-import * as Filter from '@/shared/forms/Filter'
-import { colorTokens } from '@/shared/utils/colors'
-import { createHugeIconComponent } from '@/shared/utils/createHugeIconComponent'
 
-const ReviewIcon = createHugeIconComponent(EyeIcon)
-
-const isMobile = useIsMobile()
+import ApprovalFilter from '../components/ApprovalFilter.vue'
+import ApprovalList from '../components/ApprovalList.vue'
 
 const router = useRouter()
 
-const approvals = ref([
+const approvals = ref<
   {
-    noApproval: 'JUL-2026-0011',
-    noTransaksi: 'TRX-2026-4563',
-    jenisApproval: 'Relokasi',
-    pengaju: 'Alvita Rahma',
-    tanggalPengajuan: '17 Jul 2026',
-    keterangan:
+    approvalNo: string
+    transactionNo: string
+    approvalType: string
+    requester: string
+    submittedDate: string
+    description: string
+    approvalStatus: 'APPROVED' | 'PENDING' | 'REJECTED'
+  }[]
+>([
+  {
+    approvalNo: 'JUL-2026-0011',
+    transactionNo: 'TRX-2026-4563',
+    approvalType: 'Relokasi',
+    requester: 'Alvita Rahma',
+    submittedDate: '17 Jul 2026',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DISETUJUI',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'JUN-2026-0011',
-    noTransaksi: 'TRX-2026-8841',
-    jenisApproval: 'Perpindahan Outlet',
-    pengaju: 'Andi Saputra',
-    tanggalPengajuan: '26 Jun 2026',
-    keterangan: 'Perpindahan outlet Apotek Sehat Jaya ke Rayon Jakarta Selatan',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'JUN-2026-0011',
+    transactionNo: 'TRX-2026-8841',
+    approvalType: 'Perpindahan Outlet',
+    requester: 'Andi Saputra',
+    submittedDate: '26 Jun 2026',
+    description: 'Perpindahan outlet Apotek Sehat Jaya ke Rayon Jakarta Selatan',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'MEI-2026-0011-DM',
-    noTransaksi: 'TRX-2026-8564',
-    jenisApproval: 'MCL',
-    pengaju: 'Lucky Chandra',
-    tanggalPengajuan: '16 Mei 2026',
-    keterangan: 'MCL Triwulan IV (Oktober - Desember 2026) - DM Lucky Chandra',
-    statusApproval: 'MENUNGGU',
+    approvalNo: 'MEI-2026-0011-DM',
+    transactionNo: 'TRX-2026-8564',
+    approvalType: 'MCL',
+    requester: 'Lucky Chandra',
+    submittedDate: '16 Mei 2026',
+    description: 'MCL Triwulan IV (Oktober - Desember 2026) - DM Lucky Chandra',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'APR-2026-0011',
-    noTransaksi: 'TRX-2026-1465',
-    jenisApproval: 'ED Khusus',
-    pengaju: 'Futukhal Arifin',
-    tanggalPengajuan: '21 Apr 2026',
-    keterangan:
+    approvalNo: 'APR-2026-0011',
+    transactionNo: 'TRX-2026-1465',
+    approvalType: 'ED Khusus',
+    requester: 'Futukhal Arifin',
+    submittedDate: '21 Apr 2026',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'MENUNGGU',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'FEB-2026-0012',
-    noTransaksi: 'TRX-2026-1234',
-    jenisApproval: 'Rencana Visit Mingguan',
-    pengaju: 'Lamsyah',
-    tanggalPengajuan: '15 Feb 2026',
-    keterangan: 'Visit Mingguan Periode 10-15 Agustus 2026 - MR Lamsyah',
-    statusApproval: 'MENUNGGU',
+    approvalNo: 'FEB-2026-0012',
+    transactionNo: 'TRX-2026-1234',
+    approvalType: 'Rencana Visit Mingguan',
+    requester: 'Lamsyah',
+    submittedDate: '15 Feb 2026',
+    description: 'Visit Mingguan Periode 10-15 Agustus 2026 - MR Lamsyah',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'FEB-2026-0011',
-    noTransaksi: 'TRX-2026-9174',
-    jenisApproval: 'Rotasi Personel',
-    pengaju: 'Nur Aziz',
-    tanggalPengajuan: '3 Feb 2026',
-    keterangan:
+    approvalNo: 'FEB-2026-0011',
+    transactionNo: 'TRX-2026-9174',
+    approvalType: 'Rotasi Personel',
+    requester: 'Nur Aziz',
+    submittedDate: '3 Feb 2026',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'MENUNGGU',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'JAN-2026-0011',
-    noTransaksi: 'TRX-2026-2424',
-    jenisApproval: 'Relokasi',
-    pengaju: 'Christian',
-    tanggalPengajuan: '30 Jan 2026',
-    keterangan:
+    approvalNo: 'JAN-2026-0011',
+    transactionNo: 'TRX-2026-2424',
+    approvalType: 'Relokasi',
+    requester: 'Christian',
+    submittedDate: '30 Jan 2026',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DITOLAK',
+    approvalStatus: 'REJECTED',
   },
   {
-    noApproval: 'NOV-2026-0011',
-    noTransaksi: 'TRX-2026-4527',
-    jenisApproval: 'Rotasi Personel',
-    pengaju: 'Yeremiah',
-    tanggalPengajuan: '27 Nov 2025',
-    keterangan:
+    approvalNo: 'NOV-2026-0011',
+    transactionNo: 'TRX-2026-4527',
+    approvalType: 'Rotasi Personel',
+    requester: 'Yeremiah',
+    submittedDate: '27 Nov 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DITOLAK',
+    approvalStatus: 'REJECTED',
   },
   {
-    noApproval: 'OKT-2026-0011',
-    noTransaksi: 'TRX-2025-2845',
-    jenisApproval: 'Perpindahan Outlet',
-    pengaju: 'Mando Gunawan',
-    tanggalPengajuan: '10 Okt 2025',
-    keterangan: 'Perpindahan Apotek Abadi ke Rayon Jakarta Pusat',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'OKT-2026-0011',
+    transactionNo: 'TRX-2025-2845',
+    approvalType: 'Perpindahan Outlet',
+    requester: 'Mando Gunawan',
+    submittedDate: '10 Okt 2025',
+    description: 'Perpindahan Apotek Abadi ke Rayon Jakarta Pusat',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'SEP-2025-0011',
-    noTransaksi: 'TRX-2025-4241',
-    jenisApproval: 'Rotasi Personel',
-    pengaju: 'Ridow Kantana',
-    tanggalPengajuan: '18 Sep 2025',
-    keterangan:
+    approvalNo: 'SEP-2025-0011',
+    transactionNo: 'TRX-2025-4241',
+    approvalType: 'Rotasi Personel',
+    requester: 'Ridow Kantana',
+    submittedDate: '18 Sep 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DISETUJUI',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'AGU-2025-0014',
-    noTransaksi: 'TRX-2025-3312',
-    jenisApproval: 'MCL',
-    pengaju: 'Dewi Anggraini',
-    tanggalPengajuan: '9 Agu 2025',
-    keterangan: 'MCL Triwulan III (Juli - September 2025) - DM Dewi Anggraini',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'AGU-2025-0014',
+    transactionNo: 'TRX-2025-3312',
+    approvalType: 'MCL',
+    requester: 'Dewi Anggraini',
+    submittedDate: '9 Agu 2025',
+    description: 'MCL Triwulan III (Juli - September 2025) - DM Dewi Anggraini',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'AGU-2025-0009',
-    noTransaksi: 'TRX-2025-2987',
-    jenisApproval: 'ED Khusus',
-    pengaju: 'Rizal Fahmi',
-    tanggalPengajuan: '2 Agu 2025',
-    keterangan:
+    approvalNo: 'AGU-2025-0009',
+    transactionNo: 'TRX-2025-2987',
+    approvalType: 'ED Khusus',
+    requester: 'Rizal Fahmi',
+    submittedDate: '2 Agu 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'MENUNGGU',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'JUL-2025-0022',
-    noTransaksi: 'TRX-2025-2765',
-    jenisApproval: 'Rencana Visit Mingguan',
-    pengaju: 'Siti Rahayu',
-    tanggalPengajuan: '28 Jul 2025',
-    keterangan: 'Visit Mingguan Periode 21-26 Juli 2025 - MR Siti Rahayu',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'JUL-2025-0022',
+    transactionNo: 'TRX-2025-2765',
+    approvalType: 'Rencana Visit Mingguan',
+    requester: 'Siti Rahayu',
+    submittedDate: '28 Jul 2025',
+    description: 'Visit Mingguan Periode 21-26 Juli 2025 - MR Siti Rahayu',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'JUL-2025-0015',
-    noTransaksi: 'TRX-2025-2410',
-    jenisApproval: 'Relokasi',
-    pengaju: 'Bambang Setiawan',
-    tanggalPengajuan: '14 Jul 2025',
-    keterangan: 'Perpindahan outlet Apotek Sentosa ke Rayon Bekasi',
-    statusApproval: 'DITOLAK',
+    approvalNo: 'JUL-2025-0015',
+    transactionNo: 'TRX-2025-2410',
+    approvalType: 'Relokasi',
+    requester: 'Bambang Setiawan',
+    submittedDate: '14 Jul 2025',
+    description: 'Perpindahan outlet Apotek Sentosa ke Rayon Bekasi',
+    approvalStatus: 'REJECTED',
   },
   {
-    noApproval: 'JUN-2025-0031',
-    noTransaksi: 'TRX-2025-2098',
-    jenisApproval: 'Rotasi Personel',
-    pengaju: 'Hendra Wijaya',
-    tanggalPengajuan: '25 Jun 2025',
-    keterangan:
+    approvalNo: 'JUN-2025-0031',
+    transactionNo: 'TRX-2025-2098',
+    approvalType: 'Rotasi Personel',
+    requester: 'Hendra Wijaya',
+    submittedDate: '25 Jun 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DISETUJUI',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'JUN-2025-0018',
-    noTransaksi: 'TRX-2025-1876',
-    jenisApproval: 'Perpindahan Outlet',
-    pengaju: 'Melati Putri',
-    tanggalPengajuan: '11 Jun 2025',
-    keterangan: 'Perpindahan outlet Apotek Sejahtera ke Rayon Tangerang',
-    statusApproval: 'MENUNGGU',
+    approvalNo: 'JUN-2025-0018',
+    transactionNo: 'TRX-2025-1876',
+    approvalType: 'Perpindahan Outlet',
+    requester: 'Melati Putri',
+    submittedDate: '11 Jun 2025',
+    description: 'Perpindahan outlet Apotek Sejahtera ke Rayon Tangerang',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'MEI-2025-0027',
-    noTransaksi: 'TRX-2025-1654',
-    jenisApproval: 'MCL',
-    pengaju: 'Agus Salim',
-    tanggalPengajuan: '30 Mei 2025',
-    keterangan: 'MCL Triwulan II (April - Juni 2025) - DM Agus Salim',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'MEI-2025-0027',
+    transactionNo: 'TRX-2025-1654',
+    approvalType: 'MCL',
+    requester: 'Agus Salim',
+    submittedDate: '30 Mei 2025',
+    description: 'MCL Triwulan II (April - Juni 2025) - DM Agus Salim',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'MEI-2025-0012',
-    noTransaksi: 'TRX-2025-1432',
-    jenisApproval: 'ED Khusus',
-    pengaju: 'Nadia Kusuma',
-    tanggalPengajuan: '16 Mei 2025',
-    keterangan:
+    approvalNo: 'MEI-2025-0012',
+    transactionNo: 'TRX-2025-1432',
+    approvalType: 'ED Khusus',
+    requester: 'Nadia Kusuma',
+    submittedDate: '16 Mei 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DITOLAK',
+    approvalStatus: 'REJECTED',
   },
   {
-    noApproval: 'APR-2025-0029',
-    noTransaksi: 'TRX-2025-1287',
-    jenisApproval: 'Rencana Visit Mingguan',
-    pengaju: 'Fajar Ramadhan',
-    tanggalPengajuan: '22 Apr 2025',
-    keterangan: 'Visit Mingguan Periode 15-20 April 2025 - MR Fajar Ramadhan',
-    statusApproval: 'MENUNGGU',
+    approvalNo: 'APR-2025-0029',
+    transactionNo: 'TRX-2025-1287',
+    approvalType: 'Rencana Visit Mingguan',
+    requester: 'Fajar Ramadhan',
+    submittedDate: '22 Apr 2025',
+    description: 'Visit Mingguan Periode 15-20 April 2025 - MR Fajar Ramadhan',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'APR-2025-0016',
-    noTransaksi: 'TRX-2025-1103',
-    jenisApproval: 'Rotasi Personel',
-    pengaju: 'Wulan Sari',
-    tanggalPengajuan: '8 Apr 2025',
-    keterangan:
+    approvalNo: 'APR-2025-0016',
+    transactionNo: 'TRX-2025-1103',
+    approvalType: 'Rotasi Personel',
+    requester: 'Wulan Sari',
+    submittedDate: '8 Apr 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DISETUJUI',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'MAR-2025-0024',
-    noTransaksi: 'TRX-2025-0982',
-    jenisApproval: 'Relokasi',
-    pengaju: 'Dimas Prasetyo',
-    tanggalPengajuan: '26 Mar 2025',
-    keterangan: 'Perpindahan outlet Apotek Harapan ke Rayon Depok',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'MAR-2025-0024',
+    transactionNo: 'TRX-2025-0982',
+    approvalType: 'Relokasi',
+    requester: 'Dimas Prasetyo',
+    submittedDate: '26 Mar 2025',
+    description: 'Perpindahan outlet Apotek Harapan ke Rayon Depok',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'MAR-2025-0011',
-    noTransaksi: 'TRX-2025-0765',
-    jenisApproval: 'Perpindahan Outlet',
-    pengaju: 'Ayu Lestari',
-    tanggalPengajuan: '12 Mar 2025',
-    keterangan: 'Perpindahan outlet Apotek Mulia ke Rayon Bogor',
-    statusApproval: 'MENUNGGU',
+    approvalNo: 'MAR-2025-0011',
+    transactionNo: 'TRX-2025-0765',
+    approvalType: 'Perpindahan Outlet',
+    requester: 'Ayu Lestari',
+    submittedDate: '12 Mar 2025',
+    description: 'Perpindahan outlet Apotek Mulia ke Rayon Bogor',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'FEB-2025-0033',
-    noTransaksi: 'TRX-2025-0621',
-    jenisApproval: 'MCL',
-    pengaju: 'Reza Pratama',
-    tanggalPengajuan: '24 Feb 2025',
-    keterangan: 'MCL Triwulan I (Januari - Maret 2025) - DM Reza Pratama',
-    statusApproval: 'DITOLAK',
+    approvalNo: 'FEB-2025-0033',
+    transactionNo: 'TRX-2025-0621',
+    approvalType: 'MCL',
+    requester: 'Reza Pratama',
+    submittedDate: '24 Feb 2025',
+    description: 'MCL Triwulan I (Januari - Maret 2025) - DM Reza Pratama',
+    approvalStatus: 'REJECTED',
   },
   {
-    noApproval: 'FEB-2025-0019',
-    noTransaksi: 'TRX-2025-0487',
-    jenisApproval: 'ED Khusus',
-    pengaju: 'Indah Permata',
-    tanggalPengajuan: '10 Feb 2025',
-    keterangan:
+    approvalNo: 'FEB-2025-0019',
+    transactionNo: 'TRX-2025-0487',
+    approvalType: 'ED Khusus',
+    requester: 'Indah Permata',
+    submittedDate: '10 Feb 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'DISETUJUI',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'JAN-2025-0026',
-    noTransaksi: 'TRX-2025-0342',
-    jenisApproval: 'Rencana Visit Mingguan',
-    pengaju: 'Taufik Hidayat',
-    tanggalPengajuan: '27 Jan 2025',
-    keterangan: 'Visit Mingguan Periode 20-25 Januari 2025 - MR Taufik Hidayat',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'JAN-2025-0026',
+    transactionNo: 'TRX-2025-0342',
+    approvalType: 'Rencana Visit Mingguan',
+    requester: 'Taufik Hidayat',
+    submittedDate: '27 Jan 2025',
+    description: 'Visit Mingguan Periode 20-25 Januari 2025 - MR Taufik Hidayat',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'JAN-2025-0013',
-    noTransaksi: 'TRX-2025-0198',
-    jenisApproval: 'Rotasi Personel',
-    pengaju: 'Sri Wahyuni',
-    tanggalPengajuan: '13 Jan 2025',
-    keterangan:
+    approvalNo: 'JAN-2025-0013',
+    transactionNo: 'TRX-2025-0198',
+    approvalType: 'Rotasi Personel',
+    requester: 'Sri Wahyuni',
+    submittedDate: '13 Jan 2025',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'MENUNGGU',
+    approvalStatus: 'PENDING',
   },
   {
-    noApproval: 'DES-2024-0038',
-    noTransaksi: 'TRX-2024-9876',
-    jenisApproval: 'Relokasi',
-    pengaju: 'Rudi Hartono',
-    tanggalPengajuan: '29 Des 2024',
-    keterangan: 'Perpindahan outlet Apotek Bahagia ke Rayon Bandung',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'DES-2024-0038',
+    transactionNo: 'TRX-2024-9876',
+    approvalType: 'Relokasi',
+    requester: 'Rudi Hartono',
+    submittedDate: '29 Des 2024',
+    description: 'Perpindahan outlet Apotek Bahagia ke Rayon Bandung',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'DES-2024-0021',
-    noTransaksi: 'TRX-2024-9654',
-    jenisApproval: 'Perpindahan Outlet',
-    pengaju: 'Fitriani',
-    tanggalPengajuan: '15 Des 2024',
-    keterangan: 'Perpindahan outlet Apotek Sentral ke Rayon Cimahi',
-    statusApproval: 'DITOLAK',
+    approvalNo: 'DES-2024-0021',
+    transactionNo: 'TRX-2024-9654',
+    approvalType: 'Perpindahan Outlet',
+    requester: 'Fitriani',
+    submittedDate: '15 Des 2024',
+    description: 'Perpindahan outlet Apotek Sentral ke Rayon Cimahi',
+    approvalStatus: 'REJECTED',
   },
   {
-    noApproval: 'NOV-2024-0035',
-    noTransaksi: 'TRX-2024-9432',
-    jenisApproval: 'MCL',
-    pengaju: 'Gilang Ramadhan',
-    tanggalPengajuan: '28 Nov 2024',
-    keterangan: 'MCL Triwulan IV (Oktober - Desember 2024) - DM Gilang Ramadhan',
-    statusApproval: 'DISETUJUI',
+    approvalNo: 'NOV-2024-0035',
+    transactionNo: 'TRX-2024-9432',
+    approvalType: 'MCL',
+    requester: 'Gilang Ramadhan',
+    submittedDate: '28 Nov 2024',
+    description: 'MCL Triwulan IV (Oktober - Desember 2024) - DM Gilang Ramadhan',
+    approvalStatus: 'APPROVED',
   },
   {
-    noApproval: 'NOV-2024-0020',
-    noTransaksi: 'TRX-2024-9187',
-    jenisApproval: 'ED Khusus',
-    pengaju: 'Putri Ayu',
-    tanggalPengajuan: '14 Nov 2024',
-    keterangan:
+    approvalNo: 'NOV-2024-0020',
+    transactionNo: 'TRX-2024-9187',
+    approvalType: 'ED Khusus',
+    requester: 'Putri Ayu',
+    submittedDate: '14 Nov 2024',
+    description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus non eros ut porta.',
-    statusApproval: 'MENUNGGU',
+    approvalStatus: 'PENDING',
   },
 ])
 
-const statusBadgeMap: Record<string, { bg: string; text: string }> = {
-  DISETUJUI: {
-    bg: 'color-mix(in srgb, var(--bnf-color-success) 12%, transparent)',
-    text: colorTokens.success,
-  },
-  MENUNGGU: {
-    bg: 'color-mix(in srgb, var(--bnf-color-warning) 12%, transparent)',
-    text: colorTokens.warning,
-  },
-  DITOLAK: {
-    bg: 'color-mix(in srgb, var(--bnf-color-danger) 12%, transparent)',
-    text: colorTokens.danger,
-  },
+function handleView(row: { approvalNo: string }) {
+  router.push(`/app/approvals/${row.approvalNo}`)
 }
 
-function handleView(row: { noApproval: string }) {
-  router.push(`/app/approvals/${row.noApproval}`)
-}
-
-const statusTabDefs = [
-  { label: 'semua', value: null },
-  { label: 'Menunggu', value: 'MENUNGGU', color: colorTokens.warning },
-  { label: 'Disetujui', value: 'DISETUJUI', color: colorTokens.success },
-  { label: 'Ditolak', value: 'DITOLAK', color: colorTokens.danger },
-]
-
-const jenisApprovalOptions = [
-  'Relokasi',
-  'Perpindahan Outlet',
-  'MCL',
-  'ED Khusus',
-  'Rencana Visit Mingguan',
-  'Rotasi Personel',
-]
-
-const activeTab = ref<string | null>(null)
+const statusFilter = ref<string | null>(null)
 const searchQuery = ref('')
-const groupFilter = ref<string | null>(null)
+const typeFilter = ref<string | null>(null)
 
 const filteredData = computed(() => {
+  const query = searchQuery.value.toLowerCase()
   return approvals.value.filter((item) => {
-    const matchesTab = activeTab.value === null || item.statusApproval === activeTab.value
+    const matchesStatus = statusFilter.value === null || item.approvalStatus === statusFilter.value
     const matchesSearch =
-      !searchQuery.value ||
-      item.noApproval.toLocaleLowerCase().includes(searchQuery.value.toLocaleLowerCase()) ||
-      item.pengaju.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesGroup = !groupFilter.value || item.jenisApproval === groupFilter.value
-    return matchesTab && matchesSearch && matchesGroup
+      !query ||
+      item.approvalNo.toLowerCase().includes(query) ||
+      item.requester.toLowerCase().includes(query)
+
+    const matchesType = !typeFilter.value || item.approvalType === typeFilter.value
+    return matchesStatus && matchesSearch && matchesType
   })
 })
 </script>
@@ -363,144 +335,14 @@ const filteredData = computed(() => {
     max-width="max-w-8xl"
   >
     <div class="flex flex-col gap-4">
-      <Filter.Bar class="lg:items-center lg:justify-between">
-        <Filter.Tabs
-          v-model="activeTab"
-          :tabs="statusTabDefs"
-          :data="approvals"
-          status-field="statusApproval"
-          title="STATUS APPROVAL"
-        />
+      <ApprovalFilter
+        v-model:status="statusFilter"
+        v-model:search="searchQuery"
+        v-model:type="typeFilter"
+        :data="approvals"
+      />
 
-        <div class="flex items-center gap-3 flex-nowrap">
-          <div class="w-px self-stretch bg-bnf-surface-muted hidden lg:block shrink-0" />
-
-          <div class="w-full sm:w-64 shrink-0">
-            <SearchInput v-model="searchQuery" placeholder="Cari Approval" />
-          </div>
-
-          <Filter.InlineSelect
-            v-model="groupFilter"
-            label="FILTER"
-            :icon="FilterIcon"
-            :options="jenisApprovalOptions"
-            placeholder="Jenis Approval"
-          />
-        </div>
-      </Filter.Bar>
-
-      <DataTable
-        v-if="!isMobile"
-        :value="filteredData"
-        data-key="noApproval"
-        paginator
-        :rows="10"
-        empty-message="Tidak ada data approval"
-        responsive-layout="scroll"
-      >
-        <Column header="NO" :style="{ width: '3rem' }">
-          <template #body="{ index }">{{ index + 1 }}</template>
-        </Column>
-        <Column field="noApproval" header="NO APPROVAL" :style="{ width: '9rem' }" sortable />
-        <Column field="noTransaksi" header="NO TRANSAKSI" :style="{ width: '9rem' }" />
-        <Column field="jenisApproval" header="JENIS APPROVAL" :style="{ width: '9rem' }">
-          <template #body="{ data }">
-            <span
-              class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap"
-              :style="{
-                backgroundColor: 'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-                color: colorTokens.primary,
-              }"
-            >
-              {{ data.jenisApproval }}
-            </span>
-          </template>
-        </Column>
-        <Column field="pengaju" header="PENGAJU" :style="{ width: '9rem' }" />
-        <Column field="tanggalPengajuan" header="TANGGAL PENGAJUAN" :style="{ width: '9rem' }" />
-        <Column field="keterangan" header="KETERANGAN" />
-        <Column field="statusApproval" header="STATUS APPROVAL" :style="{ width: '8rem' }">
-          <template #body="{ data }">
-            <span
-              class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap"
-              :style="{
-                backgroundColor:
-                  statusBadgeMap[data.statusApproval]?.bg ||
-                  'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-                color: statusBadgeMap[data.statusApproval]?.text || colorTokens.primary,
-              }"
-            >
-              {{ data.statusApproval }}
-            </span>
-          </template>
-        </Column>
-        <Column header="AKSI" :style="{ width: '6rem' }">
-          <template #body="{ data }">
-            <Button
-              label="Review"
-              :icon="ReviewIcon"
-              severity="info"
-              size="small"
-              @click="handleView(data)"
-            />
-          </template>
-        </Column>
-      </DataTable>
-      <DynamicList v-else :items="filteredData" layout="column" :gap="4" :show-arrow="false">
-        <template #item="{ item }">
-          <div class="flex flex-col w-full gap-3">
-            <span
-              class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap w-fit"
-              :style="{
-                backgroundColor: 'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-                color: colorTokens.primary,
-              }"
-            >
-              {{ item.jenisApproval }}
-            </span>
-            <div class="flex w-full justify-between items-center">
-              <div class="flex flex-col gap-2">
-                <span class="text-bnf-text text-[14px] font-bold">{{ item.noApproval }}</span>
-                <div class="flex items-center gap-2 text-bnf-text-muted text-[12.5px]">
-                  <span
-                    >Pengaju: <span class="text-bnf-text">{{ item.pengaju }}</span></span
-                  >
-                  <span>&bull;</span>
-                  <span>{{ item.tanggalPengajuan }}</span>
-                </div>
-              </div>
-              <span
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap"
-                :style="{
-                  backgroundColor:
-                    statusBadgeMap[item.statusApproval]?.bg ||
-                    'color-mix(in srgb, var(--bnf-color-primary) 12%, transparent)',
-                  color: statusBadgeMap[item.statusApproval]?.text || colorTokens.primary,
-                }"
-              >
-                {{ item.statusApproval }}
-              </span>
-            </div>
-
-            <div class="text-bnf-text-muted text-[13px] bg-bnf-surface-muted rounded-md p-2">
-              {{ item.keterangan }}
-            </div>
-
-            <div class="flex w-full justify-between items-center">
-              <span class="text-[11.5px] text-bnf-text-muted">{{ item.noTransaksi }}</span>
-              <Button
-                label="Review"
-                :icon="ReviewIcon"
-                severity="info"
-                rounded
-                size="small"
-                class="text-xs py-1 px-3"
-                @click="handleView(item)"
-              />
-            </div>
-          </div>
-        </template>
-      </DynamicList>
+      <ApprovalList :data="filteredData" @view="handleView" />
     </div>
   </AppHeader>
 </template>

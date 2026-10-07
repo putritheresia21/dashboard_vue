@@ -73,8 +73,8 @@ export const sidebarMenu: SidebarMenuItem[] = [
   {
     label: 'Approval',
     icon: approvalIcon,
-    parentRoute: '/app/approvals',
-    children: [{ label: 'List Approval', to: '/app/approvals' }],
+    parentRoute: '/app/approval',
+    children: [{ label: 'List Approval', to: '/app/approval' }],
   },
   {
     label: 'Laporan',
