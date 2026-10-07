@@ -2,7 +2,7 @@
 import { Button, Column, DataTable } from '@bernofarm/core'
 import { EyeIcon, FilterIcon } from '@hugeicons/core-free-icons'
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import DynamicList from '@/shared/components/DynamicList.vue'
 import AppHeader from '@/shared/components/layout/AppHeader.vue'
@@ -17,6 +17,8 @@ const ReviewIcon = createHugeIconComponent(EyeIcon)
 const isMobile = useIsMobile()
 
 const router = useRouter()
+
+const route = useRoute()
 
 const approvals = ref([
   {
@@ -320,7 +322,7 @@ const statusBadgeMap: Record<string, { bg: string; text: string }> = {
 }
 
 function handleView(row: { noApproval: string }) {
-  router.push(`/app/approvals/${row.noApproval}`)
+  router.push(`${route.path}/${row.noApproval}`)
 }
 
 const statusTabDefs = [

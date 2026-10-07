@@ -6,7 +6,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import CellInput from '@/features/visits/master-call-list/components/CellInput.vue'
-import CellSelect from '@/features/visits/master-call-list/components/CellSelect.vue'
 import MasterCallListTable from '@/features/visits/master-call-list/components/MasterCallListTable.vue'
 import MclPeriodFilter from '@/features/visits/master-call-list/components/MclPeriodFilter.vue'
 import SummaryCard from '@/features/visits/master-call-list/components/SummaryCard.vue'
@@ -225,7 +224,7 @@ onMounted(() => {
               </div>
 
               <hr class="my-bnf-md w-full border-bnf-border" />
-              <div v-if="role === 'dm'" class="flex w-full flex-row justify-between">
+              <div v-if="role === 'dm'" class="grid w-full grid-cols-[1fr_1fr_1fr_2fr] gap-4">
                 <div class="flex flex-col items-center gap-bnf-xs">
                   <label :for="`mr-${index}`" class="text-[11px] text-bnf-text-muted">MR</label>
                   <CellInput
@@ -260,7 +259,14 @@ onMounted(() => {
                   <label :for="`shift-${index}`" class="text-[11px] text-bnf-text-muted"
                     >SHIFT</label
                   >
-                  <CellSelect :id="`shift-${index}`" v-model="item.shift" :options="shiftOptions" />
+                  <Select
+                    :id="`shift-${index}`"
+                    v-model="item.shift"
+                    :options="shiftOptions"
+                    class="w-full"
+                    size="small"
+                    input-class="flex items-center justify-center w-full h-full py-0 px-1 text-center text-[13px] font-bold text-bnf-text"
+                  />
                 </div>
               </div>
 
@@ -286,8 +292,8 @@ onMounted(() => {
                     :id="`shift-${index}`"
                     v-model="item.shift"
                     :options="shiftOptions"
-                    class="h-7.5 w-full"
-                    :pt="{ dropdownIcon: { class: 'w-3 h-3' } }"
+                    class="w-full"
+                    size="small"
                     input-class="flex items-center justify-center w-full h-full py-0 px-1 text-center text-[13px] font-bold text-bnf-text"
                   />
                 </div>
@@ -396,7 +402,10 @@ onMounted(() => {
                       </div>
 
                       <hr class="my-bnf-md w-full border-bnf-border" />
-                      <div v-if="role === 'dm'" class="flex w-full flex-row justify-between">
+                      <div
+                        v-if="role === 'dm'"
+                        class="grid w-full grid-cols-[1fr_1fr_1fr_2fr] gap-4"
+                      >
                         <div class="flex flex-col items-center gap-bnf-xs">
                           <label :for="`mr-${index}`" class="text-[11px] text-bnf-text-muted"
                             >MR</label
@@ -441,8 +450,8 @@ onMounted(() => {
                             :id="`shift-${index}`"
                             v-model="visitor.shift"
                             :options="shiftOptions"
-                            class="w-22.5 h-7.5"
-                            :pt="{ dropdownIcon: { class: 'w-3 h-3' } }"
+                            class="w-full"
+                            size="small"
                             input-class="flex items-center justify-center w-full h-full py-0 px-1 text-center text-[13px] font-bold text-bnf-text"
                           />
                         </div>
@@ -465,10 +474,13 @@ onMounted(() => {
                           <label :for="`shift-${index}`" class="text-[11px] text-bnf-text-muted"
                             >SHIFT</label
                           >
-                          <CellSelect
+                          <Select
                             :id="`shift-${index}`"
                             v-model="visitor.shift"
                             :options="shiftOptions"
+                            class="w-full"
+                            size="small"
+                            input-class="flex items-center justify-center w-full h-full py-0 px-1 text-center text-[13px] font-bold text-bnf-text"
                           />
                         </div>
                       </div>
