@@ -146,7 +146,7 @@ function handleItemClick(item: unknown) {
   router.push({
     path: `/app/visits/master-call-list/${mcl.id}`,
     query: { status: mcl.status, triwulan: mcl.triwulan },
-  }) //route detailnya atur disini
+  })
 }
 
 function handleCreateNew() {
